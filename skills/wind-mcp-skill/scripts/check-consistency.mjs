@@ -6,7 +6,7 @@
 // 2. manifest 每个工具在 references 里恰好出现一次（### `tool` 标题），反向亦然；2b. 入口文件存在且引用的文件都存在
 // 3. call-rules.json 与 cli.mjs CALL_EXAMPLES 引用的工具名都在 manifest 内
 // 4. --live：每站 tools/list 的工具名、required、顶层类型与 manifest 一致
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,7 +38,16 @@ for (const [srv, tools] of Object.entries(manifest.servers || {})) for (const t 
 }
 const refDir = join(SKILL_DIR, 'references');
 const headingCount = new Map(); // tool -> [files]
-for (const f of readdirSync(refDir).filter(n => n.endsWith('.md'))) {
+function walkMd(dir, prefix = '') {
+  const out = [];
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) out.push(...walkMd(full, prefix + name + '/'));
+    else if (name.endsWith('.md')) out.push(prefix + name);
+  }
+  return out;
+}
+for (const f of walkMd(refDir)) {
   const text = readFileSync(join(refDir, f), 'utf8');
   for (const m of text.matchAll(/^### `([A-Za-z0-9_]+)`/gm)) {
     headingCount.set(m[1], [...(headingCount.get(m[1]) || []), f]);
@@ -64,7 +73,7 @@ for (const [srv, prefix] of Object.entries(ENTRY)) {
 }
 const linkSources = [['SKILL.md', skillMd], ...Object.values(ENTRY).map(p => [`references/${p}.md`, existsSync(join(refDir, `${p}.md`)) ? readFileSync(join(refDir, `${p}.md`), 'utf8') : ''])];
 for (const [src, text] of linkSources) {
-  for (const m of text.matchAll(/`references\/([A-Za-z0-9-]+\.md)`/g)) {
+  for (const m of text.matchAll(/`references\/([A-Za-z0-9/-]+\.md)`/g)) {
     if (!existsSync(join(refDir, m[1]))) note(`[2b] ${src} 引用了不存在的 references/${m[1]}`);
   }
 }

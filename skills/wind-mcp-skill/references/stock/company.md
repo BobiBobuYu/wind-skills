@@ -4,7 +4,7 @@
 
 - `stock_screener` 只返回符合条件的代码列表，不返回明细；逐只详情再调本文件其它工具。
 - `stock_get_company_finance_analysis` 的 `reportPeriod` 按 `{报告期}{FY|CY}{年份}` 拼写，如 `H1FY2025`、`Q3FY2025`、`CY2025`；年报不写报告期前缀。
-- `stock_get_realtime_analysis` 只用于一只股票的盘中表现分析（资金、技术、点位）；纯最新价快照走 `references/quote.md`。
+- `stock_get_realtime_analysis` 只用于一只股票的盘中表现分析（资金、技术、点位）；纯最新价快照走 `references/finance/quote.md`。
 
 ## 工具契约
 

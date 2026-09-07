@@ -68,14 +68,14 @@ skills/wind-mcp-skill/
 │   ├── call-rules.json              v19：只剩 schema 表达不了的跨字段规则 + 指数 K 线周期映射
 │   ├── check-consistency.mjs        名字层面一致性校验（4 项）；--live 与线上 tools/list 比对
 │   └── update-check.mjs             不变
-├── references/                      三层：入口文件（6 个多文件站）→ 主题契约（25 个）；单文件站 5 个 + 指标集 2 个
-│   ├── stock.md → stock-market.md / stock-company.md
-│   ├── fund.md → fund-screen-profile.md / fund-nav-performance.md / fund-holdings.md / fund-attribution.md / fund-position-peers.md
-│   ├── options.md → options-chain.md / options-variety.md / options-volatility.md / options-pricing-vanilla.md
-│   ├── futures.md → futures-market.md / futures-fundamentals.md
-│   ├── company.md（含 company_search_entity / company_get_biz_enum 入口契约）→ company-registration.md / company-equity.md / company-business.md / company-tax-credit.md / company-lawsuit.md / company-enforcement.md / company-status-risk.md / company-penalty-sentiment.md
-│   ├── finance.md → quote.md（+ quote-indicators.md）/ general-data.md / general-docs.md
-│   ├── index.md（+ index-indicators.md）   bond.md   financial-docs.md   edb.md   analytics.md
+├── references/                      顶层 = 入口（每站一个 <站前缀>.md）；多文件站的主题契约在同名子目录
+│   ├── stock.md        stock/{market,company}.md
+│   ├── fund.md         fund/{screen-profile,nav-performance,holdings,attribution,position-peers}.md
+│   ├── options.md      options/{chain,variety,volatility,pricing-vanilla}.md
+│   ├── futures.md      futures/{market,fundamentals}.md
+│   ├── company.md      company/{registration,equity,business,tax-credit,lawsuit,enforcement,status-risk,penalty-sentiment}.md（入口含 company_search_entity / company_get_biz_enum 契约）
+│   ├── finance.md      finance/{quote,quote-indicators,general-data,general-docs}.md
+│   ├── index.md  index-indicators.md  bond.md  financial-docs.md  edb.md  analytics.md（单文件站，入口即契约）
 └── tests/
     ├── README.md
     ├── mock-fetch.mjs               场景：isError 文本 / JSON 正文 / Markdown 正文 / 纯文本错误 / 旧式内层信封
@@ -123,7 +123,7 @@ argv → loadParamsInput(@file 或内联) → JSON.parse
 ## 6. references 写法（三层）
 
 - **SKILL.md**：每站一行（server_type / 用于 / 入口文件），不列主题、不列工具。跨站仲裁 5 条。
-- **入口文件** `references/<站前缀>.md`（仅多文件站）：全站通用守则（3 到 5 条）+ 入口工具契约（如 company 的 `company_search_entity`）+ 主题分流表（问题涉及 / 读哪个文件 / 工具名）。
+- **入口文件** `references/<站前缀>.md`（仅多文件站，主题契约放在 `references/<站前缀>/` 子目录）：全站通用守则（3 到 5 条）+ 入口工具契约（如 company 的 `company_search_entity`）+ 主题分流表（问题涉及 / 读哪个文件 / 工具名）。
 - **主题契约**：本主题特有守则（0 到 6 条）+ 逐工具契约（`### \`tool_name\``、后端描述四段、参数表）+ 一个可运行示例。
 - 单文件站的入口就是契约文件。
 

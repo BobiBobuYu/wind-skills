@@ -2,7 +2,7 @@
 
 全站通用守则见 `references/finance.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- `quote_get_realtime_indicators`：`indexes` 逐字取自 `references/quote-indicators.md`，不确定时先 `quote_search_realtime_indicators`，用返回的 `cnName` 或 `enName`。
+- `quote_get_realtime_indicators`：`indexes` 逐字取自 `references/finance/quote-indicators.md`，不确定时先 `quote_search_realtime_indicators`，用返回的 `cnName` 或 `enName`。
 - `quote_get_historical_data_series`：`type=1` 是 K 线、`type=0` 是分时；`params.indexes` 必须显式包含 `TIME`，否则返回的行没有日期列（实测默认不含）。
 - K 线 `params.period` 只填数字：`10` 日、`11` 周、`12` 月、`1` 1 分钟、`3` 5 分钟、`7` 60 分钟等，见子字段表。按日期区间取数传 `rangeflag=2` + `startDate` / `endDate`；取最近 N 条传 `rangeflag=0` + `count`。
 - 分时在非交易时段可能返回空 `data`，不是错误；需要历史分时传 `rangeflag=2` 和日期区间。

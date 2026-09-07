@@ -12,7 +12,7 @@
 
 | 问题涉及 | 读 | 工具 |
 | --- | --- | --- |
-| 存续期限、某到期日的期权链截面、具体合约的历史序列 | `references/options-chain.md` | `options_get_listed_terms`, `options_get_term_metrics`, `options_get_contract_series` |
-| 品种隐波 / 历史波动率 / PCR / 偏度序列与分布统计、多空情绪 | `references/options-variety.md` | `options_get_variety_series`, `options_get_variety_stats`, `options_get_sentiment_data` |
-| 隐含波动率曲面、隐波锥、隐波期限结构 | `references/options-volatility.md` | `options_get_volatility_surface`, `options_get_iv_term_structure`, `options_calc_iv_cone` |
-| 欧式 / 美式香草期权、二元期权的定价与希腊字母 | `references/options-pricing-vanilla.md` | `options_calc_vanilla`, `options_calc_binary` |
+| 存续期限、某到期日的期权链截面、具体合约的历史序列 | `references/options/chain.md` | `options_get_listed_terms`, `options_get_term_metrics`, `options_get_contract_series` |
+| 品种隐波 / 历史波动率 / PCR / 偏度序列与分布统计、多空情绪 | `references/options/variety.md` | `options_get_variety_series`, `options_get_variety_stats`, `options_get_sentiment_data` |
+| 隐含波动率曲面、隐波锥、隐波期限结构 | `references/options/volatility.md` | `options_get_volatility_surface`, `options_get_iv_term_structure`, `options_calc_iv_cone` |
+| 欧式 / 美式香草期权、二元期权的定价与希腊字母 | `references/options/pricing-vanilla.md` | `options_calc_vanilla`, `options_calc_binary` |

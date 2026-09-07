@@ -2,7 +2,7 @@
 
 全站通用守则见 `references/fund.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- 相似基金结果是候选列表，可接着用 `references/fund-screen-profile.md` 的工具批量取档案对比。
+- 相似基金结果是候选列表，可接着用 `references/fund/screen-profile.md` 的工具批量取档案对比。
 
 ## 工具契约
 

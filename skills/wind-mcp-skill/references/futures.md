@@ -10,5 +10,5 @@
 
 | 问题涉及 | 读 | 工具 |
 | --- | --- | --- |
-| 合约规格与交割规则、基差快照与历史、资金变动、交易所席位排名 | `references/futures-market.md` | `futures_get_contract_spec`, `futures_get_basis`, `futures_get_fund_flow`, `futures_get_position_ranking` |
-| 仓单与交割汇总、商品供需指标、公开研报方向统计 | `references/futures-fundamentals.md` | `futures_get_warehouse_receipt`, `futures_get_supply_demand`, `futures_get_research_opinion` |
+| 合约规格与交割规则、基差快照与历史、资金变动、交易所席位排名 | `references/futures/market.md` | `futures_get_contract_spec`, `futures_get_basis`, `futures_get_fund_flow`, `futures_get_position_ranking` |
+| 仓单与交割汇总、商品供需指标、公开研报方向统计 | `references/futures/fundamentals.md` | `futures_get_warehouse_receipt`, `futures_get_supply_demand`, `futures_get_research_opinion` |
