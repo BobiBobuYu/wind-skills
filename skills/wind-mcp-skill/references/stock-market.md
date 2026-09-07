@@ -1,12 +1,10 @@
 # `stock_research` 工具契约：市场、板块、叙事与行业研究
 
-覆盖全市场与跨资产盘中概览、板块 / 行业 / 主题 / 指数盘中表现、市场叙事、大类资产阶段表现和行业投研语料。用户问的是市场、板块、行业或主题而不是某一只股票时读本文件。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/stock.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- 单只股票的画像、财务、估值、实时行情读 `references/stock-company.md`；历史 K 线和分钟走势读 `references/quote.md`。
 - 板块、行业、主题、指数的盘中表现统一用 `stock_get_sector_realtime_analysis`，`windCode` 传名称或代码，如 `沪深300`、`000300.SH`、`白酒`。
 - 叙事两步走：先 `stock_get_market_narratives` 取候选和子叙事 ID，再 `stock_get_narrative_details` 传 `childId` 展开；只有用户给了明确关键词且无需挑选时才直接传 `keyword`。
 - `stock_get_market_realtime_analysis` 的 `marketType` 不传默认 A 股，全球概览传 `0`。
-- 返回 JSON，字段名为中文；单位随字段自带说明，不自行换算。
 
 ## 工具契约
 

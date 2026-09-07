@@ -27,7 +27,7 @@
 ## 2. 调用逻辑（Agent 视角，四步不变）
 
 ```
-① 定路由  SKILL.md 路由表：先按标的/意图选 server_type，再选该站下的一份 references 子文件，只读这一份
+① 定路由  三层渐进加载：SKILL.md 只有 11 行站表 → 站入口文件（全站守则 + 主题分流表）→ 一份主题契约；单文件站入口即契约
 ② 发命令  node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 ③ 读回执  成功：数据对象（content[0].text 为 JSON 字符串或 Markdown 表格）；失败：{ok:false, code, message}
 ④ 收口    核对标的、附数据来源声明、给完成状态
@@ -68,20 +68,14 @@ skills/wind-mcp-skill/
 │   ├── call-rules.json              v19：只剩 schema 表达不了的跨字段规则 + 指数 K 线周期映射
 │   ├── check-consistency.mjs        名字层面一致性校验（4 项）；--live 与线上 tools/list 比对
 │   └── update-check.mjs             不变
-├── references/                      每站按主题拆分（31 个文件），单文件 ≤ 约 7000 token
-│   ├── stock-market.md              stock-company.md
-│   ├── fund-screen-profile.md       fund-nav-performance.md   fund-holdings.md   fund-attribution.md   fund-position-peers.md
-│   ├── index.md                     index-indicators.md
-│   ├── bond.md
-│   ├── financial-docs.md
-│   ├── edb.md
-│   ├── analytics.md
-│   ├── options-chain.md             options-variety.md   options-volatility.md   options-pricing-vanilla.md
-│   ├── futures-market.md            futures-fundamentals.md
-│   ├── company-registration.md      company-equity.md   company-business.md   company-tax-credit.md
-│   ├── company-lawsuit.md           company-enforcement.md   company-status-risk.md   company-penalty-sentiment.md
-│   ├── quote.md                     quote-indicators.md（由 stock-indicators.md 改名，内容对应 quote_* 的 indexes）
-│   └── general-data.md              general-docs.md
+├── references/                      三层：入口文件（6 个多文件站）→ 主题契约（25 个）；单文件站 5 个 + 指标集 2 个
+│   ├── stock.md → stock-market.md / stock-company.md
+│   ├── fund.md → fund-screen-profile.md / fund-nav-performance.md / fund-holdings.md / fund-attribution.md / fund-position-peers.md
+│   ├── options.md → options-chain.md / options-variety.md / options-volatility.md / options-pricing-vanilla.md
+│   ├── futures.md → futures-market.md / futures-fundamentals.md
+│   ├── company.md（含 company_search_entity / company_get_biz_enum 入口契约）→ company-registration.md / company-equity.md / company-business.md / company-tax-credit.md / company-lawsuit.md / company-enforcement.md / company-status-risk.md / company-penalty-sentiment.md
+│   ├── finance.md → quote.md（+ quote-indicators.md）/ general-data.md / general-docs.md
+│   ├── index.md（+ index-indicators.md）   bond.md   financial-docs.md   edb.md   analytics.md
 └── tests/
     ├── README.md
     ├── mock-fetch.mjs               场景：isError 文本 / JSON 正文 / Markdown 正文 / 纯文本错误 / 旧式内层信封
@@ -126,22 +120,21 @@ argv → loadParamsInput(@file 或内联) → JSON.parse
 - 跨字段规则：`ordered_dates`（startDate/endDate、begin/end、begin_date/end_date、timeFrom/timeTo）、EDB 的 `paired` 与 `mutually_exclusive`。
 - 删除：`tool_by_domain` 跨域改写、`basic.string_keys` 全局字符串键（由 manifest 类型取代）、旧工具的 required 列表（由 manifest 取代）。
 
-## 6. references 写法
+## 6. references 写法（三层）
 
-每个文件固定三段：
+- **SKILL.md**：每站一行（server_type / 用于 / 入口文件），不列主题、不列工具。跨站仲裁 5 条。
+- **入口文件** `references/<站前缀>.md`（仅多文件站）：全站通用守则（3 到 5 条）+ 入口工具契约（如 company 的 `company_search_entity`）+ 主题分流表（问题涉及 / 读哪个文件 / 工具名）。
+- **主题契约**：本主题特有守则（0 到 6 条）+ 逐工具契约（`### \`tool_name\``、后端描述四段、参数表）+ 一个可运行示例。
+- 单文件站的入口就是契约文件。
 
-1. 文件头：本文件覆盖的 server_type、主题、何时读本文件、本主题特有的约束（3 到 8 条）。
-2. 逐工具契约：`### \`tool_name\``、后端描述（功能 / 适用场景 / 返回 / 边界 原文）、参数表（参数 / 必填 / 类型 / 枚举 / 示例或默认 / 官方说明）。
-3. 一个可直接运行的 `cli.mjs call` 例子。
-
-company 系列文件开头统一放同一段 `company_search_entity` 入口契约，是唯一允许的重复。
+每次问答最多加载：SKILL.md + 一份入口 + 一份主题契约。守则不重复：全站的写入口，主题的写主题文件。
 
 ## 7. 一致性检查（`scripts/check-consistency.mjs`）
 
 只做四项，全部是名字层面：
 
 1. `cli.mjs` 的 SERVERS key 与 manifest 的 server key 完全相等。
-2. manifest 中每个工具在 references 里恰好出现一次（`### \`tool\`` 标题），反向亦然；`company_search_entity` 允许多次。
+2. manifest 中每个工具在 references 里恰好出现一次（`### \`tool\`` 标题），反向亦然；每站有入口文件，SKILL.md 与入口文件引用的 references 都存在。
 3. `call-rules.json` 与 `cli.mjs` CALL_EXAMPLES 里的工具名都在 manifest 内。
 4. `--live`：对每站 `tools/list`，比对工具名集合与 required/type 是否和 manifest 一致；发版前手动跑。
 

@@ -1,12 +1,11 @@
 # `finance_data` 工具契约：文档检索、单篇读取与投研语料
 
-覆盖全球新闻、公告、研报的清单检索与单篇读取，自然语言文档检索，以及参考投研语料（分类体系、术语表、研究框架、标的映射）。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/finance.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 文档两步：`general_search_documents` 按类型、关键词、代码、日期拿清单和文档编号；`general_get_document` 用编号和同一 `documentType` 读单篇全文。
 - `documentType` 必填且只能来自用户明确指定：`news` 新闻、`na` 公告、`rpp` 研报；用户没说类型时先问，不得自选。研报只能走这条路径。
-- `general_query_documents` 用自然语言直接检索新闻和公告正文，`docType` 用 `1` 新闻、`3` 公告，日期格式 `YYYY-MM-DD HH:MM:SS`；它与 `financial_docs` 站的公告新闻工具功能重叠，取舍待评审，评审前公告新闻优先读 `references/financial-docs.md`。
-- 投研语料两步：`general_search_research_insight` 拿 `templateId`，`general_get_research_insight` 用模板和 `arg` 读内容。
-- 相对时间（最近一周）先换算成具体日期再传。
+- `general_query_documents` 用自然语言直接检索新闻和公告正文，`docType` 用 `1` 新闻、`3` 公告，日期格式 `YYYY-MM-DD HH:MM:SS`；它与 `financial_docs` 站功能重叠，取舍待评审，评审前公告新闻优先走 `financial_docs`。
+- 投研语料两步：`general_search_research_insight` 拿 `templateId`，`general_get_research_insight` 用模板和 `arg` 读内容。相对时间（最近一周）先换算成具体日期再传。
 
 ## 工具契约
 

@@ -1,10 +1,9 @@
 # `options_data` 工具契约：品种序列、分布统计与情绪
 
-覆盖期权品种层面的隐波、历史波动率、PCR、偏度时间序列及其分布统计，以及期权市场多空情绪。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/options.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- `windCodes` 必须是数组，元素是期权标的代码或名称。
 - `indicator` 只能是 `vol_moneyness` / `vol_delta` / `hv` / `pcr_volume` / `pcr_oi` / `pcr_turnover` / `skew` / `skew_normalized`；实测传 `IV` 会被拒绝。配套参数：`vol_moneyness` 要 `tenor` + `moneyness`，`vol_delta` 要 `tenor` + `deltaLevel`，`skew` / `skew_normalized` 要 `tenor`，`hv` 要 `windows`（交易日数）。
-- `startDate` / `endDate` 在 schema 里不是必填，但后端默认值是固定常量；一律显式传入，格式 `YYYY-MM-DD`。序列与统计要用同一标的、指标、期限和区间才能勾稽。
+- 序列与统计要用同一标的、指标、期限和区间才能勾稽。
 - `options_get_sentiment_data` 的 `windCode` 是 ETF、股票或期货的基础代码。截至 2026-09-07 实测该工具持续返回「服务暂时不可用」；遇到时直接报告 `backend_error`，不重试、不用品种序列冒充情绪数据。
 
 ## 工具契约

@@ -1,13 +1,10 @@
 # `stock_research` 工具契约：公司研究与选股
 
-覆盖单只股票（A 股、港股、美股）的公司画像、财务分析、盈利预测、估值、近期动态、资金流、技术指标、实时行情，以及自然语言选股。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/stock.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- `windCode` 只传一只股票的名称或代码，如 `贵州茅台`、`600519.SH`、`AAPL.O`；多标的拆成多次调用。
-- 后端按名称做实体识别，名称不存在或有歧义时可能匹配到另一家公司（实测传入不存在的名称会返回其它公司的画像）。作答前必须核对返回体中的证券代码或公司名称与用户标的一致，不一致按标的未识别处理并向用户确认。
-- 历史 K 线、分钟走势、多标的最新价快照走 `finance_data`，读 `references/quote.md`；`stock_get_realtime_analysis` 只用于一只股票的盘中表现分析。
 - `stock_screener` 只返回符合条件的代码列表，不返回明细；逐只详情再调本文件其它工具。
 - `stock_get_company_finance_analysis` 的 `reportPeriod` 按 `{报告期}{FY|CY}{年份}` 拼写，如 `H1FY2025`、`Q3FY2025`、`CY2025`；年报不写报告期前缀。
-- 公告、新闻、研报正文不在本站：公告新闻读 `references/financial-docs.md`，研报读 `references/general-docs.md`。
+- `stock_get_realtime_analysis` 只用于一只股票的盘中表现分析（资金、技术、点位）；纯最新价快照走 `references/quote.md`。
 
 ## 工具契约
 

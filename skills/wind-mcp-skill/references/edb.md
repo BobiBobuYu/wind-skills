@@ -1,13 +1,13 @@
 # `edb_data` 工具契约：宏观、行业与汇率 EDB 指标
 
-只用于 Wind EDB 经济数据库的指标检索与取数。宏观、行业、区域、汇率、商品价格等时间序列指标走本站。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+只读本文件即可调用下列工具。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 指标名称常见且唯一（GDP、CPI、PMI、社融、LPR、主要汇率、主流商品价格等）时，直接用 `economic_query_indicator_series` 传自然语言取数，不要先 search。
 - `economic_search_indicator` 只在三种情况用：不确定指标是否存在或口径；一个描述对应多个候选需要先挑代码；用户明确要「有哪些指标」的清单。search 命中后，下一步用返回的 `code` 调 `economic_get_indicator_series`，不要再用自然语言重查一遍。
 - 时间范围只能通过 `startDate` + `endDate`（成对，`YYYY-MM-DD`）或近 N 期整数传入，两者互斥，不要写进 `question`。近 N 期的参数名两个工具不同：`economic_query_indicator_series` 用 `observation`，`economic_get_indicator_series` 用 `numOfObservation`。按代码取数不传范围时默认近 2 年。
 - `targetMagnitude` / `targetCurrency` / `targetFrequency` 只在需要统一口径（跨指标拼表、跨国比较、换算展示）时填，单指标查询不填。
 - 同一 `tool_name + arguments` 的调用不得重复发出：上次成功直接用结果；上次报错先按错误信息改参数或换工具；连续两次相同入参视为异常并中止。
-- 返回 `metrics[]`，每条 `{meta, date[], value[]}`；单位和量级以 `meta.unit`、`meta.magnitude` 为准，不自行换算。`observation` 按用户需要取合理期数，不要一次拉全历史。
+- 返回 `metrics[]`，每条 `{meta, date[], value[]}`；单位和量级以 `meta.unit`、`meta.magnitude` 为准，不自行换算。近 N 期按用户需要取合理期数，不要一次拉全历史。
 
 ## 工具契约
 

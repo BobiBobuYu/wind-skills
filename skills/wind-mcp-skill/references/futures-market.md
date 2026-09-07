@@ -1,12 +1,9 @@
 # `futures_data` 工具契约：合约规格、基差、资金与席位
 
-覆盖期货品种的合约规格与交割规则、基差快照与历史、资金变动、交易所席位排名。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/futures.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- 品种代码用品种级 Wind 代码，如 `CU.SHF`、`AL.SHF`、`M.DCE`，多数工具也接受名称如 `沪铜`；`futures_get_position_ranking` 不支持中文名称，用户给中文时要求提供代码。
-- `windCodes` 必须是数组；`date` 格式 `YYYY-MM-DD`。
 - `futures_get_basis`：`windCodes` 与 `sector` 至少给一个；`startDate` / `endDate` 必须成对，都不传取最新交易日快照。`sector` 用表中的英文枚举或等价中文键。
 - `futures_get_fund_flow` 只支持单日；`futures_get_position_ranking` 一次返回九类席位排名，`limit` 控制条数。
-- 返回 JSON，`fields` + `rows` 结构；单位随品种记录。
 
 ## 工具契约
 

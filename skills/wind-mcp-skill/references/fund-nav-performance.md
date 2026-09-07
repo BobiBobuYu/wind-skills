@@ -1,12 +1,9 @@
 # `fund_research` 工具契约：净值、业绩、场内行情与 ETF 申赎清单
 
-覆盖基金时点净值、区间业绩与评级、场内基金单日行情摘要、ETF 申赎清单（PCF）。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/fund.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- `windCodes` 必须是数组（最多 50）；`includeFields` 只在 `fund_get_performance`、`fund_get_listed_historical_price` 上可用，留空取默认包，指定时逐字用助记符。
-- 本文件的净值和行情都是时点或单日摘要，不返回序列。净值或价格的历史序列读 `references/quote.md`，用 `quote_get_historical_data_series`。
-- `asOfDate` / `tradeDate` 不传取最新可用日期，非交易日自动回溯；实际日期以返回体的日期字段为准。
+- `asOfDate` / `tradeDate` 不传取最新可用日期，非交易日自动回溯。
 - `fund_get_etf_pcf` 的 `asOfDate` 必填，只适用于 ETF。
-- 返回正文是 Markdown 表格。
 
 ## 工具契约
 

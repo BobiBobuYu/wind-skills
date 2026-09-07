@@ -3,17 +3,17 @@
 //   node scripts/check-consistency.mjs          # 1-3 离线检查
 //   node scripts/check-consistency.mjs --live   # 追加第 4 项：与线上 tools/list 比对（需 API Key）
 // 1. cli.mjs 的 SERVERS key == tool-manifest.json 的 servers key
-// 2. manifest 每个工具在 references 里恰好出现一次（### `tool` 标题），反向亦然；REPEATABLE 例外
+// 2. manifest 每个工具在 references 里恰好出现一次（### `tool` 标题），反向亦然；2b. 入口文件存在且引用的文件都存在
 // 3. call-rules.json 与 cli.mjs CALL_EXAMPLES 引用的工具名都在 manifest 内
 // 4. --live：每站 tools/list 的工具名、required、顶层类型与 manifest 一致
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SKILL_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
 const CLI = join(SKILL_DIR, 'scripts', 'cli.mjs');
-const REPEATABLE = new Set(['company_search_entity', 'company_get_biz_enum']);
+const REPEATABLE = new Set();
 const LIVE = process.argv.includes('--live');
 
 const cliSrc = readFileSync(CLI, 'utf8');
@@ -51,6 +51,22 @@ for (const [tool] of manifestTools) {
 }
 for (const [tool, files] of headingCount) {
   if (!manifestTools.has(tool)) note(`[2] references 里的 ${tool}（${files.join(', ')}）不在 manifest 内`);
+}
+
+// ---- 2b. SKILL.md 与入口文件引用的 references/*.md 必须存在；每个 server_type 必须有入口文件
+const ENTRY = { stock_research: 'stock', fund_research: 'fund', index_data: 'index', bond_data: 'bond', financial_docs: 'financial-docs', edb_data: 'edb', analytics_data: 'analytics', options_data: 'options', futures_data: 'futures', company_data: 'company', finance_data: 'finance' };
+const skillMd = readFileSync(join(SKILL_DIR, 'SKILL.md'), 'utf8');
+for (const [srv, prefix] of Object.entries(ENTRY)) {
+  if (!manifestServers.includes(srv)) continue;
+  const entry = `references/${prefix}.md`;
+  if (!existsSync(join(SKILL_DIR, entry))) note(`[2b] ${srv} 缺少入口文件 ${entry}`);
+  if (!skillMd.includes(`\`${entry}\``)) note(`[2b] SKILL.md 路由表没有指向 ${entry}`);
+}
+const linkSources = [['SKILL.md', skillMd], ...Object.values(ENTRY).map(p => [`references/${p}.md`, existsSync(join(refDir, `${p}.md`)) ? readFileSync(join(refDir, `${p}.md`), 'utf8') : ''])];
+for (const [src, text] of linkSources) {
+  for (const m of text.matchAll(/`references\/([A-Za-z0-9-]+\.md)`/g)) {
+    if (!existsSync(join(refDir, m[1]))) note(`[2b] ${src} 引用了不存在的 references/${m[1]}`);
+  }
 }
 
 // ---- 3. call-rules / CALL_EXAMPLES tool names

@@ -1,12 +1,9 @@
 # `options_data` 工具契约：定价计算：香草与二元期权
 
-覆盖欧式 / 美式香草期权和二元期权的定价与希腊字母计算。本站当前只提供这两个定价工具。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/options.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- 定价工具不查行情：现价、波动率、利率、股息率等市场参数必须由调用方给出；缺什么先用 `references/quote.md` 或 `references/options-volatility.md` 取，再调本文件工具。
-- `expirationDate` / `valuationDate` 在 schema 里不是必填，但后端默认值是固定常量；一律显式传入，格式 `YYYY-MM-DD`。
-- 波动率、利率、股息率一律小数形式（25% 填 `0.25`）。
-- `assetClass` 为 `fx` 时 `dividendYield` 填外币无风险利率，为 `futures` 时通常填 0。
-- 美式期权 `pricingMethod` 优先 `baw`，欧式用 `bs`。
+- 现价、波动率、利率、股息率先用 `references/quote.md` 或 `references/options-volatility.md` 取，再调本文件工具。
+- `assetClass` 为 `fx` 时 `dividendYield` 填外币无风险利率，为 `futures` 时通常填 0。美式期权 `pricingMethod` 优先 `baw`，欧式用 `bs`。
 - 返回 NPV 与 Delta / Gamma / Vega / Theta / Rho，数值与单位分开表达。
 
 ## 工具契约

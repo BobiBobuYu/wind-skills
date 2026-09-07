@@ -188,23 +188,21 @@ AI 会根据问题自动选择可用能力。取数类问题优先使用 `wind-m
 
 ## 🧭 wind-mcp-skill 的 server_type 选择守则
 
-| 你想问                                                        | server_type        | 契约文件（`references/`）          |
-| ------------------------------------------------------------- | ------------------ | ---------------------------------- |
-| 全市场 / 板块 / 行业盘中表现、市场叙事、大类资产、行业研究    | `stock_research`   | `stock-market.md`                  |
-| 单只股票画像 / 财务 / 盈利预测 / 估值 / 资金 / 技术、自然语言选股 | `stock_research`   | `stock-company.md`                 |
-| 基金筛选、档案、净值、业绩、持仓、归因、相似基金              | `fund_research`    | `fund-*.md`（5 份按主题）          |
-| 指数 / 板块**行情 / PE/PB / 技术指标 / K 线**                 | `index_data`       | `index.md`                         |
-| 债券**档案 / 行情估值 / 发债主体**                            | `bond_data`        | `bond.md`                          |
-| **公告 / 年报 / 招股书 / 财经新闻**                           | `financial_docs`   | `financial-docs.md`                |
-| **GDP / CPI / 汇率 / 行业经济**等 EDB 指标                    | `edb_data`         | `edb.md`                           |
-| 跨标的聚合 / 排名 / 复合计算                                  | `analytics_data`   | `analytics.md`                     |
-| 期权链、品种序列、波动率、定价计算                            | `options_data`     | `options-*.md`（4 份按主题）       |
-| 期货合约规格、基差、席位、仓单、供需                          | `futures_data`     | `futures-*.md`（2 份）             |
-| 企业工商、股权、经营、税务、司法、风险、舆情                  | `company_data`     | `company-*.md`（8 份按主题）       |
-| 股票 / 基金 / 期货 / 外汇**最新价、K 线、分时**               | `finance_data`     | `quote.md`                         |
-| 标准指标取数、指标字典、报表；新闻 / 公告 / 研报清单与单篇    | `finance_data`     | `general-data.md` / `general-docs.md` |
+| 你想问                                                        | server_type        | 入口文件（`references/`） |
+| ------------------------------------------------------------- | ------------------ | ------------------------- |
+| 股票：全市场 / 板块 / 行业盘中、市场叙事、单只公司研究、选股  | `stock_research`   | `stock.md`                |
+| 基金：筛选、档案、净值业绩、持仓、归因、相似基金              | `fund_research`    | `fund.md`                 |
+| 指数 / 板块**行情 / PE/PB / 技术指标 / K 线**                 | `index_data`       | `index.md`                |
+| 债券**档案 / 行情估值 / 发债主体**                            | `bond_data`        | `bond.md`                 |
+| **公告 / 年报 / 招股书 / 财经新闻**                           | `financial_docs`   | `financial-docs.md`       |
+| **GDP / CPI / 汇率 / 行业经济**等 EDB 指标                    | `edb_data`         | `edb.md`                  |
+| 跨标的聚合 / 排名 / 复合计算                                  | `analytics_data`   | `analytics.md`            |
+| 期权：链与合约、品种序列、波动率、香草 / 二元定价             | `options_data`     | `options.md`              |
+| 期货：合约、基差、席位、仓单、供需、研报观点                  | `futures_data`     | `futures.md`              |
+| 企业：工商、股权、经营、税务、司法、风险、舆情                | `company_data`     | `company.md`              |
+| 全品种**最新价 / K 线**；标准指标取数、报表；新闻 / 公告 / 研报清单 | `finance_data`     | `finance.md`              |
 
-> 11 个 server_type 与万得 MCP 地址路径段一一对应（`https://mcp.wind.com.cn/vserver_<server_type>/mcp/`）。新站参数用 camelCase（`windCode` / `startDate`），保留站用 snake_case（`windcode` / `begin_date`），以各自契约为准。
+> 三层渐进加载：SKILL.md 只有这 11 行；多文件站的入口文件放全站守则和主题分流表；每次问答只再读一份主题契约。11 个 server_type 与万得 MCP 地址路径段一一对应（`https://mcp.wind.com.cn/vserver_<server_type>/mcp/`）。
 
 更详细的路由表与仲裁顺序见 [`skills/wind-mcp-skill/SKILL.md`](./skills/wind-mcp-skill/SKILL.md)，设计说明见 [`docs/wind-mcp-skill-v3-design.md`](./docs/wind-mcp-skill-v3-design.md)。
 

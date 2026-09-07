@@ -1,11 +1,8 @@
 # `options_data` 工具契约：期限、链截面与合约序列
 
-覆盖期权标的的存续期限、某到期日的期权链截面、具体合约的历史序列。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/options.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 三步链路：`options_get_listed_terms` 用标的代码和交易日拿 `optionVarietyCode` 与 `expiryDate`；`options_get_term_metrics` 用这两个值看截面；`options_get_contract_series` 用截面里的合约代码看序列。后一步的代码只能来自前一步的返回。
-- `windCode` 是期权标的（如 `510300.SH`、`000300.SH`），`optionVarietyCode` 形如 `510300OP.SH`，两者不要混用。
-- `tradeDate`、`expiryDate`、`startDate`、`endDate` 在 schema 里不是必填，但后端默认值是固定常量，不是当天；一律显式传入，格式 `YYYY-MM-DD`。
-- `optionContractCodes`、`indicators` 必须是数组，指标用表中的英文枚举。
 - `strikeLevels` 与 `underlyingPrice` 配合缩小行权价范围，不传返回全部合约。
 
 ## 工具契约
