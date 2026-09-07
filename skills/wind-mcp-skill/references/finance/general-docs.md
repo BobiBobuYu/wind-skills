@@ -1,6 +1,14 @@
 # `finance_data` 工具契约：文档检索、单篇读取与投研语料
 
-全站通用守则见 `references/finance/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+覆盖：全球新闻 / 公告 / 研报清单与单篇、自然语言文档检索、参考投研语料。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+
+## 本站通用守则
+
+- 本站是全品种兜底：行情快照与历史序列覆盖股票、基金、指数、债券、期货、外汇、衍生品；指标取数、报表、文档、投研语料按主题文件分流。
+- 参数用 camelCase（`windCode`、`windCodes`、`startDate`）；`windCodes` 在本站是英文逗号分隔的字符串，单次最多 50 个。
+- 与 `analytics_data`、`financial_docs` 的取舍待评审，评审前按 SKILL.md 仲裁顺序执行。行情指标字段清单在 `references/finance/quote-indicators.md`。
+
+## 本主题守则
 
 - 文档两步：`general_search_documents` 按类型、关键词、代码、日期拿清单和文档编号；`general_get_document` 用编号和同一 `documentType` 读单篇全文。
 - `documentType` 必填且只能来自用户明确指定：`news` 新闻、`na` 公告、`rpp` 研报；用户没说类型时先问，不得自选。研报只能走这条路径。

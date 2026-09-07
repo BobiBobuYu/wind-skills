@@ -27,7 +27,7 @@
 ## 2. 调用逻辑（Agent 视角，四步不变）
 
 ```
-① 定路由  三层渐进加载：SKILL.md 只有 11 行站表 → 站入口文件（全站守则 + 主题分流表）→ 一份主题契约；单文件站入口即契约
+① 定路由  两层渐进加载：SKILL.md 11 行站表（每行列出该站目录下的主题文件）→ 一份主题契约（开头自带本站通用守则）
 ② 发命令  node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 ③ 读回执  成功：数据对象（content[0].text 为 JSON 字符串或 Markdown 表格）；失败：{ok:false, code, message}
 ④ 收口    核对标的、附数据来源声明、给完成状态
@@ -68,15 +68,15 @@ skills/wind-mcp-skill/
 │   ├── call-rules.json              v19：只剩 schema 表达不了的跨字段规则 + 指数 K 线周期映射
 │   ├── check-consistency.mjs        名字层面一致性校验（4 项）；--live 与线上 tools/list 比对
 │   └── update-check.mjs             不变
-├── references/                      每站一个目录（目录名 = server_type 前缀），README.md 是入口；单文件站的 README 即契约
-│   ├── stock/          README.md  market.md  company.md
-│   ├── fund/           README.md  screen-profile.md  nav-performance.md  holdings.md  attribution.md  position-peers.md
-│   ├── options/        README.md  chain.md  variety.md  volatility.md  pricing-vanilla.md
-│   ├── futures/        README.md  market.md  fundamentals.md
-│   ├── company/        README.md（含 company_search_entity / company_get_biz_enum 契约）registration.md  equity.md  business.md  tax-credit.md  lawsuit.md  enforcement.md  status-risk.md  penalty-sentiment.md
-│   ├── finance/        README.md  quote.md  quote-indicators.md  general-data.md  general-docs.md
-│   ├── index/          README.md  indicators.md
-│   └── bond/  financial-docs/  edb/  analytics/   各只有 README.md
+├── references/                      每站一个目录（目录名 = server_type 前缀），目录里只有业务契约文件，没有入口文件
+│   ├── stock/          market.md  company.md
+│   ├── fund/           screen-profile.md  nav-performance.md  holdings.md  attribution.md  position-peers.md
+│   ├── options/        chain.md  variety.md  volatility.md  pricing-vanilla.md
+│   ├── futures/        market.md  fundamentals.md
+│   ├── company/        entity.md（company_search_entity / company_get_biz_enum）registration.md  equity.md  business.md  tax-credit.md  lawsuit.md  enforcement.md  status-risk.md  penalty-sentiment.md
+│   ├── finance/        quote.md  quote-indicators.md  general-data.md  general-docs.md
+│   ├── index/          index.md  indicators.md
+│   └── bond/bond.md  financial-docs/financial-docs.md  edb/edb.md  analytics/analytics.md
 └── tests/
     ├── README.md
     ├── mock-fetch.mjs               场景：isError 文本 / JSON 正文 / Markdown 正文 / 纯文本错误 / 旧式内层信封
@@ -87,7 +87,7 @@ skills/wind-mcp-skill/
     └── run-smoke-real.mjs           集成：每个 references 文件至少一个真实调用（需凭据，手动）
 ```
 
-删除：`references/stock/README.md`、`fund.md`、`economic.md`、`fund-indicators.md`、`economic_analysis_conclusion.md`（结论并入 edb.md）、旧 `tests/` 全部脚本与 `error-suite.cases.json`。
+删除：`references/stock/`、`fund.md`、`economic.md`、`fund-indicators.md`、`economic_analysis_conclusion.md`（结论并入 edb.md）、旧 `tests/` 全部脚本与 `error-suite.cases.json`。
 
 ## 5. CLI 内部流程
 
@@ -121,21 +121,21 @@ argv → loadParamsInput(@file 或内联) → JSON.parse
 - 跨字段规则：`ordered_dates`（startDate/endDate、begin/end、begin_date/end_date、timeFrom/timeTo）、EDB 的 `paired` 与 `mutually_exclusive`。
 - 删除：`tool_by_domain` 跨域改写、`basic.string_keys` 全局字符串键（由 manifest 类型取代）、旧工具的 required 列表（由 manifest 取代）。
 
-## 6. references 写法（三层）
+## 6. references 写法（两层）
 
-- **SKILL.md**：每站一行（server_type / 用于 / 入口文件），不列主题、不列工具。跨站仲裁 5 条。
-- **入口文件** `references/<站前缀>/README.md`（多文件站放全站守则和主题表，单文件站直接是契约）：全站通用守则（3 到 5 条）+ 入口工具契约（如 company 的 `company_search_entity`）+ 主题分流表（问题涉及 / 读哪个文件 / 工具名）。
-- **主题契约**：本主题特有守则（0 到 6 条）+ 逐工具契约（`### \`tool_name\``、后端描述四段、参数表）+ 一个可运行示例。
-- 每站一个目录，目录名等于 server_type 前缀；主题契约与指标集都在目录内，顶层不放散文件。
+- **SKILL.md**：每站一行（server_type / 目录与主题文件），行内列出该站目录下每个文件和它覆盖的主题。跨站仲裁 5 条。
+- **业务契约** `references/<站前缀>/<主题>.md`：覆盖说明 + 本站通用守则（同一站所有文件逐字相同，由 check-consistency 校验）+ 本主题守则 + 逐工具契约（`### \`tool_name\``、后端描述四段、参数表）+ 一个可运行示例。
+- 单文件站的目录里只有一个同名文件（如 `bond/bond.md`）；指标集（`index/indicators.md`、`finance/quote-indicators.md`）是从属文件，只在契约里被引用。
+- 没有 README 或入口文件：目录名和文件名本身就是路由。
 
-每次问答最多加载：SKILL.md + 一份入口 + 一份主题契约。守则不重复：全站的写入口，主题的写主题文件。
+每次问答最多加载：SKILL.md + 一份业务契约。
 
 ## 7. 一致性检查（`scripts/check-consistency.mjs`）
 
 只做四项，全部是名字层面：
 
 1. `cli.mjs` 的 SERVERS key 与 manifest 的 server key 完全相等。
-2. manifest 中每个工具在 references 里恰好出现一次（`### \`tool\`` 标题），反向亦然；每站有入口文件，SKILL.md 与入口文件引用的 references 都存在。
+2. manifest 中每个工具在 references 里恰好出现一次（`### \`tool\`` 标题），反向亦然；每站目录存在且 SKILL.md 指向它，所有 `references/...` 引用都存在；同一站各文件的「本站通用守则」段逐字相同。
 3. `call-rules.json` 与 `cli.mjs` CALL_EXAMPLES 里的工具名都在 manifest 内。
 4. `--live`：对每站 `tools/list`，比对工具名集合与 required/type 是否和 manifest 一致；发版前手动跑。
 

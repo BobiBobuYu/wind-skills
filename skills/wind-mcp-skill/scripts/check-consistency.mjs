@@ -3,7 +3,7 @@
 //   node scripts/check-consistency.mjs          # 1-3 离线检查
 //   node scripts/check-consistency.mjs --live   # 追加第 4 项：与线上 tools/list 比对（需 API Key）
 // 1. cli.mjs 的 SERVERS key == tool-manifest.json 的 servers key
-// 2. manifest 每个工具在 references 里恰好出现一次（### `tool` 标题），反向亦然；2b. 入口文件存在且引用的文件都存在
+// 2. manifest 每个工具在 references 里恰好出现一次（### `tool` 标题），反向亦然；2b. 站目录与引用文件存在；2c. 同站通用守则逐字相同
 // 3. call-rules.json 与 cli.mjs CALL_EXAMPLES 引用的工具名都在 manifest 内
 // 4. --live：每站 tools/list 的工具名、required、顶层类型与 manifest 一致
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
@@ -62,20 +62,42 @@ for (const [tool, files] of headingCount) {
   if (!manifestTools.has(tool)) note(`[2] references 里的 ${tool}（${files.join(', ')}）不在 manifest 内`);
 }
 
-// ---- 2b. SKILL.md 与入口文件引用的 references/*.md 必须存在；每个 server_type 必须有入口文件
+// ---- 2b. 每站目录存在且 SKILL.md 指向它；SKILL.md 与契约里引用的 references/... 都存在
 const ENTRY = { stock_research: 'stock', fund_research: 'fund', index_data: 'index', bond_data: 'bond', financial_docs: 'financial-docs', edb_data: 'edb', analytics_data: 'analytics', options_data: 'options', futures_data: 'futures', company_data: 'company', finance_data: 'finance' };
 const skillMd = readFileSync(join(SKILL_DIR, 'SKILL.md'), 'utf8');
 for (const [srv, prefix] of Object.entries(ENTRY)) {
   if (!manifestServers.includes(srv)) continue;
-  const entry = `references/${prefix}/README.md`;
-  if (!existsSync(join(SKILL_DIR, entry))) note(`[2b] ${srv} 缺少入口文件 ${entry}`);
-  if (!skillMd.includes(`\`${entry}\``)) note(`[2b] SKILL.md 路由表没有指向 ${entry}`);
+  if (!existsSync(join(refDir, prefix))) note(`[2b] ${srv} 缺少目录 references/${prefix}/`);
+  if (!skillMd.includes(`\`references/${prefix}/\``)) note(`[2b] SKILL.md 路由表没有指向 references/${prefix}/`);
 }
-const linkSources = [['SKILL.md', skillMd], ...Object.values(ENTRY).map(p => [`references/${p}/README.md`, existsSync(join(refDir, p, 'README.md')) ? readFileSync(join(refDir, p, 'README.md'), 'utf8') : ''])];
+const linkSources = [['SKILL.md', skillMd], ...walkMd(refDir).map(f => [`references/${f}`, readFileSync(join(refDir, f), 'utf8')])];
 for (const [src, text] of linkSources) {
   for (const m of text.matchAll(/`references\/([A-Za-z0-9/-]+\.md)`/g)) {
     if (!existsSync(join(refDir, m[1]))) note(`[2b] ${src} 引用了不存在的 references/${m[1]}`);
   }
+}
+// SKILL.md 行内列出的主题文件必须存在（形如 `references/x/`：`a.md` ...）
+for (const row of skillMd.split('\n').filter(l => /^\| `[a-z_]+` \| `references\//.test(l))) {
+  const dir = row.match(/`references\/([a-z-]+)\/`/)?.[1];
+  for (const m of row.matchAll(/`([a-z-]+\.md)`/g)) {
+    if (dir && !existsSync(join(refDir, dir, m[1]))) note(`[2b] SKILL.md 列出的 references/${dir}/${m[1]} 不存在`);
+  }
+}
+
+// ---- 2c. 同一站各契约文件的「本站通用守则」段逐字相同
+const blocks = new Map();
+for (const f of walkMd(refDir)) {
+  const text = readFileSync(join(refDir, f), 'utf8');
+  const m = text.match(/## 本站通用守则\n([\s\S]*?)\n## /);
+  if (!m) continue;
+  const dir = f.split('/')[0];
+  const list = blocks.get(dir) || [];
+  list.push([f, m[1].trim()]);
+  blocks.set(dir, list);
+}
+for (const [dir, list] of blocks) {
+  const ref = list[0][1];
+  for (const [f, block] of list.slice(1)) if (block !== ref) note(`[2c] ${f} 的本站通用守则与 ${list[0][0]} 不一致`);
 }
 
 // ---- 3. call-rules / CALL_EXAMPLES tool names

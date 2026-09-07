@@ -1,6 +1,16 @@
 # `company_data` 工具契约：客户、供应商、招投标、知识产权、资质与资产
 
-全站通用守则见 `references/company/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+覆盖：客户、供应商、招投标、商标、专利、企业标准、科技型企业名录、土地受让、融资租赁。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+
+## 本站通用守则
+
+- 本站除 `company_search_entity` 与 `company_get_biz_enum`（契约在 `references/company/entity.md`）外，所有工具都要 `companyKey`，取值只能是企业名称全称或统一社会信用代码，两者都来自 `company_search_entity` 返回表的「企业名称」「统一社会信用代码」两列；不得用简称、证券简称或股票代码。
+- `company_search_entity` 返回多家候选时，除非用户表述能唯一对应，先把候选列给用户确认再继续。用户已给出唯一全称或信用代码时可直接查询。
+- 返回正文是 Markdown 表格；「无匹配记录」「没有公开记录」是正常结果，不是错误，如实转告。
+- 日期区间 `startDate` / `endDate`（司法类为 `timeFrom` / `timeTo`）格式 `YYYY-MM-DD`，不传按各工具默认（多数为近 5 年）。
+- 数组过滤参数（案由、当事人角色、舆情标签）契约里的枚举只是常见值，完整列表用 `company_get_biz_enum` 取。
+
+## 本主题守则
 
 - `patentType` / `lawStatus` / `trademarkStatus` 传空字符串或不传表示查全部。
 

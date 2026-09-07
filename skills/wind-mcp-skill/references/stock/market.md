@@ -1,6 +1,15 @@
 # `stock_research` 工具契约：市场、板块、叙事与行业研究
 
-全站通用守则见 `references/stock/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+覆盖：全市场 / 板块 / 行业 / 主题盘中表现、市场叙事、大类资产阶段表现、行业投研语料。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+
+## 本站通用守则
+
+- `windCode` 只传一只股票的名称或代码，如 `贵州茅台`、`600519.SH`、`AAPL.O`；多标的拆成多次调用。
+- 后端按名称做实体识别，名称不存在或有歧义时会匹配到另一家公司（实测传入不存在的名称返回了其它公司的画像）。作答前必须核对返回体中的证券代码或公司名称与用户标的一致，不一致按标的未识别处理并向用户确认。
+- 历史 K 线、分钟走势、多标的最新价快照不在本站，走 `finance_data`（`references/finance/quote.md`）；公告新闻走 `financial_docs`，研报走 `finance_data`（`references/finance/general-docs.md`）。
+- 返回 JSON，字段名为中文；单位随字段自带说明，不自行换算。
+
+## 本主题守则
 
 - 板块、行业、主题、指数的盘中表现统一用 `stock_get_sector_realtime_analysis`，`windCode` 传名称或代码，如 `沪深300`、`000300.SH`、`白酒`。
 - 叙事两步走：先 `stock_get_market_narratives` 取候选和子叙事 ID，再 `stock_get_narrative_details` 传 `childId` 展开；只有用户给了明确关键词且无需挑选时才直接传 `keyword`。

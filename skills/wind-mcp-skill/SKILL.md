@@ -34,21 +34,21 @@ examples:
 
 ## 1. 定路由
 
-按标的类型和意图选一个 `server_type`，读它目录下的 `README.md`。单文件站的 README 就是契约；多文件站的 README 只放全站守则和一张主题表，按表再读同目录下**一份**主题契约。只读这一条路径上的文件，参数一律以契约为准，不凭记忆填参数名或字段值。
+按标的类型和意图选一个 `server_type`，进它的目录；目录里每个文件就是一个主题，按下表选**一份**读。只读这一份，参数一律以契约为准，不凭记忆填参数名或字段值。每份文件开头都有本站通用守则和本主题守则。
 
-| `server_type` | 用于 | 入口文件 |
-| --- | --- | --- |
-| `stock_research` | 股票：全市场 / 板块 / 行业盘中、市场叙事、单只公司研究、选股 | `references/stock/README.md` |
-| `fund_research` | 基金：筛选、档案、净值业绩、持仓、归因、相似基金 | `references/fund/README.md` |
-| `index_data` | 指数 / 板块：档案、基本面、技术、行情、K 线、分钟 | `references/index/README.md` |
-| `bond_data` | 债券：档案、发债主体、行情估值、主体财务 | `references/bond/README.md` |
-| `financial_docs` | 公告、年报、季报、招股书、财经新闻 | `references/financial-docs/README.md` |
-| `edb_data` | 宏观、行业、区域、汇率、商品价格等 EDB 指标 | `references/edb/README.md` |
-| `analytics_data` | 跨标的聚合、加权平均、排名、复合指标推导 | `references/analytics/README.md` |
-| `options_data` | 期权：链与合约、品种序列与情绪、波动率、香草 / 二元定价 | `references/options/README.md` |
-| `futures_data` | 期货：合约、基差、资金、席位、仓单、供需、研报观点 | `references/futures/README.md` |
-| `company_data` | 企业：工商、股权、经营、税务、司法、风险、舆情（不限上市公司） | `references/company/README.md` |
-| `finance_data` | 全品种行情快照与 K 线；标准指标取数、指标字典、报表；新闻 / 公告 / 研报清单与单篇、投研语料 | `references/finance/README.md` |
+| `server_type` | 目录与主题文件 |
+| --- | --- |
+| `stock_research` | `references/stock/`：`market.md` 全市场 / 板块 / 行业 / 主题盘中、市场叙事、大类资产、行业研究；`company.md` 单只股票画像、财务、盈利预测、估值、动态、资金、技术、盘中分析，自然语言选股 |
+| `fund_research` | `references/fund/`：`screen-profile.md` 筛选、档案、申赎、规模、财务；`nav-performance.md` 净值、业绩评级、场内单日行情、ETF 申赎清单；`holdings.md` 资产 / 行业 / 债券配置、持仓、重仓；`attribution.md` Brinson、多因子、风格；`position-peers.md` 选股择时、相似基金 |
+| `index_data` | `references/index/`：`index.md` 指数 / 板块档案、基本面、技术、行情、K 线、分钟（`indicators.md` 是行情指标字段清单） |
+| `bond_data` | `references/bond/`：`bond.md` 债券档案、发债主体、行情估值、主体财务 |
+| `financial_docs` | `references/financial-docs/`：`financial-docs.md` 公告、年报、季报、招股书、财经新闻 |
+| `edb_data` | `references/edb/`：`edb.md` 宏观、行业、区域、汇率、商品价格等 EDB 指标 |
+| `analytics_data` | `references/analytics/`：`analytics.md` 跨标的聚合、加权平均、排名、复合指标推导 |
+| `options_data` | `references/options/`：`chain.md` 存续期限、链截面、合约序列；`variety.md` 品种隐波 / PCR / 偏度序列与统计、多空情绪；`volatility.md` 波动率曲面、隐波锥、期限结构；`pricing-vanilla.md` 香草、二元定价 |
+| `futures_data` | `references/futures/`：`market.md` 合约规格、基差、资金变动、席位排名；`fundamentals.md` 仓单、交割、供需、研报观点 |
+| `company_data` | `references/company/`：先 `entity.md` 取 `companyKey`（实体检索、枚举字典）；`registration.md` 工商、变更、年报、联系方式；`equity.md` 股东、实控人、受益人、穿透、投资、人员、出质冻结；`business.md` 客户、供应商、招投标、知识产权、资质、土地、租赁；`tax-credit.md` 税务与信用；`lawsuit.md` 立案、开庭、公告、判决、送达；`enforcement.md` 被执行、终本、失信、限高、拍卖、询价；`status-risk.md` 经营异常、破产、清算、注销、评分；`penalty-sentiment.md` 惩戒、处罚、舆情 |
+| `finance_data` | `references/finance/`：`quote.md` 全品种最新行情快照、K 线、分时（`quote-indicators.md` 是行情指标字段清单）；`general-data.md` 标准指标取数、指标字典、报表；`general-docs.md` 新闻 / 公告 / 研报清单与单篇、自然语言文档检索、投研语料 |
 
 意图跨站时按这个顺序仲裁：
 

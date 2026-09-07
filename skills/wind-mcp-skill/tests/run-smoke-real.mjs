@@ -36,7 +36,7 @@ const CASES = [
   ['options/pricing-vanilla.md', 'options_data', 'options_calc_vanilla', { assetClass: 'equity', spotPrice: 4.3, optionType: 'call', strikePrice: 4.5, expirationDate: '2026-12-23', valuationDate: '2026-09-07', volatility: 0.2, riskFreeRate: 0.02, dividendYield: 0.01 }],
   ['futures/market.md', 'futures_data', 'futures_get_basis', { windCodes: ['CU.SHF'] }],
   ['futures/fundamentals.md', 'futures_data', 'futures_get_warehouse_receipt', { type: 'receipt', windCodes: ['CU.SHF'] }],
-  ['company/registration.md', 'company_data', 'company_search_entity', { searchKey: '贵州茅台' }],
+  ['company/entity.md', 'company_data', 'company_search_entity', { searchKey: '贵州茅台' }],
   ['company/registration.md', 'company_data', 'company_get_registration_info', { companyKey: '9152000071430580XT' }],
   ['company/equity.md', 'company_data', 'company_list_shareholder', { companyKey: '9152000071430580XT' }],
   ['company/business.md', 'company_data', 'company_list_patent', { companyKey: '贵州茅台酒股份有限公司', patentType: '授权发明' }],

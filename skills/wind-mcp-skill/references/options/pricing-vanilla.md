@@ -1,6 +1,16 @@
 # `options_data` 工具契约：定价计算：香草与二元期权
 
-全站通用守则见 `references/options/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+覆盖：欧式 / 美式香草期权、二元期权的定价与希腊字母。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+
+## 本站通用守则
+
+- `windCode` / `windCodes` 是期权标的（如 `510300.SH`、`000300.SH`），`optionVarietyCode` 是期权品种（如 `510300OP.SH`），合约代码来自链截面返回；三者不要混用。
+- 日期类参数（`tradeDate`、`expiryDate`、`startDate`、`endDate`、`time`）在 schema 里多数不是必填，但后端默认值是固定常量，不是当天；一律显式传入，格式 `YYYY-MM-DD` 或 `YYYY-MM-DD HH:mm`。
+- 契约标为数组的参数（`windCodes`、`optionContractCodes`、`indicators`）必须传 JSON 数组；指标用表中的英文枚举。
+- 波动率、利率、股息率一律小数形式（25% 填 `0.25`）。定价工具不查行情，市场参数由调用方先取。
+- 本站当前只有香草和二元两个定价工具；障碍、亚式、累计、鲨鱼鳍、雪球定价与历史波动率锥已下架，遇到这类需求回 `OUT_OF_SCOPE`。
+
+## 本主题守则
 
 - 现价、波动率、利率、股息率先用 `references/finance/quote.md` 或 `references/options/volatility.md` 取，再调本文件工具。
 - `assetClass` 为 `fx` 时 `dividendYield` 填外币无风险利率，为 `futures` 时通常填 0。美式期权 `pricingMethod` 优先 `baw`，欧式用 `bs`。

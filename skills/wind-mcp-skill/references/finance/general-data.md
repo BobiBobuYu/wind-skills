@@ -1,10 +1,18 @@
 # `finance_data` 工具契约：指标字典、结构化取数与报表
 
-全站通用守则见 `references/finance/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+覆盖：自然语言标准指标取数、专业指标字典与按代码取数、金融报表发现与读取。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+
+## 本站通用守则
+
+- 本站是全品种兜底：行情快照与历史序列覆盖股票、基金、指数、债券、期货、外汇、衍生品；指标取数、报表、文档、投研语料按主题文件分流。
+- 参数用 camelCase（`windCode`、`windCodes`、`startDate`）；`windCodes` 在本站是英文逗号分隔的字符串，单次最多 50 个。
+- 与 `analytics_data`、`financial_docs` 的取舍待评审，评审前按 SKILL.md 仲裁顺序执行。行情指标字段清单在 `references/finance/quote-indicators.md`。
+
+## 本主题守则
 
 - 对象和指标都明确、只要标准数值（收盘价、市盈率、营业收入等）时用 `general_query_data` 一步取数；需要严格控制指标代码、参数、复权或币种时走 `general_search_indicators` 到 `general_get_indicator_data` 两步。
 - `general_get_indicator_data` 的 `indicatorCode` 和 `parameter` 必须来自 `general_search_indicators` 的返回；报表两步：`general_search_datasets` 拿 `reportId` 与 `inputSchema`，`general_get_dataset` 的 `condition` 严格按该 schema 组装。
-- 跨标的聚合、加权、排名、复合计算不在本文件，走 `analytics_data`（`references/analytics/README.md`）。
+- 跨标的聚合、加权、排名、复合计算不在本文件，走 `analytics_data`（`references/analytics/analytics.md`）。
 - 返回 JSON；`general_query_data` 为 `{data:{data:[{columns,rows}]}, error}` 结构。
 
 ## 工具契约

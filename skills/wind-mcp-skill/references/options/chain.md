@@ -1,6 +1,16 @@
 # `options_data` 工具契约：期限、链截面与合约序列
 
-全站通用守则见 `references/options/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+覆盖：存续期限、某到期日的期权链截面、具体合约的历史序列。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+
+## 本站通用守则
+
+- `windCode` / `windCodes` 是期权标的（如 `510300.SH`、`000300.SH`），`optionVarietyCode` 是期权品种（如 `510300OP.SH`），合约代码来自链截面返回；三者不要混用。
+- 日期类参数（`tradeDate`、`expiryDate`、`startDate`、`endDate`、`time`）在 schema 里多数不是必填，但后端默认值是固定常量，不是当天；一律显式传入，格式 `YYYY-MM-DD` 或 `YYYY-MM-DD HH:mm`。
+- 契约标为数组的参数（`windCodes`、`optionContractCodes`、`indicators`）必须传 JSON 数组；指标用表中的英文枚举。
+- 波动率、利率、股息率一律小数形式（25% 填 `0.25`）。定价工具不查行情，市场参数由调用方先取。
+- 本站当前只有香草和二元两个定价工具；障碍、亚式、累计、鲨鱼鳍、雪球定价与历史波动率锥已下架，遇到这类需求回 `OUT_OF_SCOPE`。
+
+## 本主题守则
 
 - 三步链路：`options_get_listed_terms` 用标的代码和交易日拿 `optionVarietyCode` 与 `expiryDate`；`options_get_term_metrics` 用这两个值看截面；`options_get_contract_series` 用截面里的合约代码看序列。后一步的代码只能来自前一步的返回。
 - `strikeLevels` 与 `underlyingPrice` 配合缩小行权价范围，不传返回全部合约。
