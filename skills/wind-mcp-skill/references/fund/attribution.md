@@ -1,6 +1,6 @@
 # `fund_research` 工具契约：归因与风格分析
 
-全站通用守则见 `references/fund.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/fund/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 基准用指数 Wind 代码（如 `000300.SH`），参数名各工具不同（`benchCode` / `benchmarkWindCode`），以表为准；`fund_get_return_attribution` 的 `startDate` / `endDate` 必填。
 - 模型、周期、行业标准都有枚举和默认值，用户没指定就不传；因子模型不含的项返回空。

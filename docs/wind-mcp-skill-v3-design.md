@@ -68,14 +68,15 @@ skills/wind-mcp-skill/
 │   ├── call-rules.json              v19：只剩 schema 表达不了的跨字段规则 + 指数 K 线周期映射
 │   ├── check-consistency.mjs        名字层面一致性校验（4 项）；--live 与线上 tools/list 比对
 │   └── update-check.mjs             不变
-├── references/                      顶层 = 入口（每站一个 <站前缀>.md）；多文件站的主题契约在同名子目录
-│   ├── stock.md        stock/{market,company}.md
-│   ├── fund.md         fund/{screen-profile,nav-performance,holdings,attribution,position-peers}.md
-│   ├── options.md      options/{chain,variety,volatility,pricing-vanilla}.md
-│   ├── futures.md      futures/{market,fundamentals}.md
-│   ├── company.md      company/{registration,equity,business,tax-credit,lawsuit,enforcement,status-risk,penalty-sentiment}.md（入口含 company_search_entity / company_get_biz_enum 契约）
-│   ├── finance.md      finance/{quote,quote-indicators,general-data,general-docs}.md
-│   ├── index.md  index-indicators.md  bond.md  financial-docs.md  edb.md  analytics.md（单文件站，入口即契约）
+├── references/                      每站一个目录（目录名 = server_type 前缀），README.md 是入口；单文件站的 README 即契约
+│   ├── stock/          README.md  market.md  company.md
+│   ├── fund/           README.md  screen-profile.md  nav-performance.md  holdings.md  attribution.md  position-peers.md
+│   ├── options/        README.md  chain.md  variety.md  volatility.md  pricing-vanilla.md
+│   ├── futures/        README.md  market.md  fundamentals.md
+│   ├── company/        README.md（含 company_search_entity / company_get_biz_enum 契约）registration.md  equity.md  business.md  tax-credit.md  lawsuit.md  enforcement.md  status-risk.md  penalty-sentiment.md
+│   ├── finance/        README.md  quote.md  quote-indicators.md  general-data.md  general-docs.md
+│   ├── index/          README.md  indicators.md
+│   └── bond/  financial-docs/  edb/  analytics/   各只有 README.md
 └── tests/
     ├── README.md
     ├── mock-fetch.mjs               场景：isError 文本 / JSON 正文 / Markdown 正文 / 纯文本错误 / 旧式内层信封
@@ -86,7 +87,7 @@ skills/wind-mcp-skill/
     └── run-smoke-real.mjs           集成：每个 references 文件至少一个真实调用（需凭据，手动）
 ```
 
-删除：`references/stock.md`、`fund.md`、`economic.md`、`fund-indicators.md`、`economic_analysis_conclusion.md`（结论并入 edb.md）、旧 `tests/` 全部脚本与 `error-suite.cases.json`。
+删除：`references/stock/README.md`、`fund.md`、`economic.md`、`fund-indicators.md`、`economic_analysis_conclusion.md`（结论并入 edb.md）、旧 `tests/` 全部脚本与 `error-suite.cases.json`。
 
 ## 5. CLI 内部流程
 
@@ -123,9 +124,9 @@ argv → loadParamsInput(@file 或内联) → JSON.parse
 ## 6. references 写法（三层）
 
 - **SKILL.md**：每站一行（server_type / 用于 / 入口文件），不列主题、不列工具。跨站仲裁 5 条。
-- **入口文件** `references/<站前缀>.md`（仅多文件站，主题契约放在 `references/<站前缀>/` 子目录）：全站通用守则（3 到 5 条）+ 入口工具契约（如 company 的 `company_search_entity`）+ 主题分流表（问题涉及 / 读哪个文件 / 工具名）。
+- **入口文件** `references/<站前缀>/README.md`（多文件站放全站守则和主题表，单文件站直接是契约）：全站通用守则（3 到 5 条）+ 入口工具契约（如 company 的 `company_search_entity`）+ 主题分流表（问题涉及 / 读哪个文件 / 工具名）。
 - **主题契约**：本主题特有守则（0 到 6 条）+ 逐工具契约（`### \`tool_name\``、后端描述四段、参数表）+ 一个可运行示例。
-- 单文件站的入口就是契约文件。
+- 每站一个目录，目录名等于 server_type 前缀；主题契约与指标集都在目录内，顶层不放散文件。
 
 每次问答最多加载：SKILL.md + 一份入口 + 一份主题契约。守则不重复：全站的写入口，主题的写主题文件。
 

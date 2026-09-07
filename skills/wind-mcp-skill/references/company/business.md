@@ -1,6 +1,6 @@
 # `company_data` 工具契约：客户、供应商、招投标、知识产权、资质与资产
 
-全站通用守则见 `references/company.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/company/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - `patentType` / `lawStatus` / `trademarkStatus` 传空字符串或不传表示查全部。
 

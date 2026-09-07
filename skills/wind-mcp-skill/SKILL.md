@@ -34,21 +34,21 @@ examples:
 
 ## 1. 定路由
 
-按标的类型和意图选一个 `server_type`，读它的入口文件。单文件站的入口就是契约；多文件站的入口只放全站守则和一张主题表，按表再读**一份**主题契约。只读这一条路径上的文件，参数一律以契约为准，不凭记忆填参数名或字段值。
+按标的类型和意图选一个 `server_type`，读它目录下的 `README.md`。单文件站的 README 就是契约；多文件站的 README 只放全站守则和一张主题表，按表再读同目录下**一份**主题契约。只读这一条路径上的文件，参数一律以契约为准，不凭记忆填参数名或字段值。
 
 | `server_type` | 用于 | 入口文件 |
 | --- | --- | --- |
-| `stock_research` | 股票：全市场 / 板块 / 行业盘中、市场叙事、单只公司研究、选股 | `references/stock.md` |
-| `fund_research` | 基金：筛选、档案、净值业绩、持仓、归因、相似基金 | `references/fund.md` |
-| `index_data` | 指数 / 板块：档案、基本面、技术、行情、K 线、分钟 | `references/index.md` |
-| `bond_data` | 债券：档案、发债主体、行情估值、主体财务 | `references/bond.md` |
-| `financial_docs` | 公告、年报、季报、招股书、财经新闻 | `references/financial-docs.md` |
-| `edb_data` | 宏观、行业、区域、汇率、商品价格等 EDB 指标 | `references/edb.md` |
-| `analytics_data` | 跨标的聚合、加权平均、排名、复合指标推导 | `references/analytics.md` |
-| `options_data` | 期权：链与合约、品种序列与情绪、波动率、香草 / 二元定价 | `references/options.md` |
-| `futures_data` | 期货：合约、基差、资金、席位、仓单、供需、研报观点 | `references/futures.md` |
-| `company_data` | 企业：工商、股权、经营、税务、司法、风险、舆情（不限上市公司） | `references/company.md` |
-| `finance_data` | 全品种行情快照与 K 线；标准指标取数、指标字典、报表；新闻 / 公告 / 研报清单与单篇、投研语料 | `references/finance.md` |
+| `stock_research` | 股票：全市场 / 板块 / 行业盘中、市场叙事、单只公司研究、选股 | `references/stock/README.md` |
+| `fund_research` | 基金：筛选、档案、净值业绩、持仓、归因、相似基金 | `references/fund/README.md` |
+| `index_data` | 指数 / 板块：档案、基本面、技术、行情、K 线、分钟 | `references/index/README.md` |
+| `bond_data` | 债券：档案、发债主体、行情估值、主体财务 | `references/bond/README.md` |
+| `financial_docs` | 公告、年报、季报、招股书、财经新闻 | `references/financial-docs/README.md` |
+| `edb_data` | 宏观、行业、区域、汇率、商品价格等 EDB 指标 | `references/edb/README.md` |
+| `analytics_data` | 跨标的聚合、加权平均、排名、复合指标推导 | `references/analytics/README.md` |
+| `options_data` | 期权：链与合约、品种序列与情绪、波动率、香草 / 二元定价 | `references/options/README.md` |
+| `futures_data` | 期货：合约、基差、资金、席位、仓单、供需、研报观点 | `references/futures/README.md` |
+| `company_data` | 企业：工商、股权、经营、税务、司法、风险、舆情（不限上市公司） | `references/company/README.md` |
+| `finance_data` | 全品种行情快照与 K 线；标准指标取数、指标字典、报表；新闻 / 公告 / 研报清单与单篇、投研语料 | `references/finance/README.md` |
 
 意图跨站时按这个顺序仲裁：
 

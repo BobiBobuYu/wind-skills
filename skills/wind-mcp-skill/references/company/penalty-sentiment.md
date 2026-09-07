@@ -1,6 +1,6 @@
 # `company_data` 工具契约：惩戒、处罚与舆情
 
-全站通用守则见 `references/company.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/company/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - `tagCode` / `emotionId` 是数组过滤参数；完整标签用 `company_get_biz_enum(listType=2, categoryName="舆情标签")` 取。
 

@@ -67,11 +67,11 @@ const ENTRY = { stock_research: 'stock', fund_research: 'fund', index_data: 'ind
 const skillMd = readFileSync(join(SKILL_DIR, 'SKILL.md'), 'utf8');
 for (const [srv, prefix] of Object.entries(ENTRY)) {
   if (!manifestServers.includes(srv)) continue;
-  const entry = `references/${prefix}.md`;
+  const entry = `references/${prefix}/README.md`;
   if (!existsSync(join(SKILL_DIR, entry))) note(`[2b] ${srv} 缺少入口文件 ${entry}`);
   if (!skillMd.includes(`\`${entry}\``)) note(`[2b] SKILL.md 路由表没有指向 ${entry}`);
 }
-const linkSources = [['SKILL.md', skillMd], ...Object.values(ENTRY).map(p => [`references/${p}.md`, existsSync(join(refDir, `${p}.md`)) ? readFileSync(join(refDir, `${p}.md`), 'utf8') : ''])];
+const linkSources = [['SKILL.md', skillMd], ...Object.values(ENTRY).map(p => [`references/${p}/README.md`, existsSync(join(refDir, p, 'README.md')) ? readFileSync(join(refDir, p, 'README.md'), 'utf8') : ''])];
 for (const [src, text] of linkSources) {
   for (const m of text.matchAll(/`references\/([A-Za-z0-9/-]+\.md)`/g)) {
     if (!existsSync(join(refDir, m[1]))) note(`[2b] ${src} 引用了不存在的 references/${m[1]}`);

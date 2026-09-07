@@ -2,13 +2,13 @@
 
 只用于指数和板块。参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
-- `indexes` 逐字取自 `references/index-indicators.md`；用户未指定字段时省略 `indexes` 走默认值，指定字段时才读取该指标集。
+- `indexes` 逐字取自 `references/index/indicators.md`；用户未指定字段时省略 `indexes` 走默认值，指定字段时才读取该指标集。
 - 已确认的标准代码可直接传，例如 `000300.SH`、`HSI.HI`；不得猜测未知后缀。
 
 ## 目录
 
 - [工具契约](#工具契约)
-- 行情指标集：`references/index-indicators.md`（仅 `get_index_price_indicators` 需要）
+- 行情指标集：`references/index/indicators.md`（仅 `get_index_price_indicators` 需要）
 
 ## 工具契约
 
@@ -61,7 +61,7 @@
 | 参数 | 必填 | 类型 | 枚举 | 示例 / 默认 | 官方说明 |
 | --- | --- | --- | --- | --- | --- |
 | `windcode` | 是 | string | — | — | 一个或多个指数名称或者指数代码，如沪深300或000300.SH；多个用英文逗号分隔，单次最多 50 个，超过请分批查询。 |
-| `indexes` | 否 | string | — | 默认："最新交易日,交易时间,最新成交价,前收盘价,今日开盘价,今日最高价,今日最低价,成交量" | 指标字段，多个字段用英文逗号分隔；可选值见 `references/index-indicators.md`，构造前先读取该文件并逐字复制。 |
+| `indexes` | 否 | string | — | 默认："最新交易日,交易时间,最新成交价,前收盘价,今日开盘价,今日最高价,今日最低价,成交量" | 指标字段，多个字段用英文逗号分隔；可选值见 `references/index/indicators.md`，构造前先读取该文件并逐字复制。 |
 
 ### `get_index_basicinfo`
 
@@ -71,4 +71,4 @@
 | --- | --- | --- | --- | --- | --- |
 | `question` | 是 | string | — | 示例："查询沪深300指数的基本信息，包括发布机构、基日和成份股数量" | 自然语言查询要求，为"实体 + 指标 + 指标参数"三要素的组合超集，应包含指数或板块实体、指标名称、日期等查询要素。 |
 
-行情指标集已独立为 `references/index-indicators.md`，仅构造 `get_index_price_indicators` 的 `indexes` 参数时读取。
+行情指标集已独立为 `references/index/indicators.md`，仅构造 `get_index_price_indicators` 的 `indexes` 参数时读取。

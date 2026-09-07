@@ -1,6 +1,6 @@
 # `fund_research` 工具契约：净值、业绩、场内行情与 ETF 申赎清单
 
-全站通用守则见 `references/fund.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/fund/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - `asOfDate` / `tradeDate` 不传取最新可用日期，非交易日自动回溯。
 - `fund_get_etf_pcf` 的 `asOfDate` 必填，只适用于 ETF。

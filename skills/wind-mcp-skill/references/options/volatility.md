@@ -1,6 +1,6 @@
 # `options_data` 工具契约：波动率曲面、隐波锥与期限结构
 
-全站通用守则见 `references/options.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/options/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - `windCode` 只支持非期货证券和期货主力合约；`moneyness` 用数值，`100.0` 表示平值。
 - 历史波动率不在本文件：用 `references/options/variety.md` 的 `options_get_variety_series`，`indicator=hv`。隐含波动率与历史波动率口径不同，不得互相替代或混合比较。

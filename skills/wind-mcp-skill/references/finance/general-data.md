@@ -1,10 +1,10 @@
 # `finance_data` 工具契约：指标字典、结构化取数与报表
 
-全站通用守则见 `references/finance.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/finance/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 对象和指标都明确、只要标准数值（收盘价、市盈率、营业收入等）时用 `general_query_data` 一步取数；需要严格控制指标代码、参数、复权或币种时走 `general_search_indicators` 到 `general_get_indicator_data` 两步。
 - `general_get_indicator_data` 的 `indicatorCode` 和 `parameter` 必须来自 `general_search_indicators` 的返回；报表两步：`general_search_datasets` 拿 `reportId` 与 `inputSchema`，`general_get_dataset` 的 `condition` 严格按该 schema 组装。
-- 跨标的聚合、加权、排名、复合计算不在本文件，走 `analytics_data`（`references/analytics.md`）。
+- 跨标的聚合、加权、排名、复合计算不在本文件，走 `analytics_data`（`references/analytics/README.md`）。
 - 返回 JSON；`general_query_data` 为 `{data:{data:[{columns,rows}]}, error}` 结构。
 
 ## 工具契约

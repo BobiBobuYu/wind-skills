@@ -1,6 +1,6 @@
 # `options_data` 工具契约：期限、链截面与合约序列
 
-全站通用守则见 `references/options.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/options/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 三步链路：`options_get_listed_terms` 用标的代码和交易日拿 `optionVarietyCode` 与 `expiryDate`；`options_get_term_metrics` 用这两个值看截面；`options_get_contract_series` 用截面里的合约代码看序列。后一步的代码只能来自前一步的返回。
 - `strikeLevels` 与 `underlyingPrice` 配合缩小行权价范围，不传返回全部合约。

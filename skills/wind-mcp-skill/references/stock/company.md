@@ -1,6 +1,6 @@
 # `stock_research` 工具契约：公司研究与选股
 
-全站通用守则见 `references/stock.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/stock/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - `stock_screener` 只返回符合条件的代码列表，不返回明细；逐只详情再调本文件其它工具。
 - `stock_get_company_finance_analysis` 的 `reportPeriod` 按 `{报告期}{FY|CY}{年份}` 拼写，如 `H1FY2025`、`Q3FY2025`、`CY2025`；年报不写报告期前缀。

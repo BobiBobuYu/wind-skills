@@ -1,6 +1,6 @@
 # `stock_research` 工具契约：市场、板块、叙事与行业研究
 
-全站通用守则见 `references/stock.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/stock/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - 板块、行业、主题、指数的盘中表现统一用 `stock_get_sector_realtime_analysis`，`windCode` 传名称或代码，如 `沪深300`、`000300.SH`、`白酒`。
 - 叙事两步走：先 `stock_get_market_narratives` 取候选和子叙事 ID，再 `stock_get_narrative_details` 传 `childId` 展开；只有用户给了明确关键词且无需挑选时才直接传 `keyword`。

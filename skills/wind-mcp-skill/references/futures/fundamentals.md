@@ -1,6 +1,6 @@
 # `futures_data` 工具契约：仓单、交割、供需与研报观点
 
-全站通用守则见 `references/futures.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
+全站通用守则见 `references/futures/README.md`，本文件只放本主题的补充守则。 参数名称、类型、必填项、示例与默认值和枚举以本文件各工具的契约为准。
 
 - `futures_get_warehouse_receipt` 的 `windCodes` 不传为全市场；只接受品种级代码，不接受月合约代码。
 - `futures_get_supply_demand` 返回供需指标的最新值与历史序列，`includeHistory=false` 只要最新值；口径以返回的指标元数据为准，不默认代表中国市场。
