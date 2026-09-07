@@ -1,6 +1,10 @@
 # wind-mcp-skill v3 设计：调用逻辑与骨架
 
-> 状态：开发中（开发仓 main）。目标版本 3.0.0。本文是改造的唯一设计依据，改动先改这里再改代码。
+> 状态：v3.0.0 迁移已于 2026-09-07 完成（afd6738…131923c），随后同日的 3.3.0 重写（19cede4、3022a9f）做了三项调整并经确认：
+> ① 不再随 skill 携带 tool-manifest / call-rules / check-consistency / tests，tool_name 与参数由 MCP Server 实时校验，CLI 只做代码字段归一化与传输；
+> ② references 布局以 SKILL.md 站表为准（stock / fund / options / company 二级目录，其余站单文件）；
+> ③ 数据来源声明改为「Wind Alice 万得金融数据服务」。
+> 本文第 3 节的实测结论仍然有效；第 4、5.2、7 节描述的是 3.0.0 的本地校验方案，已被 ① 取代，仅作历史记录。
 > 实测日期：2026-09-07，所有结论来自对线上 MCP 的 `tools/list` 与少量 `tools/call`。
 > 教训：9 月 5 日的 tools/list 快照到 9 月 7 日已有 3 站 11 个工具、40 处参数变化。**任何契约改动前先跑 `scripts/check-consistency.mjs --live`，以当天线上为准，不用旧快照。**
 
