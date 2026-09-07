@@ -1,51 +1,2766 @@
 {
-    "stock_data": [
-    "get_stock_price_indicators",
-    "get_risk_metrics",
-    "get_stock_events",
-    "get_stock_kline",
-    "get_stock_basicinfo",
-    "get_stock_equity_holders",
-    "get_stock_fundamentals",
-    "get_stock_quote",
-    "get_stock_technicals",
-    "search_stocks"
-  ],
-  "fund_data": [
-    "get_fund_price_indicators",
-    "get_fund_kline",
-    "get_fund_financials",
-    "get_fund_holdings",
-    "get_fund_company_info",
-    "get_fund_quote",
-    "get_fund_info",
-    "get_fund_holders",
-    "get_fund_performance",
-    "search_funds"
-  ],
-  "index_data": [
-    "get_index_technicals",
-    "get_index_quote",
-    "get_index_kline",
-    "get_index_fundamentals",
-    "get_index_price_indicators",
-    "get_index_basicinfo"
-  ],
-  "bond_data": [
-    "get_bond_basicinfo",
-    "get_bond_issuer_info",
-    "get_bond_market_data",
-    "get_bond_financial_data"
-  ],
-  "financial_docs": [
-    "get_company_announcements",
-    "get_financial_news"
-  ],
-  "economic_data": [
-    "search_economic_indicator",
-    "query_economic_indicator_data"
-  ],
-  "analytics_data": [
-    "get_financial_data"
-  ]
+  "schema_version": 2,
+  "generated_from": "tools/list 2026-09-07（充值后重新拉取）",
+  "description": "server_type → tool_name → 参数类型与必填。由线上 tools/list 生成，是合法 server_type + tool_name 组合、必填字段与类型收敛的权威表。标量参数的 enum 本地校验；数组参数的 items_enum 仅供契约文档（后端多数接受别名，不本地校验）。修改后端 schema 后用 check-consistency.mjs --live 复核。",
+  "servers": {
+    "stock_research": {
+      "stock_get_market_realtime_analysis": {
+        "required": [],
+        "params": {
+          "marketType": {
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "7",
+              "br"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "stock_get_sector_realtime_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_market_narratives": {
+        "required": [],
+        "params": {
+          "limit": {
+            "type": "integer"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_narrative_details": {
+        "required": [],
+        "params": {
+          "childId": {
+            "type": "integer"
+          },
+          "keyword": {
+            "type": "string"
+          }
+        }
+      },
+      "stock_get_asset_market_performance": {
+        "required": [],
+        "params": {}
+      },
+      "stock_get_industry_research": {
+        "required": [
+          "keyword"
+        ],
+        "params": {
+          "keyword": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_company_profile": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        }
+      },
+      "stock_get_company_finance_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "ORIGIN",
+              "CNY",
+              "USD",
+              "HKD",
+              "EUR",
+              "JPY",
+              "GBP",
+              "CAD",
+              "AUD",
+              "SGD",
+              "TWD",
+              "CHF"
+            ]
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "reportPeriod": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_company_earnings_estimate": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_company_valuation": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_company_updates": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_get_money_flow_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        }
+      },
+      "stock_get_technical_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        }
+      },
+      "stock_get_realtime_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "stock_screener": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "fund_research": {
+      "fund_get_similar_funds": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "onlyValid": {
+            "type": "boolean"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_brinson_attribution": {
+        "required": [
+          "windCode",
+          "benchCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "benchCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          },
+          "heldFundType": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2"
+            ]
+          },
+          "queryMode": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2"
+            ]
+          },
+          "industryStandard": {
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "5"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_style_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "cycle": {
+            "type": "string",
+            "enum": [
+              "monthly",
+              "quarterly"
+            ]
+          },
+          "indexs": {
+            "type": "array",
+            "items": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_return_attribution": {
+        "required": [
+          "windCode",
+          "benchmarkWindCode",
+          "startDate",
+          "endDate"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "benchmarkWindCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "modelType": {
+            "type": "string",
+            "enum": [
+              "capm",
+              "ff3",
+              "ff4",
+              "ff5",
+              "ff6"
+            ]
+          },
+          "cycle": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "yearly",
+              "daily"
+            ]
+          },
+          "marketIndex": {
+            "type": "string"
+          },
+          "riskRate": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_selection_timing_analysis": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "5"
+            ]
+          },
+          "date": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_asset_allocation": {
+        "required": [
+          "windCode",
+          "reportDate"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_industry_allocation": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          },
+          "classificationType": {
+            "type": "string",
+            "enum": [
+              "3",
+              "4",
+              "5",
+              "6",
+              "10",
+              "11"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_bond_type_allocation": {
+        "required": [
+          "windCode",
+          "reportDate"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_equity_holdings": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          },
+          "industryType": {
+            "type": "string",
+            "enum": [
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "10",
+              "11"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_top_equity_holdings": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          },
+          "industryType": {
+            "type": "string",
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_bond_holdings": {
+        "required": [
+          "windCode",
+          "reportDate"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_top_fund_holdings": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "reportDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_etf_pcf": {
+        "required": [
+          "windCode",
+          "asOfDate"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "asOfDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_basic_info": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "includeFields": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "f_info_windcode",
+              "f_info_name",
+              "f_info_setupdate",
+              "f_info_investtype",
+              "f_info_mgrcomp",
+              "f_info_fundmanager",
+              "f_info_benchmark",
+              "f_info_fullname",
+              "f_info_code",
+              "f_info_frontendcode",
+              "f_info_backendcode",
+              "s_info_isincode",
+              "f_info_firstinvesttype",
+              "f_info_type",
+              "f_style_marketvaluestyleattribute",
+              "f_info_investmentregion",
+              "f_info_maturitydate_2",
+              "f_info_loflisteddate",
+              "f_info_exchmarket",
+              "f_info_minholdingperiod",
+              "f_info_t0ornot",
+              "f_info_custodianbank",
+              "f_info_foreigninvestmentadvisor",
+              "f_info_foreigncustodian",
+              "f_info_investobject",
+              "f_info_investscope",
+              "f_info_investstrategy2",
+              "f_info_investingregiondescription",
+              "f_info_managementfeeratio",
+              "f_info_custodianfeeratio",
+              "f_info_salefeeratio",
+              "f_info_purchasefeeratio",
+              "f_info_redemptionfeeratio",
+              "f_info_relatedcode"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_nav": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "asOfDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_purchase_redemption_status": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "includeFields": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "f_info_windcode",
+              "f_info_name",
+              "f_dq_status",
+              "f_info_pchmstatus",
+              "f_info_redmstatus",
+              "f_pchredm_largepchmaxamt",
+              "s_dq_tradestatus",
+              "f_info_date_suspension",
+              "f_info_date_resumption",
+              "f_info_startdateofclosure",
+              "f_info_lastopenday",
+              "f_info_expectedendingday",
+              "f_info_expectedopenday"
+            ]
+          }
+        },
+        "strict": true
+      },
+      "fund_get_performance": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "includeFields": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "f_info_windcode",
+              "f_info_name",
+              "f_return_1w",
+              "f_return_1m",
+              "f_return_3m",
+              "f_return_6m",
+              "f_return_1y",
+              "f_return_2y",
+              "f_return_3y",
+              "f_return_5y",
+              "f_return_ytd",
+              "f_return_std",
+              "f_nav_periodreturnranking_1w",
+              "f_nav_periodreturnranking_1m",
+              "f_nav_periodreturnranking_3m",
+              "f_nav_periodreturnranking_6m",
+              "f_nav_periodreturnranking_1y",
+              "f_nav_periodreturnranking_3y",
+              "f_nav_periodreturnranking_5y",
+              "f_nav_periodreturnranking_ytd",
+              "f_rating_wind3y",
+              "f_rating_wind5y",
+              "f_risk_stdevyearly",
+              "f_risk_maxdownside",
+              "f_risk_maxdownside_recoverdays",
+              "f_risk_downsiderisk",
+              "f_risk_annutrackerror_index",
+              "f_risk_sharpe",
+              "f_risk_inforatio",
+              "f_risk_treynor",
+              "f_risk_sortino",
+              "f_risk_calmar",
+              "f_risk_alpha",
+              "f_risk_beta"
+            ]
+          },
+          "asOfDate": {
+            "type": "string"
+          },
+          "benchmarkWindCode": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_listed_historical_price": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "includeFields": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "f_info_windcode",
+              "f_info_name",
+              "f_dq_close",
+              "f_dq_volume",
+              "f_nav_iopv",
+              "f_nav_iopv_discountratio",
+              "f_mf_netinflow",
+              "s_margin_tradingandseclendingbalance"
+            ]
+          },
+          "tradeDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_size": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "asOfDate": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_get_financials": {
+        "required": [
+          "windCodes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "includeFields": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "f_info_windcode",
+              "f_info_name",
+              "f_stm_is",
+              "f_stm_is_reits_netprofit",
+              "f_stm_is_79_total",
+              "f_stm_is_75",
+              "s_stm07_is_105",
+              "f_stm_is_76",
+              "fair_value_change_income",
+              "fund_management_fee",
+              "fund_custody_fee",
+              "fund_sales_service_fee",
+              "trading_expenses",
+              "audit_fee",
+              "other_expenses",
+              "interest_expense",
+              "ending_net_assets",
+              "total_assets",
+              "total_liabilities",
+              "f_nav_return"
+            ]
+          },
+          "reportPeriod": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "fund_screener": {
+        "required": [
+          "query"
+        ],
+        "params": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      }
+    },
+    "index_data": {
+      "get_index_technicals": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "get_index_quote": {
+        "required": [
+          "windcode"
+        ],
+        "params": {
+          "windcode": {
+            "type": "string"
+          },
+          "begin": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "get_index_kline": {
+        "required": [
+          "windcode",
+          "begin_date",
+          "end_date"
+        ],
+        "params": {
+          "windcode": {
+            "type": "string"
+          },
+          "begin_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "get_index_fundamentals": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "get_index_price_indicators": {
+        "required": [
+          "windcode"
+        ],
+        "params": {
+          "windcode": {
+            "type": "string"
+          },
+          "indexes": {
+            "type": "string"
+          }
+        }
+      },
+      "get_index_basicinfo": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "bond_data": {
+      "get_bond_basicinfo": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "get_bond_issuer_info": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "get_bond_market_data": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "get_bond_financial_data": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "financial_docs": {
+      "get_company_announcements": {
+        "required": [
+          "query"
+        ],
+        "params": {
+          "query": {
+            "type": "string"
+          },
+          "top_k": {
+            "type": "integer"
+          }
+        }
+      },
+      "get_financial_news": {
+        "required": [
+          "query"
+        ],
+        "params": {
+          "query": {
+            "type": "string"
+          },
+          "top_k": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "edb_data": {
+      "economic_search_indicator": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "economic_get_indicator_series": {
+        "required": [
+          "metricCodes"
+        ],
+        "params": {
+          "metricCodes": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "numOfObservation": {
+            "type": "integer"
+          }
+        },
+        "strict": true
+      },
+      "economic_query_indicator_series": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "observation": {
+            "type": "integer"
+          },
+          "targetMagnitude": {
+            "type": "string",
+            "enum": [
+              "十万分之一",
+              "万分之一",
+              "千分之一",
+              "百分之一",
+              "十分之一",
+              "个",
+              "十",
+              "百",
+              "千",
+              "万",
+              "十万",
+              "百万",
+              "千万",
+              "亿",
+              "十亿",
+              "百亿",
+              "千亿",
+              "万亿",
+              "十万亿",
+              "百万亿",
+              "千万亿",
+              "亿亿",
+              "十亿亿",
+              "百亿亿"
+            ]
+          },
+          "targetCurrency": {
+            "type": "string"
+          },
+          "targetFrequency": {
+            "type": "string",
+            "enum": [
+              "日",
+              "工作日",
+              "周",
+              "月",
+              "季",
+              "半年",
+              "年",
+              "年度"
+            ]
+          }
+        },
+        "strict": true
+      }
+    },
+    "analytics_data": {
+      "get_financial_data": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "options_data": {
+      "options_get_listed_terms": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "tradeDate": {
+            "type": "string"
+          }
+        }
+      },
+      "options_get_term_metrics": {
+        "required": [
+          "optionVarietyCode"
+        ],
+        "params": {
+          "optionVarietyCode": {
+            "type": "string"
+          },
+          "tradeDate": {
+            "type": "string"
+          },
+          "expiryDate": {
+            "type": "string"
+          },
+          "underlyingPrice": {
+            "type": "number"
+          },
+          "indicators": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "lastPrice",
+              "settlePrice",
+              "volume",
+              "openInterest",
+              "oiChange",
+              "iv",
+              "ivChange",
+              "delta",
+              "gamma",
+              "vega",
+              "theta",
+              "change",
+              "pctChange",
+              "open",
+              "high",
+              "low"
+            ]
+          },
+          "strikeLevels": {
+            "type": "integer"
+          }
+        }
+      },
+      "options_get_contract_series": {
+        "required": [
+          "optionContractCodes",
+          "indicators"
+        ],
+        "params": {
+          "optionContractCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "indicators": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "lastPrice",
+              "change",
+              "pctChange",
+              "settlePrice",
+              "volume",
+              "openInterest",
+              "oiChange",
+              "iv",
+              "ivChange",
+              "delta",
+              "gamma",
+              "vega",
+              "theta",
+              "open",
+              "high",
+              "low"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "options_get_variety_series": {
+        "required": [
+          "windCodes",
+          "indicator"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "indicator": {
+            "type": "string",
+            "enum": [
+              "vol_moneyness",
+              "vol_delta",
+              "hv",
+              "pcr_volume",
+              "pcr_oi",
+              "pcr_turnover",
+              "skew",
+              "skew_normalized"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "tenor": {
+            "type": "string",
+            "enum": [
+              "1W",
+              "1M",
+              "2M",
+              "3M",
+              "6M",
+              "9M",
+              "1Y",
+              "18M",
+              "2Y",
+              "3Y",
+              "4Y",
+              "5Y",
+              "7Y",
+              "10Y"
+            ]
+          },
+          "moneyness": {
+            "type": "string",
+            "enum": [
+              "30",
+              "40",
+              "60",
+              "80",
+              "90",
+              "95",
+              "97.5",
+              "100",
+              "102.5",
+              "105",
+              "110",
+              "120",
+              "130",
+              "150",
+              "175",
+              "200",
+              "250",
+              "300"
+            ]
+          },
+          "deltaLevel": {
+            "type": "string",
+            "enum": [
+              "5DP",
+              "10DP",
+              "15DP",
+              "25DP",
+              "35DP",
+              "50D",
+              "35DC",
+              "25DC",
+              "15DC",
+              "10DC",
+              "5DC"
+            ]
+          },
+          "windows": {
+            "type": "string"
+          }
+        }
+      },
+      "options_get_variety_stats": {
+        "required": [
+          "windCodes",
+          "indicator"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "indicator": {
+            "type": "string",
+            "enum": [
+              "vol_moneyness",
+              "vol_delta",
+              "hv",
+              "pcr_volume",
+              "pcr_oi",
+              "pcr_turnover",
+              "skew",
+              "skew_normalized"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "tenor": {
+            "type": "string",
+            "enum": [
+              "1W",
+              "1M",
+              "2M",
+              "3M",
+              "6M",
+              "9M",
+              "1Y",
+              "18M",
+              "2Y",
+              "3Y",
+              "4Y",
+              "5Y",
+              "7Y",
+              "10Y"
+            ]
+          },
+          "moneyness": {
+            "type": "string",
+            "enum": [
+              "30",
+              "40",
+              "60",
+              "80",
+              "90",
+              "95",
+              "97.5",
+              "100",
+              "102.5",
+              "105",
+              "110",
+              "120",
+              "130",
+              "150",
+              "175",
+              "200",
+              "250",
+              "300"
+            ]
+          },
+          "deltaLevel": {
+            "type": "string",
+            "enum": [
+              "5DP",
+              "10DP",
+              "15DP",
+              "25DP",
+              "35DP",
+              "50D",
+              "35DC",
+              "25DC",
+              "15DC",
+              "10DC",
+              "5DC"
+            ]
+          },
+          "windows": {
+            "type": "string"
+          }
+        }
+      },
+      "options_calc_binary": {
+        "required": [
+          "assetClass",
+          "spotPrice",
+          "optionType",
+          "strikePrice",
+          "volatility",
+          "riskFreeRate",
+          "dividendYield"
+        ],
+        "params": {
+          "assetClass": {
+            "type": "string",
+            "enum": [
+              "equity",
+              "fx",
+              "futures"
+            ]
+          },
+          "spotPrice": {
+            "type": "number"
+          },
+          "optionType": {
+            "type": "string",
+            "enum": [
+              "call",
+              "put"
+            ]
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "type": "string"
+          },
+          "valuationDate": {
+            "type": "string"
+          },
+          "volatility": {
+            "type": "number"
+          },
+          "riskFreeRate": {
+            "type": "number"
+          },
+          "dividendYield": {
+            "type": "number"
+          },
+          "payoffType": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "asset"
+            ]
+          },
+          "cashAmount": {
+            "type": "number"
+          },
+          "dayCount": {
+            "type": "string",
+            "enum": [
+              "actual",
+              "business"
+            ]
+          }
+        }
+      },
+      "options_get_volatility_surface": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          }
+        }
+      },
+      "options_calc_iv_cone": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "options_get_iv_term_structure": {
+        "required": [
+          "windCode",
+          "moneyness"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "moneyness": {
+            "type": "number"
+          },
+          "time": {
+            "type": "string"
+          }
+        }
+      },
+      "options_calc_vanilla": {
+        "required": [
+          "assetClass",
+          "spotPrice",
+          "optionType",
+          "strikePrice",
+          "volatility",
+          "riskFreeRate",
+          "dividendYield"
+        ],
+        "params": {
+          "assetClass": {
+            "type": "string",
+            "enum": [
+              "equity",
+              "fx",
+              "futures"
+            ]
+          },
+          "spotPrice": {
+            "type": "number"
+          },
+          "optionType": {
+            "type": "string",
+            "enum": [
+              "call",
+              "put"
+            ]
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "type": "string"
+          },
+          "valuationDate": {
+            "type": "string"
+          },
+          "volatility": {
+            "type": "number"
+          },
+          "riskFreeRate": {
+            "type": "number"
+          },
+          "dividendYield": {
+            "type": "number"
+          },
+          "exerciseStyle": {
+            "type": "string",
+            "enum": [
+              "european",
+              "american"
+            ]
+          },
+          "pricingMethod": {
+            "type": "string",
+            "enum": [
+              "bs",
+              "baw",
+              "binomial"
+            ]
+          },
+          "dayCount": {
+            "type": "string",
+            "enum": [
+              "actual",
+              "business"
+            ]
+          },
+          "timeSteps": {
+            "type": "integer"
+          }
+        }
+      },
+      "options_get_sentiment_data": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "termCount": {
+            "type": "integer"
+          },
+          "strikeCount": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "futures_data": {
+      "futures_get_warehouse_receipt": {
+        "required": [],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      },
+      "futures_get_contract_spec": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          }
+        }
+      },
+      "futures_get_basis": {
+        "required": [],
+        "params": {
+          "windCodes": {
+            "type": "array",
+            "items": "string"
+          },
+          "sector": {
+            "type": "string",
+            "enum": [
+              "Precious metals",
+              "Non-ferrous metals",
+              "Black Series",
+              "Shipping",
+              "Crude oil",
+              "Olefins",
+              "Polyester textile",
+              "Grease and oilseed",
+              "Animal Husbandry & Breeding",
+              "Light industry",
+              "New energy materials",
+              "Rubber",
+              "Others",
+              "all"
+            ]
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "futures_get_fund_flow": {
+        "required": [
+          "date"
+        ],
+        "params": {
+          "date": {
+            "type": "string"
+          },
+          "windCode": {
+            "type": "string"
+          }
+        }
+      },
+      "futures_get_position_ranking": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          }
+        }
+      },
+      "futures_get_research_opinion": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      },
+      "futures_get_supply_demand": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "includeHistory": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "company_data": {
+      "company_search_entity": {
+        "required": [
+          "searchKey"
+        ],
+        "params": {
+          "searchKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_beneficial_owner": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_actual_controller": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_key_personnel": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "history": {
+            "type": "boolean"
+          }
+        }
+      },
+      "company_list_customer_info": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_tech_roster": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_controlled_entity": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_shareholder": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "history": {
+            "type": "boolean"
+          }
+        }
+      },
+      "company_list_trade_credit": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_tax_qual": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_ubo_related": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_traverse_equity": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_equity_change": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_contact": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_trademark": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "trademarkStatus": {
+            "type": "string",
+            "enum": [
+              "终止",
+              "已注册",
+              "初审公告",
+              "商标申请"
+            ]
+          }
+        }
+      },
+      "company_list_standard": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_change_record": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_bidding": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_annual_report": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_registration_info": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_tax_credit_rating": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_list_patent": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "patentType": {
+            "type": "string",
+            "enum": [
+              "发明申请",
+              "授权发明",
+              "实用新型",
+              "外观设计"
+            ]
+          },
+          "lawStatus": {
+            "type": "string",
+            "enum": [
+              "有效",
+              "无效",
+              "审中"
+            ]
+          },
+          "history": {
+            "type": "boolean"
+          }
+        }
+      },
+      "company_list_investment": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "history": {
+            "type": "boolean"
+          }
+        }
+      },
+      "company_list_supplier": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_abnormal_operation": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_bankruptcy_reorg": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_court_announcements": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "timeFrom": {
+            "type": "string"
+          },
+          "timeTo": {
+            "type": "string"
+          },
+          "causeOfAction": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "合同、无因管理、不当得利纠纷",
+              "与公司、证券、保险、票据等有关的民事纠纷",
+              "物权纠纷",
+              "劳动争议、人事争议",
+              "侵权责任纠纷",
+              "海事海商纠纷",
+              "侵犯财产",
+              "行政行为",
+              "刑事赔偿",
+              "执行案件"
+            ]
+          },
+          "role": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "原告",
+              "被告",
+              "上诉人",
+              "被上诉人",
+              "申诉人",
+              "被申诉人",
+              "申请执行人",
+              "被执行人",
+              "申请人",
+              "被申请人"
+            ]
+          }
+        }
+      },
+      "company_get_court_sessions": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "timeFrom": {
+            "type": "string"
+          },
+          "timeTo": {
+            "type": "string"
+          },
+          "causeOfAction": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "合同、无因管理、不当得利纠纷",
+              "与公司、证券、保险、票据等有关的民事纠纷",
+              "物权纠纷",
+              "劳动争议、人事争议",
+              "侵权责任纠纷",
+              "海事海商纠纷",
+              "侵犯财产",
+              "行政行为",
+              "刑事赔偿",
+              "执行案件"
+            ]
+          },
+          "role": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "原告",
+              "被告",
+              "上诉人",
+              "被上诉人",
+              "申诉人",
+              "被申诉人",
+              "申请执行人",
+              "被执行人",
+              "申请人",
+              "被申请人"
+            ]
+          }
+        }
+      },
+      "company_get_default_info": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_disciplinary_list": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_discredit": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_enterprise_score": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_environment_penalty": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_equity_pledged": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_executed_persons": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_filing_info": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "timeFrom": {
+            "type": "string"
+          },
+          "timeTo": {
+            "type": "string"
+          },
+          "causeOfAction": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "合同、无因管理、不当得利纠纷",
+              "与公司、证券、保险、票据等有关的民事纠纷",
+              "物权纠纷",
+              "劳动争议、人事争议",
+              "侵权责任纠纷",
+              "海事海商纠纷",
+              "侵犯财产",
+              "行政行为",
+              "刑事赔偿",
+              "执行案件"
+            ]
+          },
+          "role": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "原告",
+              "被告",
+              "上诉人",
+              "被上诉人",
+              "申诉人",
+              "被申诉人",
+              "申请执行人",
+              "被执行人",
+              "申请人",
+              "被申请人"
+            ]
+          }
+        }
+      },
+      "company_get_final_case": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_financial_leasing": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_high_consumers": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_illegal_dishonesty": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_illegal_tax": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_judgments": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "timeFrom": {
+            "type": "string"
+          },
+          "timeTo": {
+            "type": "string"
+          },
+          "causeOfAction": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "合同、无因管理、不当得利纠纷",
+              "与公司、证券、保险、票据等有关的民事纠纷",
+              "物权纠纷",
+              "劳动争议、人事争议",
+              "侵权责任纠纷",
+              "海事海商纠纷",
+              "侵犯财产",
+              "行政行为",
+              "刑事赔偿",
+              "执行案件"
+            ]
+          },
+          "role": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "原告",
+              "被告",
+              "上诉人",
+              "被上诉人",
+              "申诉人",
+              "被申诉人",
+              "申请执行人",
+              "被执行人",
+              "申请人",
+              "被申请人"
+            ]
+          }
+        }
+      },
+      "company_get_judicial_sales": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_land_acquisition": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_legal_notice": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_liquidation": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_news_sentiment": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "tagCode": {
+            "type": "array",
+            "items": "string",
+            "items_enum": [
+              "债务违约",
+              "行政处罚",
+              "诉讼纠纷",
+              "股份质押异常",
+              "冻结查封",
+              "破产重组",
+              "高管违法",
+              "信用评级下调",
+              "财务亏损或指标变差",
+              "列入异常名单"
+            ]
+          },
+          "emotionId": {
+            "type": "array",
+            "items": "string"
+          },
+          "newsPenetrateEnable": {
+            "type": "boolean"
+          },
+          "timeFrom": {
+            "type": "string"
+          },
+          "timeTo": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_owing_tax": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_penalty_info": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_share_lockup": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_simple_cancellation": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_tax_abnormal": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_valuation_inquiry": {
+        "required": [
+          "companyKey"
+        ],
+        "params": {
+          "companyKey": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "company_get_biz_enum": {
+        "required": [
+          "listType"
+        ],
+        "params": {
+          "listType": {
+            "type": "integer",
+            "enum": [
+              "1",
+              "2"
+            ]
+          },
+          "categoryName": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "finance_data": {
+      "quote_search_realtime_indicators": {
+        "required": [
+          "keyword"
+        ],
+        "params": {
+          "keyword": {
+            "type": "string"
+          }
+        }
+      },
+      "quote_get_realtime_indicators": {
+        "required": [
+          "windCodes",
+          "indexes"
+        ],
+        "params": {
+          "windCodes": {
+            "type": "string"
+          },
+          "indexes": {
+            "type": "string"
+          }
+        }
+      },
+      "quote_get_historical_data_series": {
+        "required": [
+          "windCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "type": {
+            "type": "integer",
+            "enum": [
+              "0",
+              "1"
+            ]
+          },
+          "params": {
+            "type": "object"
+          }
+        }
+      },
+      "general_search_indicators": {
+        "required": [
+          "keyword"
+        ],
+        "params": {
+          "keyword": {
+            "type": "string"
+          },
+          "windCode": {
+            "type": "string"
+          },
+          "maxCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "general_get_indicator_data": {
+        "required": [
+          "windCode",
+          "indicatorCode"
+        ],
+        "params": {
+          "windCode": {
+            "type": "string"
+          },
+          "indicatorCode": {
+            "type": "string"
+          },
+          "parameter": {
+            "type": "object"
+          }
+        }
+      },
+      "general_search_datasets": {
+        "required": [],
+        "params": {
+          "keyword": {
+            "type": "string"
+          }
+        },
+        "strict": true
+      },
+      "general_get_dataset": {
+        "required": [
+          "reportId",
+          "condition"
+        ],
+        "params": {
+          "reportId": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "object"
+          }
+        },
+        "strict": true
+      },
+      "general_search_documents": {
+        "required": [
+          "documentType"
+        ],
+        "params": {
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "news",
+              "na",
+              "rpp"
+            ]
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "windCode": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "general_get_document": {
+        "required": [
+          "documentType",
+          "documentId"
+        ],
+        "params": {
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "news",
+              "na",
+              "rpp"
+            ]
+          },
+          "documentId": {
+            "type": "string"
+          }
+        }
+      },
+      "general_query_documents": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          },
+          "docType": {
+            "type": "string",
+            "enum": [
+              "1",
+              "3"
+            ]
+          },
+          "queryMode": {
+            "type": "string",
+            "enum": [
+              "1",
+              "2",
+              "3"
+            ]
+          },
+          "topK": {
+            "type": "integer"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        }
+      },
+      "general_search_research_insight": {
+        "required": [],
+        "params": {
+          "keyword": {
+            "type": "string"
+          }
+        }
+      },
+      "general_get_research_insight": {
+        "required": [
+          "templateId"
+        ],
+        "params": {
+          "templateId": {
+            "type": "string"
+          },
+          "arg": {
+            "type": "string"
+          }
+        }
+      },
+      "general_query_data": {
+        "required": [
+          "question"
+        ],
+        "params": {
+          "question": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "excluded": {}
 }

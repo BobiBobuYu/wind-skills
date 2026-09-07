@@ -1,107 +1,56 @@
-// Preload module: replaces globalThis.fetch so the REAL cli.mjs runs end-to-end
-// against a simulated Wind MCP server. cli.mjs calls bare `fetch(...)`, which
-// resolves to globalThis.fetch — so overriding it here intercepts every call
-// without touching cli.mjs. Scenario is chosen via WIND_MOCK_SCENARIO.
-//
-// Each scenario reproduces a different shape the backend can use to deliver the
-// three new structured error codes, so we prove cli.mjs maps ALL shapes -> code.
+// Preload：替换 globalThis.fetch，让真实 cli.mjs 端到端跑在模拟的 Wind MCP 后端上，不发网络。
+//   WIND_MOCK_SCENARIO=<name>   选择 tools/call 的响应形态（默认 success_json）
+//   WIND_MOCK_CAPTURE=<path>    把每次 tools/call 的 JSON-RPC 请求追加写入该文件（用于断言实际发出的 arguments）
+// 场景覆盖 2026-09-07 实测到的全部后端形态：SSE / 纯 JSON、isError 文本、isError=false 的纯文本错误、
+// Markdown 正文、旧式内层信封 {data,error}、内层业务码、HTTP 401/429/503。
+import { writeFileSync } from 'node:fs';
 
-const SCENARIO = process.env.WIND_MOCK_SCENARIO || '';
+const SCENARIO = process.env.WIND_MOCK_SCENARIO || 'success_json';
+const CAPTURE = process.env.WIND_MOCK_CAPTURE || '';
+const captured = [];
 
-// How each scenario delivers its payload for the tools/call response.
-// shape: where in the JSON-RPC envelope the error lands (mirrors cli.mjs parsing).
-const SCENARIOS = {
-  // ── the three NEW MCP-server structured codes ──
-  invalid_param_name: {
-    shape: 'inner_error',          // result.content[0].text = JSON {error:{code,message}}
-    code: 'INVALID_PARAM_NAME',
-    message: "字段 'windcod' 不存在，正确字段名为 'windcode'；'indexes' 为必填但缺失",
-  },
-  invalid_param_value: {
-    shape: 'jsonrpc_error',        // payload.error.message
-    code: 'INVALID_PARAM_VALUE',
-    message: "begin_date 值 '2026-04-01' 不合法，必须为 yyyyMMdd（如 20260401）",
-  },
-  temporarily_unavailable: {
-    shape: 'mcp_tool_error',       // result.content[0].text = JSON {mcp_tool_error_code,mcp_tool_error_msg}
-    code: 'TEMPORARILY_UNAVAILABLE',
-    message: '后端服务偶发抖动，请稍后重试（temporarily_unavailable）',
-  },
-  // ── cross-check: same code via a different envelope shape ──
-  invalid_param_name_via_iserror: {
-    shape: 'iserror',              // result.isError + content[0].text raw
-    code: 'INVALID_PARAM_NAME',
-    message: 'invalid_param_name: 缺少必填字段 windcode',
-  },
-  // ── happy path sanity (proves success branch + no false error) ──
-  success: { shape: 'success' },
-  // ── undefined / never-defined backend codes ──
-  undefined_clean: {
-    shape: 'inner_error',
-    code: 'GALACTIC_FLUX_2026',
-    message: '后端冒出一个文档里从未定义过的全新错误码（纯新词，无已知关键词）',
-  },
-  undefined_keyworded: {
-    shape: 'jsonrpc_error',
-    code: 'GALACTIC_FLUX_2026',
-    message: '参数无效：后端某个新子系统报错',
-  },
+const sse = (obj) => `event: message\ndata: ${JSON.stringify(obj)}\n\n`;
+const res = (bodyText, { ok = true, status = 200 } = {}) => ({ ok, status, statusText: ok ? 'OK' : 'ERR', text: async () => bodyText });
+const textResult = (id, text, isError = false) => ({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text }], isError } });
+
+export const SCENARIOS = {
+  // ── 成功形态 ──
+  success_json: (id) => sse(textResult(id, JSON.stringify({ metrics: [{ meta: { code: 'M5567876', unit: '亿元', magnitude: '亿' }, date: ['20260630'], value: [361511.1] }] }))),
+  success_markdown: (id) => sse(textResult(id, '## 查询结果\n| Wind代码 | 单位净值 |\n|---|---|\n| 510300.SH | 4.6147 元 |')),
+  success_old_envelope: (id) => sse(textResult(id, JSON.stringify({ data: { data: [{ columns: [{ name: 'Wind代码' }], rows: [['600519.SH']] }] }, error: null }))),
+  success_no_match: (id) => sse(textResult(id, '## 摘要\n无匹配记录')),
+  success_invalid_cells: (id) => sse(textResult(id, JSON.stringify({ data: { rows: [['x', 'INVALID']], excelTotalCount: 99 } }))),
+  success_plain_json_body: (id) => JSON.stringify(textResult(id, JSON.stringify({ ok: 1 }))),
+  // ── 接口错误形态（全部应塌缩为 backend_error）──
+  iserror_text: (id) => sse(textResult(id, '缺少必填参数: metricCodes', true)),
+  unavailable: (id) => sse(textResult(id, '服务暂时不可用，请稍后重试', true)),
+  plain_text_error: (id) => sse(textResult(id, 'Invalid indicator: IV. Valid options: vol_moneyness, vol_delta, hv')),
+  plain_text_ner_error: (id) => sse(textResult(id, '未识别到有效的金融标的:C')),
+  jsonrpc_error: (id) => sse({ jsonrpc: '2.0', id, error: { code: -32000, message: 'INVALID_PARAM_VALUE: startDate 不合法' } }),
+  inner_error: (id) => sse(textResult(id, JSON.stringify({ error: { code: 'INVALID_PARAM_NAME', message: "字段 'windcod' 不存在" } }))),
+  mcp_tool_error: (id) => sse(textResult(id, JSON.stringify({ mcp_tool_error_code: 503, mcp_tool_error_msg: '后端抖动' }))),
+  inner_code_fail: (id) => sse(textResult(id, JSON.stringify({ data: { code: 1003, message: '业务失败' }, error: null }))),
+  // ── 本地/网络层 ──
+  garbage: () => 'not json, not sse',
+  http_401: () => res('unauthorized', { ok: false, status: 401 }),
+  http_429: () => res('too many requests', { ok: false, status: 429 }),
+  http_503: () => res('bad gateway', { ok: false, status: 503 }),
 };
 
-function sse(obj) {
-  // Frame as a Server-Sent-Events body to also exercise cli.mjs parseSSE().
-  return `event: message\ndata: ${JSON.stringify(obj)}\n\n`;
-}
-
-function makeResponse(bodyText, { ok = true, status = 200, statusText = 'OK' } = {}) {
-  return {
-    ok,
-    status,
-    statusText,
-    text: async () => bodyText,
-  };
-}
-
-function toolCallPayload(scn) {
-  const id = Date.now();
-  switch (scn.shape) {
-    case 'jsonrpc_error':
-      return { jsonrpc: '2.0', id, error: { code: -32000, message: `${scn.code}: ${scn.message}` } };
-    case 'iserror':
-      return { jsonrpc: '2.0', id, result: { isError: true, content: [{ type: 'text', text: scn.message }] } };
-    case 'inner_error':
-      return {
-        jsonrpc: '2.0', id,
-        result: { content: [{ type: 'text', text: JSON.stringify({ error: { code: scn.code, message: scn.message } }) }] },
-      };
-    case 'mcp_tool_error':
-      return {
-        jsonrpc: '2.0', id,
-        result: { content: [{ type: 'text', text: JSON.stringify({ mcp_tool_error_code: 503, mcp_tool_error_msg: scn.message }) }] },
-      };
-    case 'success':
-      return {
-        jsonrpc: '2.0', id,
-        result: { content: [{ type: 'text', text: JSON.stringify({ 中文简称: '贵州茅台', 最新成交价: 1688.0 }) }] },
-      };
-    default:
-      throw new Error(`unknown shape: ${scn.shape}`);
+globalThis.fetch = async (_url, opts = {}) => {
+  let payload = {};
+  try { payload = JSON.parse(opts.body || '{}'); } catch { }
+  const id = payload.id || 1;
+  if (payload.method === 'initialize') {
+    return res(sse({ jsonrpc: '2.0', id, result: { protocolVersion: '2025-03-26', capabilities: {}, serverInfo: { name: 'mock-wind', version: '0' } } }));
   }
-}
-
-globalThis.fetch = async (url, opts = {}) => {
-  let method = '';
-  try { method = JSON.parse(opts.body || '{}').method; } catch {}
-
-  // initialize handshake always succeeds
-  if (method === 'initialize') {
-    return makeResponse(sse({
-      jsonrpc: '2.0', id: 1,
-      result: { protocolVersion: '2025-03-26', capabilities: {}, serverInfo: { name: 'mock-wind', version: '0' } },
-    }));
+  if (payload.method === 'tools/list') {
+    return res(sse({ jsonrpc: '2.0', id, result: { tools: [{ name: 'mock_tool', inputSchema: { type: 'object', properties: {} } }] } }));
   }
-
-  const scn = SCENARIOS[SCENARIO];
-  if (!scn) throw new Error(`WIND_MOCK_SCENARIO not set or unknown: '${SCENARIO}'`);
-  return makeResponse(sse(toolCallPayload(scn)));
+  captured.push(payload);
+  if (CAPTURE) writeFileSync(CAPTURE, JSON.stringify(captured, null, 2) + '\n');
+  const scenario = SCENARIOS[SCENARIO];
+  if (!scenario) throw new Error(`WIND_MOCK_SCENARIO 未知: '${SCENARIO}'`);
+  const out = scenario(id);
+  return typeof out === 'string' ? res(out) : out;
 };

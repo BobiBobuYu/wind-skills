@@ -1,76 +1,55 @@
-// Runs the REAL cli.mjs end-to-end against the simulated MCP server (mock-fetch.mjs)
-// for interface error shapes, and asserts they all flatten to backend_error.
-
+// 用 mock-fetch.mjs 的每种后端形态跑真实 cli.mjs，断言：接口层错误全部塌缩为 backend_error，
+// HTTP 状态映射到本地错误码，成功形态（JSON / Markdown / 旧式信封 / 无匹配记录）不误报。
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
-const SKILL_DIR = dirname(TESTS_DIR);
-const CLI = join(SKILL_DIR, 'scripts', 'cli.mjs');
-const PRELOAD = join(TESTS_DIR, 'mock-fetch.mjs');
+const CLI = join(dirname(TESTS_DIR), 'scripts', 'cli.mjs');
+const MOCK = join(TESTS_DIR, 'mock-fetch.mjs');
+const HOME = mkdtempSync(join(tmpdir(), 'wind-err-home-'));
+const CALL = ['call', 'edb_data', 'economic_query_indicator_series', '{"question":"中国GDP","observation":4}'];
 
-// [scenario, cli args, expectedExit, expectedCode]
+// [scenario, expectedExit, expectedCode(null=成功)]
 const CASES = [
-  ['invalid_param_name',
-    ['call', 'stock_data', 'get_stock_price_indicators', '{"windcod":"600519.SH"}'],
-    1, 'backend_error'],
-
-  ['invalid_param_value',
-    ['call', 'stock_data', 'get_stock_kline', '{"windcode":"600519.SH","begin_date":"20260401","end_date":"20260430"}'],
-    1, 'backend_error'],
-
-  ['temporarily_unavailable',
-    ['call', 'stock_data', 'get_stock_price_indicators', '{"windcode":"600519.SH","indexes":"最新成交价"}'],
-    1, 'backend_error'],
-
-  ['invalid_param_name_via_iserror',
-    ['call', 'stock_data', 'get_stock_price_indicators', '{"windcode":"600519.SH","indexes":"最新成交价"}'],
-    1, 'backend_error'],
-
-  // happy path sanity
-  ['success',
-    ['call', 'stock_data', 'get_stock_price_indicators', '{"windcode":"600519.SH","indexes":"中文简称,最新成交价"}'],
-    0, null],
+  ['success_json', 0, null],
+  ['success_markdown', 0, null],
+  ['success_old_envelope', 0, null],
+  ['success_no_match', 0, null],
+  ['success_plain_json_body', 0, null],
+  ['iserror_text', 1, 'backend_error'],
+  ['unavailable', 1, 'backend_error'],
+  ['plain_text_error', 1, 'backend_error'],
+  ['plain_text_ner_error', 1, 'backend_error'],
+  ['jsonrpc_error', 1, 'backend_error'],
+  ['inner_error', 1, 'backend_error'],
+  ['mcp_tool_error', 1, 'backend_error'],
+  ['inner_code_fail', 1, 'backend_error'],
+  ['garbage', 1, 'TOOL_RUNTIME_ERROR'],
+  ['http_401', 1, 'AUTH_ERROR'],
+  ['http_429', 1, 'RATE_LIMIT_ERROR'],
+  ['http_503', 1, 'NETWORK_ERROR'],
 ];
 
-function run(scenario, args) {
-  const res = spawnSync('node', ['--import', PRELOAD, CLI, ...args], {
-    encoding: 'utf8',
-    env: { ...process.env, WIND_MOCK_SCENARIO: scenario },
-  });
-  return { exit: res.status, stdout: res.stdout || '', stderr: res.stderr || '' };
-}
-
 let pass = 0, fail = 0;
-const lines = [];
-
-for (const [scenario, args, wantExit, wantCode] of CASES) {
-  const { exit, stdout } = run(scenario, args);
-  const checks = [];
-
-  checks.push([`exit==${wantExit}`, exit === wantExit]);
-
-  let envelope = null;
-  try { envelope = JSON.parse(stdout); } catch {}
-
-  if (wantCode === null) {
-    // success path: no error envelope, stdout is raw MCP result
-    checks.push(['no error envelope', !(envelope && envelope.ok === false)]);
-  } else {
-    const code = envelope?.code;
-    checks.push([`code==${wantCode}`, code === wantCode]);
-    checks.push(['has message', typeof envelope?.message === 'string' && envelope.message.length > 0]);
+for (const [scenario, wantExit, wantCode] of CASES) {
+  const r = spawnSync(process.execPath, ['--import', MOCK, CLI, ...CALL], {
+    encoding: 'utf8', env: { ...process.env, HOME, USERPROFILE: HOME, WIND_API_KEY: 'test-key', WIND_MOCK_SCENARIO: scenario },
+  });
+  let body = null; try { body = JSON.parse(r.stdout); } catch { }
+  const checks = [[`exit==${wantExit}`, r.status === wantExit]];
+  if (wantCode === null) checks.push(['no error envelope', !(body && body.ok === false)]);
+  else {
+    checks.push([`code==${wantCode}`, body?.code === wantCode]);
+    checks.push(['has message', typeof body?.message === 'string' && body.message.length > 0]);
   }
-
-  const ok = checks.every(([, v]) => v);
-  ok ? pass++ : fail++;
-  lines.push(`${ok ? 'PASS' : 'FAIL'}  ${scenario}  (exit=${exit})`);
-  for (const [label, v] of checks) {
-    if (!v) lines.push(`        ✗ ${label}`);
-  }
+  const good = checks.every(([, v]) => v);
+  good ? pass++ : fail++;
+  console.log(`${good ? 'PASS' : 'FAIL'}  ${scenario.padEnd(26)} exit=${r.status} code=${body?.code ?? '-'}`);
+  for (const [label, v] of checks) if (!v) console.log(`        ✗ ${label}`);
 }
-
-console.log(lines.join('\n'));
 console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail === 0 ? 0 : 1);
+rmSync(HOME, { recursive: true, force: true });
+process.exit(fail ? 1 : 0);

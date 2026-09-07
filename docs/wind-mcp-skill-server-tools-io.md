@@ -1,5 +1,8 @@
 # Wind 金融数据 MCP 接口文档
 
+> **2026-09-07 说明**：本文是 2026-08-24 对 7 站旧接口的直连实测记录。skill v3 起服务变为 11 站，`stock_data` / `fund_data` / `economic_data` 已被 `stock_research` / `fund_research` / `edb_data` 替换，并新增 `options_data` / `futures_data` / `company_data` / `finance_data`。新站工具契约以 `skills/wind-mcp-skill/references/` 为准，设计说明见 `docs/wind-mcp-skill-v3-design.md`。下文中 `index_data` / `bond_data` / `financial_docs` / `analytics_data` 四节仍然有效，其余三节仅作历史参考。
+
+
 直连 7 个 Wind MCP 服务的接口说明：每个服务的地址、工具入参与返回示例。示例为 2026-08-24 直连实测（数值会变）。
 
 ## 连接
@@ -11,13 +14,17 @@
 
 | 服务 | 地址 |
 | --- | --- |
-| 股票 | `https://mcp.wind.com.cn/vserver_stock_data/mcp/` |
-| 基金 | `https://mcp.wind.com.cn/vserver_fund_data/mcp/` |
+| 股票研究 | `https://mcp.wind.com.cn/vserver_stock_research/mcp/` |
+| 基金研究 | `https://mcp.wind.com.cn/vserver_fund_research/mcp/` |
 | 指数 | `https://mcp.wind.com.cn/vserver_index_data/mcp/` |
 | 债券 | `https://mcp.wind.com.cn/vserver_bond_data/mcp/` |
 | 公告/新闻 | `https://mcp.wind.com.cn/vserver_financial_docs/mcp/` |
-| 宏观 EDB | `https://mcp.wind.com.cn/vserver_economic_data/mcp/` |
+| 宏观 EDB | `https://mcp.wind.com.cn/vserver_edb_data/mcp/` |
 | 分析 | `https://mcp.wind.com.cn/vserver_analytics_data/mcp/` |
+| 期权 | `https://mcp.wind.com.cn/vserver_options_data/mcp/` |
+| 期货 | `https://mcp.wind.com.cn/vserver_futures_data/mcp/` |
+| 企业库 | `https://mcp.wind.com.cn/vserver_company_data/mcp/` |
+| 通用工具 | `https://mcp.wind.com.cn/vserver_finance_data/mcp/` |
 
 ### Postman 请求配置
 

@@ -24,7 +24,7 @@ const CASES = [
 let pass = 0, fail = 0;
 for (const [code, asStr, expectSuccess] of CASES) {
   const env = { ...process.env, WIND_API_KEY: 'test-key-dummy', WIND_MOCK_CODE: code, WIND_MOCK_STR: asStr ? '1' : '0' };
-  const r = spawnSync('node', ['--import', PRELOAD, CLI, 'call', 'stock_data', 'get_stock_basicinfo', '{"question":"x"}'], { env, encoding: 'utf8' });
+  const r = spawnSync('node', ['--import', PRELOAD, CLI, 'call', 'finance_data', 'general_query_data', '{"question":"x"}'], { env, encoding: 'utf8' });
   let ok = null, ecode = null;
   try { const d = JSON.parse(r.stdout); ok = !(d && d.ok === false); ecode = d?.code; } catch { /* unparseable */ }
   const good = expectSuccess ? (ok === true) : (ok === false && ecode === 'backend_error');

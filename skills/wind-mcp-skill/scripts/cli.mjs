@@ -6,18 +6,18 @@ import { join, dirname, basename, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 
-// #region 静态：版本、7 个 MCP 地址、路径、HTTP 状态码映射。只含常量，不发网络。
-const SKILL_VERSION = '2.0.4';
+// #region 静态：版本、11 个 MCP 地址、路径、HTTP 状态码映射。只含常量，不发网络。
+const SKILL_VERSION = '3.0.0';
 
-// 本地 registry: 工具选择可在任何网络调用前失败
+// 本地 registry：server_type 等于地址路径段去掉 vserver_ 前缀。工具选择可在任何网络调用前失败。
 const SERVERS = {
-  stock_data: {
-    endpoint: 'https://mcp.wind.com.cn/vserver_stock_data/mcp/',
-    label: 'Wind 股票（选股筛选 + 档案/财务/股本/事件/技术/风险 + 行情/K线/分钟）',
+  stock_research: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_stock_research/mcp/',
+    label: 'Wind 股票研究（市场/板块/叙事/行业 + 公司画像/财务/估值/预期/资金/技术/实时 + 选股）',
   },
-  fund_data: {
-    endpoint: 'https://mcp.wind.com.cn/vserver_fund_data/mcp/',
-    label: 'Wind 基金（基金筛选 + 档案/财务/持仓/业绩/持有人/公司 + 行情/K线/分钟）',
+  fund_research: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_fund_research/mcp/',
+    label: 'Wind 基金研究（筛选/档案/净值/业绩/规模/持有人/财务 + 持仓配置 + 归因/风格/仓位/相似）',
   },
   index_data: {
     endpoint: 'https://mcp.wind.com.cn/vserver_index_data/mcp/',
@@ -31,13 +31,29 @@ const SERVERS = {
     endpoint: 'https://mcp.wind.com.cn/vserver_financial_docs/mcp/',
     label: 'Wind 金融文档 RAG（公告 / 新闻）',
   },
-  economic_data: {
-    endpoint: 'https://mcp.wind.com.cn/vserver_economic_data/mcp/',
-    label: 'Wind EDB 宏观/行业经济指标',
+  edb_data: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_edb_data/mcp/',
+    label: 'Wind EDB 宏观/行业经济指标（找指标 / 按代码取数 / 自然语言取数）',
   },
   analytics_data: {
     endpoint: 'https://mcp.wind.com.cn/vserver_analytics_data/mcp/',
-    label: 'Wind 通用分析数据（NL → Wind 数据）',
+    label: 'Wind 通用分析数据（跨标的聚合 / 排名 / 复合计算）',
+  },
+  options_data: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_options_data/mcp/',
+    label: 'Wind 期权（期限/链截面/合约序列 + 品种序列/情绪 + 波动率 + 定价计算）',
+  },
+  futures_data: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_futures_data/mcp/',
+    label: 'Wind 期货（合约规格/基差/资金/席位/产业链 + 仓单/交割/供需/研报）',
+  },
+  company_data: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_company_data/mcp/',
+    label: 'Wind 企业库（工商/股权/经营/税务/司法/风险/舆情；先 company_search_entity 取 companyKey）',
+  },
+  finance_data: {
+    endpoint: 'https://mcp.wind.com.cn/vserver_finance_data/mcp/',
+    label: 'Wind 通用工具（全品种行情快照/历史序列 + 指标字典取数 + 报表 + 文档 + 投研语料 + 自然语言取数）',
   },
 };
 
@@ -53,22 +69,20 @@ const CALL_RULES_PATH = join(SKILL_DIR, 'scripts', 'call-rules.json');
 const SKILL_NAME = basename(SKILL_DIR);
 
 const CALL_EXAMPLES = [
-  `cli.mjs call stock_data search_stocks '{"question":"筛选沪深市场市值超500亿且连续5日上涨的股票"}'`,
-  `cli.mjs call stock_data search_stocks '{"question":"筛选港股中市值超1000亿港元的科技股"}'`,
-  `cli.mjs call fund_data search_funds '{"question":"筛选股票型基金中近一年收益率超20%的产品"}'`,
-  `cli.mjs call stock_data get_stock_basicinfo '{"question":"600519.SH公司基本档案"}'`,
-  `cli.mjs call stock_data get_stock_price_indicators '{"windcode":"600519.SH","indexes":"中文简称,最新成交价,涨跌幅"}'`,
-  `cli.mjs call fund_data get_fund_kline '{"windcode":"588200.SH","begin_date":"2026-04-01","end_date":"2026-04-30"}'`,
-  `cli.mjs call stock_data get_stock_quote '{"windcode":"AAPL.O","begin":"2026-08-05","end":"2026-08-05","count":-30}'`,
+  `cli.mjs call stock_research stock_screener '{"question":"筛选沪深市场市值超500亿且连续5日上涨的股票"}'`,
+  `cli.mjs call stock_research stock_get_company_profile '{"windCode":"600519.SH"}'`,
+  `cli.mjs call fund_research fund_screener '{"query":"近一年收益率排名前10的偏股混合型基金"}'`,
+  `cli.mjs call fund_research fund_get_nav '{"windCodes":["510300.SH"]}'`,
   `cli.mjs call index_data get_index_kline '{"windcode":"000300.SH","begin_date":"2026-04-01","end_date":"2026-04-30"}'`,
+  `cli.mjs call bond_data get_bond_basicinfo '{"question":"24附息国债11的基本信息"}'`,
   `cli.mjs call financial_docs get_financial_news '{"query":"美联储利率政策","top_k":3}'`,
-  `cli.mjs call economic_data search_economic_indicator '{"question":"中国GDP相关指标有哪些"}'`,
-  `cli.mjs call economic_data query_economic_indicator_data '{"question":"中国GDP","observation":"10"}'`,
+  `cli.mjs call edb_data economic_query_indicator_series '{"question":"中国GDP现价当季值","observation":4}'`,
   `cli.mjs call analytics_data get_financial_data '{"question":"查询中国A股市场过去一年的平均成交量"}'`,
+  `cli.mjs call options_data options_get_listed_terms '{"windCode":"510300.SH","tradeDate":"2026-09-04"}'`,
+  `cli.mjs call futures_data futures_get_basis '{"windCodes":["CU.SHF"]}'`,
+  `cli.mjs call company_data company_search_entity '{"searchKey":"贵州茅台"}'`,
+  `cli.mjs call finance_data quote_get_historical_data_series '{"windCode":"600519.SH","type":1,"params":{"indexes":"TIME,OPEN,HIGH,LOW,MATCH,VOLUME","period":"10","rangeflag":2,"startDate":"2026-08-25","endDate":"2026-09-05"}}'`,
 ];
-
-const PRICE_INDICATOR_TOOLS = new Set(['get_stock_price_indicators', 'get_fund_price_indicators', 'get_index_price_indicators']);
-const QUOTE_TOOLS = new Set(['get_stock_quote', 'get_fund_quote', 'get_index_quote']);
 
 const HTTP_ERROR_MAP = {
   401: 'AUTH_ERROR',
@@ -78,6 +92,8 @@ const HTTP_ERROR_MAP = {
   503: 'NETWORK_ERROR',
   504: 'NETWORK_ERROR',
 };
+// 这些状态码视为网关瞬时故障，重试后再判 NETWORK_ERROR。
+const RETRYABLE_HTTP_STATUS = new Set([502, 503, 504]);
 // #endregion 静态
 
 // #region 自动更新：仅 call 成功后触发；今天已成功则跳过；detached 跑 update-check.mjs，不阻塞取数。
@@ -333,7 +349,7 @@ function getApiKey() {
 }
 // #endregion 认证
 
-// #region 路由：校验 server_type、tool_name 是否在 SERVERS 与 tool-manifest.json。非法则 ROUTE_ERROR。
+// #region 路由：校验 server_type、tool_name 是否在 SERVERS 与 tool-manifest.json（v2）。非法则 ROUTE_ERROR。
 function getServer(server_type) {
   const server = SERVERS[server_type];
   if (!server) {
@@ -344,21 +360,27 @@ function getServer(server_type) {
 
 function loadToolManifest() {
   try {
-    // tool-manifest.json is the authority for legal server_type + tool_name combinations.
+    // tool-manifest.json v2 是合法 server_type + tool_name 组合、必填字段与参数类型的权威表。
     const manifest = JSON.parse(readFileSync(TOOL_MANIFEST_PATH, 'utf8'));
-    if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-      throw new Error('manifest 顶层必须是对象');
+    const servers = manifest?.servers;
+    if (!servers || typeof servers !== 'object' || Array.isArray(servers)) {
+      throw new Error('manifest.servers 必须是对象');
     }
-    for (const [serverType, tools] of Object.entries(manifest)) {
+    for (const [serverType, tools] of Object.entries(servers)) {
       if (!SERVERS[serverType]) {
         throw new Error(`manifest 包含未知 server_type: ${serverType}`);
       }
-      if (!Array.isArray(tools) || tools.some(tool => typeof tool !== 'string' || !tool)) {
-        throw new Error(`manifest 中 ${serverType} 的工具清单必须是非空字符串数组`);
+      if (!tools || typeof tools !== 'object' || Array.isArray(tools) || Object.keys(tools).length === 0) {
+        throw new Error(`manifest 中 ${serverType} 的工具表必须是非空对象`);
+      }
+      for (const [toolName, spec] of Object.entries(tools)) {
+        if (!spec || typeof spec !== 'object' || !Array.isArray(spec.required) || !spec.params || typeof spec.params !== 'object') {
+          throw new Error(`manifest 中 ${serverType}.${toolName} 缺少 required/params`);
+        }
       }
     }
     for (const serverType of Object.keys(SERVERS)) {
-      if (!Array.isArray(manifest[serverType])) {
+      if (!servers[serverType]) {
         throw new Error(`manifest 缺少 server_type: ${serverType}`);
       }
     }
@@ -368,17 +390,22 @@ function loadToolManifest() {
   }
 }
 
-function validateToolSelection(server_type, toolName) {
+function resolveToolSpec(server_type, toolName) {
   getServer(server_type);
   const manifest = loadToolManifest();
-  const tools = manifest[server_type];
-  if (!tools.includes(toolName)) {
-    die('ROUTE_ERROR', `工具名 "${toolName}" 不属于 server_type "${server_type}"。`);
+  const spec = manifest.servers[server_type][toolName];
+  if (!spec) {
+    const excludedReason = manifest.excluded?.[server_type]?.[toolName];
+    if (excludedReason) {
+      die('ROUTE_ERROR', `工具 "${toolName}" 已从本 skill 排除：${excludedReason}`);
+    }
+    die('ROUTE_ERROR', `工具名 "${toolName}" 不属于 server_type "${server_type}"。该站可用：${Object.keys(manifest.servers[server_type]).join(' / ')}`);
   }
+  return spec;
 }
 // #endregion 路由
 
-// #region 规则加载：读 call-rules.json，得到 K 线周期映射、按域改写工具名、参数校验规则。
+// #region 规则加载：读 call-rules.json，得到指数 K 线周期映射、代码字段键、纯文本错误前缀、跨字段规则。
 function readCallRules() {
   try {
     return JSON.parse(readFileSync(CALL_RULES_PATH, 'utf8'));
@@ -387,28 +414,17 @@ function readCallRules() {
   }
 }
 
-function prepareNormalizationRules(rules) {
-  return {
-    klinePeriodMap: new Map(Object.entries(rules.kline_period_map || {})),
-    toolByDomain: rules.tool_by_domain || {},
-  };
-}
-
 const CALL_RULES = readCallRules();
-const NORMALIZATION_RULES = prepareNormalizationRules(CALL_RULES);
-const KLINE_PERIOD_MAP = NORMALIZATION_RULES.klinePeriodMap;
+const KLINE_PERIOD_MAP = new Map(Object.entries(CALL_RULES.kline_period_map || {}));
 const PUBLIC_KLINE_PERIODS = new Set(KLINE_PERIOD_MAP.keys());
 const KLINE_PERIODS = new Set(KLINE_PERIOD_MAP.values());
-const TOOL_BY_DOMAIN = NORMALIZATION_RULES.toolByDomain;
-
-const TOOL_VALIDATION_RULES = {
-  basic: CALL_RULES.basic || {},
-  toolRules: Array.isArray(CALL_RULES.tool_rules) ? CALL_RULES.tool_rules : [],
-};
-const KLINE_TOOLS = new Set(TOOL_VALIDATION_RULES.toolRules.find(rule => rule.name === 'kline')?.tools || []);
+const KLINE_TOOLS = new Set(CALL_RULES.kline_tools || []);
+const CODE_KEYS = Array.isArray(CALL_RULES.code_keys) ? CALL_RULES.code_keys : ['windcode', 'windCode', 'windCodes'];
+const TEXT_ERROR_PREFIXES = Array.isArray(CALL_RULES.text_error_prefixes) ? CALL_RULES.text_error_prefixes : [];
+const TOOL_RULES = Array.isArray(CALL_RULES.tool_rules) ? CALL_RULES.tool_rules : [];
 // #endregion 规则加载
 
-// #region 规范化：整理 windcode/indexes/period。不给中文名称猜交易所后缀。
+// #region 规范化：按 manifest 类型收敛参数；整理代码字段/indexes/period。不给中文名称猜交易所后缀。
 function normalizeIndexes(indexes) {
   if (typeof indexes !== 'string') return indexes;
   return indexes.split(',').map((item) => item.trim()).filter(Boolean).join(',');
@@ -420,54 +436,90 @@ function normalizeWindcode(windcode) {
   const upper = raw.toUpperCase();
   // Keep natural-language names untouched. Wind's backend NER is responsible
   // for resolving names/aliases; the CLI must not guess exchange suffixes.
-  if (/[\u4e00-\u9fff]/.test(raw)) return raw;
+  if (/[一-鿿]/.test(raw)) return raw;
   if (/^0\d{4}\.HK$/.test(upper)) return upper.slice(1);
   if (/^\d{4}\.HK$/.test(upper)) return upper;
   if (/^\d{6}\.(SH|SZ|BJ|OF)$/.test(upper)) return upper;
-  if (/^[A-Z]{1,5}\.(O|N|A|HK|SH|SZ|BJ)$/.test(upper)) return upper;
+  if (/^[A-Z]{1,5}\.(O|N|A|HK|SH|SZ|BJ|SHF|DCE|CZC|CFE|INE|GFE)$/.test(upper)) return upper;
   return raw;
 }
 
-function toolFamily(toolName) {
-  if (PRICE_INDICATOR_TOOLS.has(toolName)) return 'price';
-  if (KLINE_TOOLS.has(toolName)) return 'kline';
-  if (QUOTE_TOOLS.has(toolName)) return 'quote';
-  return null;
+// 代码字段：字符串按英文逗号逐项归一化后拼回；数组逐项归一化。
+function normalizeCodeValue(value) {
+  if (typeof value === 'string') {
+    return value.split(',').map((item) => normalizeWindcode(item.trim())).filter(Boolean).join(',');
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => (typeof item === 'string' ? normalizeWindcode(item.trim()) : item));
+  }
+  return value;
 }
 
-function normalizeCall(server_type, toolName, args) {
-  const family = toolFamily(toolName);
-  if (family) toolName = TOOL_BY_DOMAIN[family]?.[server_type] || toolName;
+// 类型收敛：只对顶层参数按 manifest 声明类型做无损转换；转不了原样透传，由后端报错。
+function coerceParamType(value, spec) {
+  if (value === null || value === undefined) return value;
+  switch (spec?.type) {
+    case 'integer':
+    case 'number':
+      if (typeof value === 'string' && /^-?\d+(\.\d+)?$/.test(value.trim())) return Number(value.trim());
+      return value;
+    case 'boolean':
+      if (value === 'true') return true;
+      if (value === 'false') return false;
+      return value;
+    case 'array':
+      if (typeof value === 'string') return value.split(',').map((item) => item.trim()).filter(Boolean);
+      if (!Array.isArray(value) && typeof value !== 'object') return [value];
+      return value;
+    case 'string':
+      if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+      return value;
+    case 'object':
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+        } catch { }
+      }
+      return value;
+    default:
+      return value;
+  }
+}
+
+function normalizeCall(toolName, toolSpec, args) {
   const normalizedArgs = { ...args };
   const normalizationErrors = [];
-  if (typeof normalizedArgs.indexes === 'string') normalizedArgs.indexes = normalizeIndexes(normalizedArgs.indexes);
-  if (typeof normalizedArgs.windcode === 'string') normalizedArgs.windcode = normalizeWindcode(normalizedArgs.windcode);
-  // count 是整型字段：把整数字符串收敛成 number，非整数原样留给 patterns 校验拦截。
-  if (typeof normalizedArgs.count === 'string' && /^-?\d+$/.test(normalizedArgs.count.trim())) {
-    normalizedArgs.count = Number(normalizedArgs.count.trim());
+  for (const [key, spec] of Object.entries(toolSpec.params || {})) {
+    if (key in normalizedArgs) normalizedArgs[key] = coerceParamType(normalizedArgs[key], spec);
   }
-  if (KLINE_TOOLS.has(toolName) && normalizedArgs.period === undefined) normalizedArgs.period = '1d';
-  if (typeof normalizedArgs.period === 'string') {
-    const key = normalizedArgs.period.trim();
-    const backendPeriod = KLINE_PERIOD_MAP.get(key);
-    normalizedArgs.period = backendPeriod || key;
-    if (!backendPeriod && KLINE_PERIODS.has(key)) {
-      normalizationErrors.push({
-        message: `字段 'period' 只能是 ${Array.from(PUBLIC_KLINE_PERIODS).join('/')}，日 K 请传 '1d'`,
-        field: 'period',
-        issue: 'invalid_enum',
-        actual: key,
-        allowed_values: Array.from(PUBLIC_KLINE_PERIODS),
-      });
+  for (const key of CODE_KEYS) {
+    if (key in normalizedArgs) normalizedArgs[key] = normalizeCodeValue(normalizedArgs[key]);
+  }
+  if (typeof normalizedArgs.indexes === 'string') normalizedArgs.indexes = normalizeIndexes(normalizedArgs.indexes);
+  if (KLINE_TOOLS.has(toolName)) {
+    if (normalizedArgs.period === undefined) normalizedArgs.period = '1d';
+    if (typeof normalizedArgs.period === 'string') {
+      const key = normalizedArgs.period.trim();
+      const backendPeriod = KLINE_PERIOD_MAP.get(key);
+      normalizedArgs.period = backendPeriod || key;
+      if (!backendPeriod && KLINE_PERIODS.has(key)) {
+        normalizationErrors.push({
+          message: `字段 'period' 只能是 ${Array.from(PUBLIC_KLINE_PERIODS).join('/')}，日 K 请传 '1d'`,
+          field: 'period',
+          issue: 'invalid_enum',
+          actual: key,
+          allowed_values: Array.from(PUBLIC_KLINE_PERIODS),
+        });
+      }
     }
   }
-  return { server_type, toolName, args: normalizedArgs, normalizationErrors };
+  return { args: normalizedArgs, normalizationErrors };
 }
 // #endregion 规范化
 
-// #region 校验：按 call-rules 查必填、枚举、成对/互斥字段、日期顺序。发网络前拦住非法参数。
-function validateBasicParams(params) {
-  const errors = [];
+// #region 校验：先按 manifest 查必填/类型/标量枚举/未知字段，再按 call-rules 查成对/互斥/日期顺序。发网络前拦住非法参数。
+function validateParamsShape(params) {
   if (!params || typeof params !== 'object' || Array.isArray(params)) {
     return [{
       code: 'PARAM_TYPE_ERROR',
@@ -478,21 +530,65 @@ function validateBasicParams(params) {
       actual_type: Array.isArray(params) ? 'array' : typeof params,
     }];
   }
-
-  const basic = TOOL_VALIDATION_RULES.basic;
-  for (const key of basic.string_keys || []) {
-    if (!(key in params)) continue;
-    if (typeof params[key] !== 'string') {
-      errors.push({ message: `字段 '${key}' 必须是字符串`, field: key, issue: 'invalid_type', expected_type: 'string', actual_type: Array.isArray(params[key]) ? 'array' : typeof params[key] });
-    } else if (params[key].trim().length === 0) {
-      errors.push({ message: `字段 '${key}' 不能为空或全空白`, field: key, issue: 'empty_value', expected: 'non-empty string' });
-    }
-  }
-  return errors;
+  return [];
 }
 
 function hasParamValue(params, key) {
   return params[key] !== undefined && params[key] !== null && params[key] !== '';
+}
+
+function actualTypeOf(value) {
+  if (Array.isArray(value)) return 'array';
+  if (value === null) return 'null';
+  if (typeof value === 'number') return Number.isInteger(value) ? 'integer' : 'number';
+  return typeof value;
+}
+
+function typeMatches(declared, value) {
+  const actual = actualTypeOf(value);
+  switch (declared) {
+    case 'integer': return actual === 'integer';
+    case 'number': return actual === 'integer' || actual === 'number';
+    case 'string': return actual === 'string';
+    case 'boolean': return actual === 'boolean';
+    case 'array': return actual === 'array';
+    case 'object': return actual === 'object';
+    default: return true;
+  }
+}
+
+function validateAgainstManifest(toolName, spec, params) {
+  const errors = [];
+  const declared = spec.params || {};
+  for (const key of spec.required || []) {
+    if (!hasParamValue(params, key)) {
+      errors.push({ message: `${toolName} 缺少必填字段 '${key}'`, field: key, issue: 'missing_required', required_fields: spec.required });
+    }
+  }
+  if (spec.strict) {
+    for (const key of Object.keys(params)) {
+      if (!(key in declared)) {
+        errors.push({ message: `${toolName} 不支持字段 '${key}'`, field: key, issue: 'unknown_field', allowed_fields: Object.keys(declared) });
+      }
+    }
+  }
+  for (const [key, paramSpec] of Object.entries(declared)) {
+    if (!(key in params) || params[key] === undefined || params[key] === null) continue;
+    const value = params[key];
+    if (!typeMatches(paramSpec.type, value)) {
+      errors.push({ message: `字段 '${key}' 必须是 ${paramSpec.type}`, field: key, issue: 'invalid_type', expected_type: paramSpec.type, actual_type: actualTypeOf(value) });
+      continue;
+    }
+    if (paramSpec.type === 'string' && (spec.required || []).includes(key) && value.trim().length === 0) {
+      errors.push({ message: `字段 '${key}' 不能为空或全空白`, field: key, issue: 'empty_value', expected: 'non-empty string' });
+      continue;
+    }
+    // 只对标量枚举做本地校验；数组的 items_enum 多数只是"常见值"且后端接受别名，交给后端判断。空串视为"不筛选"。
+    if (Array.isArray(paramSpec.enum) && paramSpec.type !== 'array' && value !== '' && !paramSpec.enum.includes(String(value))) {
+      errors.push({ message: `字段 '${key}' 只能是 ${paramSpec.enum.join('/')}`, field: key, issue: 'invalid_enum', actual: value, allowed_values: paramSpec.enum });
+    }
+  }
+  return errors;
 }
 
 function resolveValidationValues(fieldRule) {
@@ -520,7 +616,7 @@ function validationErrorCode(error) {
 
 function validateToolParams(toolName, params) {
   const errors = [];
-  const rules = TOOL_VALIDATION_RULES.toolRules.filter(rule => Array.isArray(rule.tools) && rule.tools.includes(toolName));
+  const rules = TOOL_RULES.filter(rule => Array.isArray(rule.tools) && rule.tools.includes(toolName));
 
   for (const rule of rules) {
     const ruleLabel = rule.label || rule.name || toolName;
@@ -559,7 +655,7 @@ function validateToolParams(toolName, params) {
     }
 
     for (const [startKey, endKey] of rule.ordered_dates || []) {
-      if (params[startKey] && params[endKey] && params[startKey] > params[endKey]) {
+      if (params[startKey] && params[endKey] && String(params[startKey]) > String(params[endKey])) {
         errors.push({ message: `字段 '${startKey}' 不能晚于 '${endKey}'`, fields: [startKey, endKey], issue: 'invalid_order', expected: `${startKey} <= ${endKey}` });
       }
     }
@@ -572,12 +668,6 @@ function validateToolParams(toolName, params) {
       }
     }
 
-    for (const conditional of rule.required_one_of_when || []) {
-      if (!conditional.values?.map(String).includes(String(params[conditional.field]))) continue;
-      const satisfied = conditional.one_of?.some(group => group.every(key => hasParamValue(params, key)));
-      if (!satisfied) errors.push({ message: conditional.message || `字段 '${conditional.field}' 当前取值缺少配套参数`, field: conditional.field, issue: 'missing_conditional_fields', one_of: conditional.one_of });
-    }
-
     for (const requirement of rule.required_one_of || []) {
       const satisfied = requirement.one_of?.some(group => group.every(key => hasParamValue(params, key)));
       if (!satisfied) errors.push({ message: requirement.message || `${ruleLabel} 工具缺少一组必填字段`, issue: 'missing_one_of', one_of: requirement.one_of });
@@ -588,6 +678,13 @@ function validateToolParams(toolName, params) {
 // #endregion 校验
 
 // #region MCP：裸 HTTP JSON-RPC + SSE。先 initialize 再 tools/call。本地/网络错误由 CLI 收口，接口错误统一 backend_error。
+function looksLikeTextError(text) {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.length > 300) return false;
+  if (/^[\[{#|*]/.test(trimmed)) return false;
+  return TEXT_ERROR_PREFIXES.some((prefix) => trimmed.startsWith(prefix));
+}
+
 function parseSSE(text) {
   const trimmed = text.trim();
   // 后端正常 SSE, 部分错误场景纯 JSON
@@ -657,10 +754,21 @@ async function mcpRequest(server_type, method, params, {
       error_message: String(message ?? '').slice(0, 2000),
     });
   };
+  // 实测网关会间歇返回 502/503/504（同一工具前后几秒内成功与失败交替），这类响应与网络异常一样重试。
+  const fetchOnce = async (url, options) => {
+    const response = await fetch(url, options);
+    if (RETRYABLE_HTTP_STATUS.has(response.status)) {
+      await response.text().catch(() => '');
+      const err = new Error(`HTTP ${response.status}`);
+      err.httpStatus = response.status;
+      throw err;
+    }
+    return response;
+  };
   let resp;
   try {
     resp = await fetchWithRetry(
-      fetch,
+      fetchOnce,
       server.endpoint,
       () => ({
         method: 'POST',
@@ -670,22 +778,25 @@ async function mcpRequest(server_type, method, params, {
       }),
       {
         attempts: 3,
-        delaysMs: [300, 1000],
+        delaysMs: [500, 1500],
         onAttemptError: process.env.WIND_DEBUG === '1'
           ? (err, attempt, total) => {
-            const causeCode = err?.cause?.code || err?.code || 'UNKNOWN_CAUSE';
+            const causeCode = err?.httpStatus || err?.cause?.code || err?.code || 'UNKNOWN_CAUSE';
             process.stderr.write(`[wind-mcp fetch retry ${attempt}/${total}] ${causeCode}: ${err?.message || err}\n`);
           }
           : null,
       },
     );
-  } catch {
+  } catch (err) {
+    if (err?.httpStatus) {
+      die(HTTP_ERROR_MAP[err.httpStatus] || 'NETWORK_ERROR', `网关返回 HTTP ${err.httpStatus}，已重试 3 次仍失败（server=${server_type}）`);
+    }
     die('NETWORK_ERROR');
   }
 
   if (!resp.ok) {
     await resp.text().catch(() => '');
-    die(HTTP_ERROR_MAP[resp.status] || 'NETWORK_ERROR');
+    die(HTTP_ERROR_MAP[resp.status] || 'NETWORK_ERROR', resp.status === 401 ? null : `网关返回 HTTP ${resp.status}（server=${server_type}）`);
   }
 
   const text = await resp.text();
@@ -706,6 +817,12 @@ async function mcpRequest(server_type, method, params, {
   if (payload.result?.isError) {
     const msg = payload.result.content?.[0]?.text || JSON.stringify(payload.result);
     dieInterfaceError(msg);
+  }
+
+  // 实测部分工具 isError=false 却用一句纯文本报错（如 "Invalid indicator: ..."），按前缀识别后同样收口为 backend_error。
+  const firstText = payload.result?.content?.[0]?.text;
+  if (typeof firstText === 'string' && looksLikeTextError(firstText)) {
+    dieInterfaceError(firstText.trim());
   }
 
   // 部分工具把业务错误包在 content[0].text 的 JSON 字符串里, 必须二次解析
@@ -817,13 +934,18 @@ async function cmdCall(server_type, toolName, paramsInput) {
     die('PARAM_TYPE_ERROR', 'params 必须是 JSON object');
   }
 
-  let normalizationErrors;
-  ({ server_type, toolName, args, normalizationErrors } = normalizeCall(server_type, toolName, args));
-  validateToolSelection(server_type, toolName);
+  const toolSpec = resolveToolSpec(server_type, toolName);
+  const shapeErrors = validateParamsShape(args);
+  if (shapeErrors.length > 0) die('PARAM_TYPE_ERROR', shapeErrors.map(validationErrorMessage).join('；'));
 
-  const validationErrors = [...normalizationErrors, ...validateBasicParams(args)];
-  const paramsShapeInvalid = validationErrors.some(error => validationErrorCode(error) === 'PARAM_TYPE_ERROR' && error.field === 'params');
-  if (!paramsShapeInvalid) validationErrors.push(...validateToolParams(toolName, args));
+  let normalizationErrors;
+  ({ args, normalizationErrors } = normalizeCall(toolName, toolSpec, args));
+
+  const validationErrors = [
+    ...normalizationErrors,
+    ...validateAgainstManifest(toolName, toolSpec, args),
+    ...validateToolParams(toolName, args),
+  ];
   if (validationErrors.length > 0) {
     const explicitCode = validationErrors.map(validationErrorCode).find(Boolean);
     const messages = validationErrors.map(validationErrorMessage);
@@ -1000,7 +1122,7 @@ function runMain() {
 
   const USAGE =
     `wind-mcp-skill\n` +
-    `访问万得 Wind 金融数据（按数据域分类调用）\n\n` +
+    `访问万得 Wind 金融数据（11 个 MCP 服务，按 server_type 分类调用）\n\n` +
     `用法:\n` +
     `  cli.mjs call <server_type> <tool_name> '<params_json>|@params_file'\n` +
     `  cli.mjs list-tools <server_type>                    # 获取后端官方工具描述和 inputSchema\n` +

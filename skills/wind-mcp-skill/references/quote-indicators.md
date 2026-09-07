@@ -1,6 +1,6 @@
 ## `indexes` 行情指标
 
-仅供 `get_stock_price_indicators` 使用。下列字段全部经过真实调用验证，可直接使用；只选择用户明确请求的字段，逐字复制，多个字段用英文逗号连接。表内没有的字段不得猜测。
+供 `finance_data` 的 `quote_get_realtime_indicators` 使用（`indexes` 字段）。清单沿用原股票行情指标集，字段名可用 `quote_search_realtime_indicators` 复核；只选择用户明确请求的字段，逐字复制，多个字段用英文逗号连接。表内没有的字段先用 `quote_search_realtime_indicators` 确认再用，不得猜测。
 
 ### 基础行情与元信息
 
