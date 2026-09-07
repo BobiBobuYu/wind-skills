@@ -1,0 +1,102 @@
+[
+  {
+    "id": 11,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 3, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 5},
+    "capability_gap": "B",
+    "backend_issue": "A",
+    "winner": "A",
+    "reason": "A 取到真实提价公告(出厂价1169→1269,+8.55%)、批价/官价价差、经销商合同执行率80%、销量与直销占比等一手证据，六个维度都有实证；B 的 stock_data 契约无公告/事件/实物销量覆盖，只能用2021-2024年报与合同负债做代理推断，且数据停在2024年。",
+    "notable": "B 侧 SKILL.md 示例中的行情指标别名 PE(TTM)/PB 在线上无效(仅在 message 里警告不报错，正确名为 市盈率(TTM)/市净率(LF))；A 侧 stock_get_company_finance_analysis 传多报告期只返回最新一期，与契约描述不符。"
+  },
+  {
+    "id": 12,
+    "A": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "六个维度两份都覆盖且都识别出东财口径异常，但 B 额外给出市值/员工/绝对营收利润/扣非增速/EBITDA率/负债率/经营现金流/主营构成三年变动/估值历史分位，一页式信息密度明显更高；A 只用4次调用更省，但缺市值、绝对收入等基础项。",
+    "notable": "东方财富「销售净利率」字段返回342.12%(分母口径与营业总收入不一致)；stock_get_company_finance_analysis 返回体的叙述文本与结构化摘要期间不一致(叙述称105.05亿 vs 摘要160.68亿)，易误引。"
+  },
+  {
+    "id": 13,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 0, "routing": 4, "faithfulness": 5, "answer": 2, "efficiency": 4},
+    "capability_gap": "B",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A 通过 stock_get_company_earnings_estimate 取到58家一致预期与5家机构逐年营收/净利/目标价明细，完成收入-利润率-资本开支-估值四层分歧拆解；B 的 Skill 无任何卖方一致预期/研报工具，逐域 list-tools 核验后判定 OUT_OF_SCOPE，诚实但零产出。",
+    "notable": "B 版 Skill 缺失卖方一致预期(Wind WEST 类)工具，financial_docs.get_financial_news 契约明确排除券商研报，导致整类「分析师预测/目标价/评级」需求无法承接。"
+  },
+  {
+    "id": 14,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "B",
+    "winner": "A",
+    "reason": "两份对回购方案要素与「用途改注销」的信号解读基本一致，但 A 只用4次调用还补上了总市值(回购占市值0.99%-1.98%)与近5年33条回购历史事件，指出「常态化回购、边际信息递减」；B 有一次 backend_error，且未取到货币口径市值与回购历史。",
+    "notable": "quote_get_realtime_indicators 的中文指标名「总市值」被映射为 TOTALCAPITAL(总股本，单位股)，指标名存在歧义/映射错误。"
+  },
+  {
+    "id": 15,
+    "A": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "A",
+    "winner": "tie",
+    "reason": "A 更完整地覆盖最新期(FY2025/2026H1)盈利、分红政策(中期74%、承诺≥65%)与负债/筹资现金流动态，并抓住「股息率处近5年6.86%分位而PE在83%分位」的反直觉点；B 用 economic_data 取到环渤海动力煤价格周度序列，把煤价周期与利润拐点直接对上，并自算五年派息率，各有明显强项。",
+    "notable": "stock_get_company_finance_analysis 传多报告期(CY2021..CY2025)直接返回 backend_error「财务摘要未查询到数据」，只能省略参数取单期；get_stock_events 分红子表跨年数值完全重复，市净率字段返回0.000。"
+  },
+  {
+    "id": 16,
+    "A": {"coverage": 3, "routing": 5, "faithfulness": 5, "answer": 3, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "同一份股东名单，B 还给出持股数量、股东类型、总股本与2026-09-02截面日期，并补充实控人8.61%、港股通持股11.84%(2026-09-04)与2026-06-30机构增减持；A 的 get_stock_equity_holders 只回名次与比例，第4-8名比例被舍入为0、第9-10名为空且无绝对持股数。",
+    "notable": "get_stock_equity_holders 返回名次9-10为空、小额权益比例四舍五入为0、且无「披露日期」字段，可用性弱于 stock_get_company_profile 内嵌的大股东明细。"
+  },
+  {
+    "id": 17,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "两份都先给稳定性口径、结论同为富国天惠且都诚实标注相对性；A 用 asOfDate 滚动构造5个年度收益点，并拿到近1/3/5年波动率、最大回撤、夏普、Calmar 与Wind评级，还在4个历史时点复核了排序稳健性；B 直接拿到自然年收益(更干净)但只有近3年波动率，缺夏普/Calmar/多时点交叉验证。",
+    "notable": "fund_research 无逐年度/区间收益序列字段，需靠多次 asOfDate 滚动取「近1年回报」近似年度收益；fund_data 侧「近1年/近3年」滚动区间不返回起止日期，与自然年口径易混。"
+  },
+  {
+    "id": 18,
+    "A": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "tie",
+    "reason": "A 多取了规模、当日成交额与个人/机构持有人结构，使「适用人群」有实证支撑，并讲清嘉实联接LOF的场内外双通道与C/I/Y各类份额费率，但缺赎回费率与跟踪偏离度；B 只用2次调用就拿到申购+赎回费率、业绩基准与近1/3/5年跟踪误差，覆盖更规范但缺规模流动性且被代码后缀问题拖累。",
+    "notable": "A 侧「赎回费率」返回空字符串、「近1年平均跟踪偏离度」返回 null；B 侧按中文名检索 ETF 返回 510330.OF/159919.OF 后缀(应为 .SH/.SZ)，且联接LOF「基金上市地点」返「不适用」与「上市日期」自相矛盾。"
+  },
+  {
+    "id": 19,
+    "A": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 4},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "both",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 用 Brinson 归因、风格分析、行业配置与前十大持仓直接把「配置 vs 选股」拆开(日常消费43.77%→18.06%、信息技术10.54%→32.15%、白酒换半导体)，正面回答四选一；A 缺归因与风格工具、行业口径是国民经济门类(制造业38%-46%)，因此错过了真正的消费→科技切换，只能靠仓位/集中度骤变推断——但 A 独家拿到基金经理任职起止与连续8期净赎回(438亿→204亿)，这两点 B 恰好缺。",
+    "notable": "B 侧 fund_get_basic_info 只返回现任经理、不含任职起止时间，且复合基准(45%HS300+35%港股通+20%中债)无法作为单一 windCode 传入归因工具，只能近似用000300.SH；A 侧 fund_data 无 Brinson/风格归因工具，换手率字段跨8期恒定为28.9825%，PE/PB与风格箱字段不返回。"
+  },
+  {
+    "id": 20,
+    "A": {"coverage": 3, "routing": 3, "faithfulness": 4, "answer": 3, "efficiency": 3},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 用3次调用拿到半年逐日规模/份额与Wind官方按月「ETF净流入额」，还原出「3-6月大额净流出→7月单月净流入+347亿→8-9月收窄企稳」的完整资金流节奏；A 因 fund_get_size 份额字段不随 asOfDate 变化，只能取4个时点用规模÷净值反推份额，采样过疏漏掉7月拐点，给出了「赎回持续且近期加剧、未见企稳」的相反结论，且花了9次调用。",
+    "notable": "fund_get_size 的「基金份额份数合计」不随 asOfDate 变化(只回最新值)、且该域无 ETF 净流入额字段，只能反推份额，极易得出错误的资金流持续性判断；另 get_fund_holders 默认截断100行，份额列标注单位「份」实为「万份」。"
+  }
+]

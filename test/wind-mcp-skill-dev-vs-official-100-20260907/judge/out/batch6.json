@@ -1,0 +1,62 @@
+[
+  {
+    "id": 45,
+    "A": {"coverage": 0, "routing": 5, "faithfulness": 5, "answer": 2, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "A 版无期货数据域，1 次核实后判 OUT_OF_SCOPE（判定本身规范但零产出）；B 用 futures_get_contract_spec 取挂牌规则再批量核验报价，列全 20 个存续合约的到期月与最新价并按到期排序。",
+    "notable": "futures_data 缺少「按品种列出全部当前存续/挂牌合约」的工具，只能靠品种级挂牌规则拼代码再逐个试探；quote_get_realtime_indicators 批量传入时只要一个代码未挂牌就整批 backend_error（\"未识别到有效的金融标的\"），且 SC2710.INE 未报错却返回内部数字 ID(1355906393)+空行情，建议改为逐标的容错返回。"
+  },
+  {
+    "id": 46,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 4},
+    "capability_gap": "B",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A 用 futures_get_supply_demand + futures_get_basis 两次调用即拿到库存、现货价、期货价、基差及基差分位，并做了水平相关 vs 周变化相关的区分和逐年稳定性拆解，直接回应「关系是否稳定」；B 走 EDB 代理（4 次调用）数据等价但基差指标口径不明、缺少分年度稳定性检验。",
+    "notable": "B 版无期货域只能把沪铜价格/库存/基差降级为 EDB 指标（M0066355/S0049507/B9719450），其中「沪铜:基差:主连」meta 未给出计算公式（现货-期货还是反之），无法判断升贴水方向；A 版 futures_get_basis 的「基差历史分位」为近 3 年口径，契约应明确标注以免与「近五年」混用。"
+  },
+  {
+    "id": 47,
+    "A": {"coverage": 3, "routing": 2, "faithfulness": 4, "answer": 3, "efficiency": 2},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "A",
+    "backend_issue": "A",
+    "winner": "B",
+    "reason": "B 检索到 Wind 官方「中国:进口盈亏:铜」(H1412342，已内嵌汇率/关税/增值税)，用年内 161 个观测建分布并给出约第 22 百分位的量化「不异常」结论；A 连 LME3 月铜标准代码都未识别，只能用近月合约代理并拿非 Wind 的经验比价区间 7.9~8.1 做定性判断，11 次调用中 3 次失败。",
+    "notable": "A 版 finance_data 实体识别对 LMCADS03/LMCADS03.LME/USDCNY.EX 全部报「未识别到有效的金融标的」且批量一损俱损，contract 未给 LME 与汇率的标准代码写法；indexes 用「最新价」不命中须写「最新成交价」；quote_get_historical_data_series 在 rangeflag=0 时返回 1995 年数据；LME 历史序列 unit 标为「万元」而币种为 USD，字段自相矛盾。"
+  },
+  {
+    "id": 48,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 1, "routing": 4, "faithfulness": 5, "answer": 2, "efficiency": 4},
+    "capability_gap": "B",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A 用 options_data 的 iv_term_structure / iv_cone / variety_stats(hv) 四次调用把近月 ATM IV、近一年 IV 分位(22.9%)、HV20/HV60 三个要件全部取到并给出一致结论；B 版无期权域，只能用 fund_data 的年化波动率代理，核心的 IV 与分位两项判 OUT_OF_SCOPE，无法作答贵/便宜。",
+    "notable": "options_get_iv_term_structure 与 options_calc_iv_cone 对同一近月 ATM IV 给出 14.44% vs 13.92% 两个数，契约未说明两者计算基准/插值差异，易被误当成数据不一致；另无独立的标的已实现波动率工具，只能用 options_get_variety_stats(indicator=hv) 代理。"
+  },
+  {
+    "id": 49,
+    "A": {"coverage": 0, "routing": 5, "faithfulness": 5, "answer": 2, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "A 版无期权域，逐份核查契约后判 OUT_OF_SCOPE，零数据；B 用波动率曲面取当前与一个月前两截面，给出各期限 ATM/m95/m90 的 IV 与偏斜数值、期限收敛特征和偏斜走阔幅度，并用 moneyness=90 期限结构交叉验证。",
+    "notable": "B 的备注称「options_calc_iv_cone 不支持 moneyness 切片，无法给偏斜历史分位」，但同一 Skill 的 options_get_variety_stats 已有 skew_normalized 指标可直接给偏斜的近一年分位（q50 中被用到），volatility.md 缺少「偏斜历史分位走 variety_stats/skew_normalized」的路由指引。"
+  },
+  {
+    "id": 50,
+    "A": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 3},
+    "B": {"coverage": 2, "routing": 4, "faithfulness": 5, "answer": 3, "efficiency": 5},
+    "capability_gap": "B",
+    "backend_issue": "A",
+    "winner": "A",
+    "reason": "A 取到 510300OP.SH 存续期限、各档 Greeks、ATM/95 隐波近一年分位、skew 与 PCR 分位，给出到期日与行权价选择、22 张头寸、对冲后组合 Greeks 的可执行方案（权利金因后端字段缺失改用明确标注的 BS 估算）；B 版无期权域，只能给方法论框架与现货/Beta/回撤等辅助数据，无具体合约。",
+    "notable": "options_get_term_metrics 在两个到期日、三种 indicators 组合下均只返回 delta/gamma/vega/theta，最新价/结算价/隐含波动率/成交量/持仓量全部为空，导致权利金与流动性无法评估；options_get_listed_terms 不传 tradeDate 时返回 backend_error「服务暂时不可用」，契约应把 tradeDate 标为实际必填。"
+  }
+]

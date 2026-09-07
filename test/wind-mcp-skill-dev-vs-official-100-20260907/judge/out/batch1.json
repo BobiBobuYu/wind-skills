@@ -1,0 +1,102 @@
+[
+ {
+  "id": 1,
+  "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "B": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+  "capability_gap": "both",
+  "backend_issue": "B",
+  "winner": "A",
+  "reason": "两份都按五个角度作答且如实标注缺口，但 A 用 4 次调用就取到非经常性损益明细表和现金流量表补充资料（存货/应收/应付变动），把利润与现金流背离拆到了科目级；B 用 6 次调用未命中非经常性损益专项明细表，只能并列两个口径 97.4 亿 vs 42.71 亿的差异。",
+  "notable": "financial_docs.get_company_announcements 对长 query 极敏感（关键词一多就 0 命中），且返回内容顶部会混入与正文矛盾的生成式摘要和未填充模板占位符（如\"2026年拟分配金额为$\"）；stock_get_company_finance_analysis 对 Q2FY2026 等单季 reportPeriod 静默丢弃不报错。"
+ },
+ {
+  "id": 2,
+  "A": {"coverage": 4, "routing": 3, "faithfulness": 5, "answer": 5, "efficiency": 2},
+  "B": {"coverage": 3, "routing": 4, "faithfulness": 4, "answer": 3, "efficiency": 5},
+  "capability_gap": "B",
+  "backend_issue": "A",
+  "winner": "A",
+  "reason": "评测日为 2026-09，\"过去三年\"应为 FY2023-FY2025，A 取的正是这三年且通过港股指标树补到了吉利应收账款；B 取的是 2022-2024（漏掉已披露的 FY2025）且吉利应收账款三次尝试后判为无覆盖，窗口陈旧+维度缺失，效率优势不足以弥补。",
+  "notable": "stock_get_company_finance_analysis 的 reportPeriod 文档示例用 CY 前缀（\"CY2025\"），线上稳定报 backend_error，必须用 FY 前缀；finance_data 指标树 A 股/港股不通用（s_bs_12 对港股无效，需改 hks_bs_12），且 s_stm07_bs 返回字段名\"划分为持有待售的资产\"与指标声明的\"应收账款\"不符；该工具\"报告期\"参数只支持相对标签，无法指定 2023/2024 具体年报，导致取不到三年趋势。"
+ },
+ {
+  "id": 3,
+  "A": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+  "B": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+  "capability_gap": "none",
+  "backend_issue": "both",
+  "winner": "B",
+  "reason": "A 在估值因素上更强（PE/PB/PS/PCF 分位、可比公司、一致预期下修明细），但对回购事件的市场反应只能定性推断；B 用两段日 K 线直接量化了两个事件的股价与成交额反应，并还原出回购公告与疲弱一季报同日发布、次日反跌 4.57% 这一关键事实，\"市场预期/短期催化\"这一必答维度更有证据。",
+  "notable": "stock_get_company_earnings_estimate 传中文名\"小米集团\"被错误解析为 A18028.SH（返回 2017 年数据），需强制用带交易所后缀的代码；get_stock_price_indicators 对 1810.HK 返回市净率 0.000；公告检索的相关性排序不等于时间排序，取\"最新一期\"须放大 top_k 后按 date 字段自行筛选。"
+ },
+ {
+  "id": 4,
+  "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "capability_gap": "none",
+  "backend_issue": "none",
+  "winner": "tie",
+  "reason": "两份都是 5 次调用零失败、逐条核对四个筛选条件并得出同一结论（仅宁德时代全部达标）；A 给出 FY2021-FY2025 五年原始表格历史更长，B 增加 H1FY2026 中报做趋势交叉验证并在年报/中报背离时按更保守口径处理，各有所长。",
+  "notable": "同名指标 ROE 在两个数据站口径不同（stock_data 返回加权口径，如茅台 FY2023 为 36.18%；stock_research 返回 ROE(摊薄) 34.65%），契约应显式标注口径，否则跨工具对比会得出不同筛选结果。"
+ },
+ {
+  "id": 5,
+  "A": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 5},
+  "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "capability_gap": "A",
+  "backend_issue": "both",
+  "winner": "B",
+  "reason": "同为 7 次调用零失败，B 有一致预期专项工具（37 家机构、目标价、9 月多家下调 2026 盈利预测）直接量化\"业绩预期差\"，还有专门的资金流工具（主力/陆股通/两融）和板块实时分析；A 明确写出契约内无一致预期工具，只能靠新闻定性佐证，资金面也只有前十大股东变动。",
+  "notable": "A 版契约（stock.md/financial-docs.md）缺一致预期/分析师预测工具，\"预期差\"类题目只能退化为新闻定性；get_stock_price_indicators 市净率再次返回 0.000；stock_research 返回的\"财务分析\"叙述文本与请求期次不匹配（引用 3448.15 亿/-3.15% 对不上 FY2025 结构化值），板块分析文本还夹带原油黄金等通用模板内容。"
+ },
+ {
+  "id": 6,
+  "A": {"coverage": 3, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 5},
+  "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "capability_gap": "A",
+  "backend_issue": "A",
+  "winner": "B",
+  "reason": "题目要求把\"高位股价\"和\"高市盈率\"结合增长、估值、风险一起理解，B 拿到了前瞻 PE 路径（37.98→12.44 倍）、25 家机构一致预期、同业分位对比和研报列出的具体风险（出口管制/HBM 涨价/自研芯片替代），并主动把\"历史高位\"限定为近 250 日窗口；A 只有历史增长率、单一 PE 分位和风险度量，且前瞻 PE 字段取不到。",
+  "notable": "get_stock_price_indicators 对美股返回市净率 0.000，且契约中列出的\"市盈率(预测)\"字段被静默丢弃不报错；get_stock_fundamentals 同一指标因自然语言措辞不同而时有时无（\"净利润增长率\"返回 null，改成\"归属母公司净利润同比增长率\"才有值）；PE 历史分位在两个数据站差异极大（全历史 35.76% vs 近 3 年 0.93%），契约需注明分位窗口。"
+ },
+ {
+  "id": 7,
+  "A": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 2},
+  "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "capability_gap": "none",
+  "backend_issue": "both",
+  "winner": "B",
+  "reason": "四个数据点、日期和单位两份完全一致（2026-09-07，市值 1.64512 万亿元、PE 20.202、PB 6.548、股息率 3.95%），但 B 用 2 次调用完成（含一次 PB 异常核验），A 因中文指标名不被解析而反复 search 字段代码，用了 7 次，属于纯查询题的严重效率浪费。",
+  "notable": "行情接口的通用\"市净率\"字段返回 0.000，必须改用\"市净率(LF)\"/PB_MRQ；finance_data.quote_get_realtime_indicators 的 indexes 不接受中文指标名（会静默只解析出部分列），需先 quote_search_realtime_indicators 拿 enName，契约应直接给出常用字段代码表；PE/PB/股息率返回体缺字段级 unit 元数据。"
+ },
+ {
+  "id": 8,
+  "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 3},
+  "capability_gap": "none",
+  "backend_issue": "B",
+  "winner": "A",
+  "reason": "FY2021-FY2025 四项指标两份数值完全一致，A 一次自然语言调用即完成；B 因按 reference 用 CY 前缀连吃两次 backend_error，探针改 FY 后才成功，共 4 次调用 2 次失败。",
+  "notable": "与第 2 题同一坑：stock_get_company_finance_analysis 的 reportPeriod 文档示例\"2025日历年年报填CY2025\"线上无效，实际必须用 FY 前缀，属契约与线上不一致，建议直接改文档并在错误信封里提示正确前缀。"
+ },
+ {
+  "id": 9,
+  "A": {"coverage": 4, "routing": 3, "faithfulness": 5, "answer": 5, "efficiency": 3},
+  "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+  "capability_gap": "both",
+  "backend_issue": "both",
+  "winner": "B",
+  "reason": "A 拿到了 10-K/股东信里的指引原文（\"return to growth in 2025\"、资本开支\">$11B\"），证据层级更高，但为找交付量在 EDB 上白跑两次、又一次新闻空返回，且 2021-2022 交付量始终缺失；B 用 7 次调用补齐 2019-2025 年度+8 个季度实绩，并还原出 2025 年 20%-30% 交付指引、2026 年资本开支从 200 亿上修到 250 亿的完整演变，指引-兑现对照的样本更完整。",
+  "notable": "EDB/economic 数据站没有个股交付量指标（只有中国/韩国区域销量），\"指引兑现\"类题目缺结构化经营数据（交付量/产量）站点；get_company_announcements 返回 10-K 全文时体积过大被终端截断落盘到技能目录外，隔离规则下无法读取，等于该公告白调一次；stock_get_company_finance_analysis 的 CY 前缀对美股同样失败。"
+ },
+ {
+  "id": 10,
+  "A": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 5},
+  "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+  "capability_gap": "none",
+  "backend_issue": "B",
+  "winner": "B",
+  "reason": "同为 3 次调用零失败、六个检查点全覆盖且短债覆盖倍数结论一致（约 0.54→0.41→0.32），但 B 额外取到存货跌价准备（115.68→285.05 亿）、归母权益因连亏从 2026.66 亿缩到 1021.81 亿、有息负债/权益 1.80→3.15 倍、取得借款收到的现金骤降等证据，把\"绝对负债在降但相对杠杆在恶化\"讲透了；A 的表格更长（含 FY2022 与两个中报），但分析停在余额层面。",
+  "notable": "stock_get_company_finance_analysis 随响应附带的自动生成\"财务分析\"语料与同一响应的结构化字段互相矛盾（资产负债率 75.49% vs 77.51%，经营现金流净额 42.03 亿 vs 4.95 亿，有息负债 3560.5 亿 vs 明细加总 3224.10 亿），契约应明确该语料不得作为数据源；get_stock_fundamentals 的\"有息负债合计\"口径未定义，与四项明细加总差额高达 4200 亿~1.03 万亿。"
+ }
+]

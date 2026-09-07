@@ -1,0 +1,62 @@
+[
+  {
+    "id": 36,
+    "A": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 3, "routing": 3, "faithfulness": 5, "answer": 4, "efficiency": 3},
+    "capability_gap": "both",
+    "backend_issue": "both",
+    "winner": "A",
+    "reason": "两者都取不到地产信用利差本身,但A用替代指标拿到了10年国债收益率(M1001654)、30城周度成交面积和万科境内主体评级,四个候选因素中三个有数值支撑;B连无风险利率都因无权限放弃,归因几乎全靠新闻定性。",
+    "notable": "凡中债估值中心口径的EDB指标(S0059746/S0059749/M10128xx系列)整体返回\"无权限\",而Wind自有口径国债收益率(M1001654)可取;契约未提示这种按数据源分级的权限差异,也没有\"行业信用利差\"专项工具,建议在economic参考里写明可替代指标;另get_bond_market_data查区间中债估值收益率返回全null。"
+  },
+  {
+    "id": 39,
+    "A": {"coverage": 3, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 4},
+    "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B有专门的futures_data站,取到基差近3年历史分位、仓单、SHFE/LME库存与TC/RC、资金流、席位持仓和跨月合约期限结构快照;A无期货站只能用EDB代理,期限结构和真实仓单两项缺失,只能间接推断。",
+    "notable": "quote_get_realtime_indicators的字段名必须用\"最新成交价\"(用\"最新价\"不报错但静默返回空),且合约代码年份极易猜错(误用已到期的CU2509等),契约宜补合约代码构造规则与可用字段名清单。"
+  },
+  {
+    "id": 40,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 3, "routing": 3, "faithfulness": 5, "answer": 3, "efficiency": 3},
+    "capability_gap": "B",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A直接取到RB2610/RB2701逐日收盘价自算10-1价差(-32→-60),并用主力换月时点、仓单增47%、基差分位回落、研报口径交叉验证四类归因;B无期货站,价差点位只能从新闻正文摘录,移仓与交割两个维度均无法量化。",
+    "notable": "quote_get_historical_data_series在rangeflag=0配合count时返回2009年历史K线而非最近N根,与reference中\"取最近count条\"的描述不符,须显式用rangeflag=2+起止日期。"
+  },
+  {
+    "id": 41,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 2, "routing": 3, "faithfulness": 5, "answer": 3, "efficiency": 4},
+    "capability_gap": "B",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A用futures_get_contract_spec取到品种级(5吨/手、保证金5%)与CU2612合约级(保证金11%、最后交易日2026-12-15)条款,合约选择、期限匹配、基差分位82.23%均有据;B无期货站,合约乘数/保证金/到期日全部取不到,合约选择环节只能留白。",
+    "notable": "无期货站的版本连合约乘数、保证金比例、最后交易日等静态条款都无处可取,套保类问题实际依赖futures_get_contract_spec;另A未取到具体远月合约的成交持仓,\"流动性充足\"只能由品种口径推断。"
+  },
+  {
+    "id": 42,
+    "A": {"coverage": 0, "routing": 3, "faithfulness": 5, "answer": 2, "efficiency": 3},
+    "B": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B仅用3次调用(两期全市场资金流快照+6品种基差快照)完成价格/持仓额/基差分位三条件筛选并如实标注代理口径;A直接判OUT_OF_SCOPE,未产出任何筛选结论,且未尝试同批次其它记录已验证可行的economic_data商品指标路径。",
+    "notable": "futures_data缺\"持仓量(手)时间序列\"与\"跨月期限结构曲线\"工具,只能用持仓额和基差历史分位代理,建议补齐;无期货站版本的路由表把商品期货一刀切判OUT_OF_SCOPE,但EDB里其实有沪铜基差/持仓量/库存等指标,路由指引与实际覆盖不一致。"
+  },
+  {
+    "id": 43,
+    "A": {"coverage": 3, "routing": 2, "faithfulness": 4, "answer": 1, "efficiency": 4},
+    "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "这是概念题,B还用数据做了实证(RB2601行情止于2026-01-14、RB.SHF连续271根不中断、同期两者价差113-136元/吨),解释既准确又有据;A把纯概念题判成OUT_OF_SCOPE直接拒答,零产出,且在无任何调用的情况下仍附了\"数据来源于万得\"的落款。",
+    "notable": "futures_get_contract_spec传具体合约代码(RB2601.SHF)返回的仍是品种级通用条款,与契约声称的\"具体合约信息包括涨跌停板比例、保证金比例\"不符;另外没有任何工具暴露\"当前主力合约代码\"这一字段,建议补充。"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": 31,
+    "A": {"coverage": 3, "routing": 4, "faithfulness": 5, "answer": 3, "efficiency": 3},
+    "B": {"coverage": 4, "routing": 3, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "both",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 取到两只基准券的换手率与成交金额，收益率、流动性、税收、利差四个维度全覆盖；A 虽用 EDB 曲线拿到近1年利差历史，但流动性与税收两块完全空白。",
+    "notable": "get_bond_market_data 对银行间券(IB)的成交量/换手率是否返回取决于提问措辞（限定“最近5个交易日”能拿到，泛化对比式提问全为 null）；get_bond_basicinfo 的“利息处理方式”字段为空，两版均无任何税收口径数据；B 版备注误判“没有国债/国开债收益率曲线聚合指标”，缺少“曲线类查询走 economic_data EDB”的路由指引。"
+  },
+  {
+    "id": 32,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 3, "routing": 3, "faithfulness": 5, "answer": 4, "efficiency": 3},
+    "capability_gap": "none",
+    "backend_issue": "B",
+    "winner": "A",
+    "reason": "同样撞上中债 S00597xx 无权限，A 找到中国货币网口径替代指标并取到 2/10/30 年 11 年历史序列加三档期限指数；B 的替代尝试分别遇 backend_error 与实体识别失败，30 年端只能用久期比例外推。",
+    "notable": "中债估值中心国债到期收益率(S0059745/S0059749/S0059752)账号无权限，但中国货币网口径 M0048267/M0325687/M0048274 可用，契约应给出无权限时的等效替代清单；index_data 按中文全称“中债-10年以上国债财富(总值)指数”检索返回“未识别到有效的金融标的”，缺可用指数名称枚举。"
+  },
+  {
+    "id": 33,
+    "A": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 取到组合久期、成立以来最大回撤 -6.66% 以及 2022年11-12月赎回潮区间 -1.30%/-2.02% 的实证窗口和持有人结构、规模缩水数据，四因素都有数据支撑；A 缺组合久期，流动性只能靠“暂停大额申购”间接说明。",
+    "notable": "A 版 fund_research 无基金组合久期字段；B 版 fund_data 的“利率债/信用债占净值比”返回同一数值 100.45%（疑标签错配）、按 AAA/AA+/AA 分档市值全部 null、前十大重仓只回 3 只且缺占净值比，字段口径与标签需修正。"
+  },
+  {
+    "id": 34,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "tie",
+    "reason": "两份都用 EDB 指标 M1001654、同为 3 次调用、同样给出 1.68% / 2026-09-04 并注明中证指数公司口径，B 多附近 9 个交易日序列，不足以构成胜负差异。",
+    "notable": "两版同时踩到 numOfObservation / observation = 1 时只返回 meta、不返回 date/value 序列的问题（不报错的空结果），需修复该参数或在契约中直接引导用日期区间取“最新一期”。"
+  },
+  {
+    "id": 35,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 3},
+    "capability_gap": "none",
+    "backend_issue": "both",
+    "winner": "A",
+    "reason": "两份都因中债系列无权限改走替代口径，A 检索到中国货币网的 3/5/10/30 年代码使五个期限同源；B 未命中这些代码，最终用中国货币网＋中证指数公司两个口径拼曲线，且多花 1 次调用。",
+    "notable": "中债估值中心 S0059744/46/47/49/52 账号无权限，Skill 应在 references 中直接列出可用替代口径（M0325686/M0048268/M0048269/M0048271/M0048274 或中证 M1001648/50/54/57），避免每题重复多轮检索拼代码。"
+  },
+  {
+    "id": 37,
+    "A": {"coverage": 4, "routing": 4, "faithfulness": 4, "answer": 4, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 查到摘牌日 2009-09-24，并用正股 K 线与转股价值逐日交叉验证（含一天转债与正股反向的实证），还识破 8.42 元转股价是退市前口径；A 未取正股，用 8.42 反推出的“正股价约 3.22 元”很可能口径错配。",
+    "notable": "退市转债的“最新”行情查询返回全 0、日期字段为“0”，而非显式 NO_RESULTS 语义；get_bond_basicinfo 返回的转股价为退市前最终值，直接用于历史区间换算会口径错配，references 应提示先查摘牌日与转股价调整历史。"
+  },
+  {
+    "id": 38,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 4, "answer": 3, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A 主动剔除已于 2026-07-24 到期的 H3万科01 后选券作答；B 恰恰把这只已到期的债当成“当前存续”主答案，与自己表格里的到期日自相矛盾（虽然它额外列出了另外 6 只正确的存续债）。",
+    "notable": "get_bond_basicinfo 返回集里混入已到期债券却按“存续”呈现，且无法约束“只返回一只”，references 需提示按到期日与当前日期自行过滤；A 版 basicinfo 不带主体评级需再调 get_bond_issuer_info，B 版一次即返回，两版字段覆盖不一致。"
+  },
+  {
+    "id": 44,
+    "A": {"coverage": 1, "routing": 5, "faithfulness": 5, "answer": 2, "efficiency": 5},
+    "B": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 4, "efficiency": 3},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 版有期货/finance_data 链路，取到主力合约 RB2701.SHF、最新价 3153、成交量与持仓量 1486476 手；A 版契约无任何期货站点，只能判 OUT_OF_SCOPE——判定过程规范但零产出。",
+    "notable": "B 版 quote_get_realtime_indicators 对持仓量字段静默丢弃（中文“持仓量”与检索得到的英文 POSITION 都不出现在 headers 且不报错）；general_query_data 返回的期货成交量标注单位为“股”，且与快照口径相差整 100 倍，字段与单位口径需修。"
+  }
+]

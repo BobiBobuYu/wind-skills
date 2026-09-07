@@ -1,0 +1,2726 @@
+[
+ {
+  "id": 1,
+  "question": "请分析宁德时代最新财报：从价格、产品结构、成本费用、非经常性损益和经营现金流几个角度解释收入与利润变化，并指出最需要核验的证据。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 0,
+   "elapsed": 434,
+   "refs": "references/stock/company-research.md,references/financial-docs.md",
+   "servers": [
+    "stock_research",
+    "financial_docs"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_company_finance_analysis",
+    "financial_docs.get_company_announcements",
+    "stock_research.stock_get_company_updates"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 4512,
+   "notes": "1. reportPeriod传入\"H1FY2026,H1FY2025,Q2FY2026,Q2FY2025,FY2025\"共5个报告期，实际返回仅H1FY2026/H1FY2025/FY2025三期，Q2FY2026与Q2FY2025单季度数据未被后端返回（未报错，静默丢弃），单季度拆分（Q2 vs Q1）未能获得，仅能基于半年度累计数分析，属数据缺口。\n2. financial_docs get_company_announcements第一次调用（query含6个关键词）返回0条命中，第二、三次调用改用更短/更具体的query后成功命中同一份半年报文档的不同片段，提示该工具对长查询词较敏感",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 387,
+   "refs": "references/stock.md, references/financial-docs.md",
+   "servers": [
+    "financial_docs",
+    "stock_data"
+   ],
+   "tools": [
+    "financial_docs.get_company_announcements",
+    "stock_data.get_stock_fundamentals"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3637,
+   "notes": "1. 路由：本题属于\"分析公司财报，解释收入利润变化\"，按 SKILL.md 仲裁顺序判断为\"财务原始数据+管理层披露文本\"复合需求，先用 `financial_docs.get_company_announcements` 取最新定期报告全文（含分产品/分地区收入成本毛利率、非经常性损益明细、现金流量表补充资料等结构化表格），再用 `stock_data.get_stock_fundamentals` 做核心指标交叉验证；未使用 `analytics_data`（该工具不适用于单一标的财报解读）。\n2. 第2次调用因 query 过长过于具体（叠加多个诉求关键词）返回 0 条结果（`item",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 2,
+  "question": "比较比亚迪与吉利汽车过去三年的盈利质量，重点看收入增长、利润率、经营现金流、应收账款和资本开支，判断谁的增长更可持续。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 12,
+   "calls_ok": 8,
+   "calls_failed": 4,
+   "elapsed": 302,
+   "refs": "references/stock/company-research.md,references/finance.md",
+   "servers": [
+    "stock_research",
+    "finance_data"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_finance_analysis",
+    "finance_data.general_search_indicators",
+    "finance_data.general_get_indicator_data"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2666,
+   "notes": "1. `stock_get_company_finance_analysis` 的 `reportPeriod` 若按 reference 文档示例使用 \"CY\" 前缀（如 `CY2023,CY2024,CY2025` 或单个 `CY2024`）会稳定返回 `backend_error：\"财务摘要未查询到数据\"`（call 1、2），与文档\"2025日历年年报填CY2025\"的示例不一致；改用 \"FY\" 前缀（`FY2023,FY2024,FY2025`）后取数成功（call 4、5），存在契约与线上实际行为不一致，已按错误信息尝试修正并确认新格式有效，未再重复原格式。\n2. 该工具返回的\"财",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 130,
+   "refs": "SKILL.md, references/stock.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3001,
+   "notes": "1. 吉利汽车（0175.HK）应收账款数据三次尝试不同措辞（\"应收账款\"、\"贸易应收款项/应收票据及应收账款\"、\"贸易及其他应收款项\"）均未取到数值，Wind 后端返回 null 或\"没找到数据\"，判断为该 HK 标的在此接口下该字段暂无覆盖，非参数错误。因此最终回答中吉利汽车应收账款维度缺失，五维度对比中有一维不完整，故状态判为 DONE_WITH_LIMITS 而非 DONE。\n2. 吉利汽车资本开支字段在第一次综合查询（call 1对应问题内直接用\"购建固定资产无形资产和其他长期资产支付的现金\"这一 A 股科目名）返回 null，第二次改用更通用的\"资本开支\"措辞后（call 3）成功",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 3,
+  "question": "围绕小米集团最新业绩公告与回购公告，分析这两个事件分别改变了哪些基本面预期、估值因素和市场预期，并区分短期催化与中期影响。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 10,
+   "calls_failed": 1,
+   "elapsed": 434,
+   "refs": "references/financial-docs.md, references/stock/company-research.md",
+   "servers": [
+    "stock_research",
+    "financial_docs"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_updates",
+    "financial_docs.get_company_announcements",
+    "stock_research.stock_get_company_earnings_estimate",
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_company_finance_analysis",
+    "financial_docs.get_financial_news"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 4017,
+   "notes": "1. 实体解析问题：调用7对 stock_get_company_earnings_estimate 传入 windCode=\"小米集团\"（中文名）时，后端错误解析为完全无关的实体 A18028.SH（返回2017年数据、净利润同比-8021%等明显异常值），未按预期匹配到1810.HK。已按契约要求（\"名称解析到其它实体或存在歧义时，不得用该结果作答\"）弃用该结果，改用显式 Wind 代码\"1810.HK\"重新调用（调用8）后取得正确数据。stock_get_company_updates（调用1）以中文名\"小米集团\"调用未出现该问题，说明不同工具对中文名实体解析的稳健性不一致，后续同类任务",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 10,
+   "calls_ok": 10,
+   "calls_failed": 0,
+   "elapsed": 456,
+   "refs": "SKILL.md, references/financial-docs.md, references/stock.md, references/stock-indicators.md",
+   "servers": [
+    "financial_docs",
+    "stock_data"
+   ],
+   "tools": [
+    "financial_docs.get_company_announcements",
+    "stock_data.get_stock_price_indicators",
+    "stock_data.get_stock_kline",
+    "stock_data.get_stock_fundamentals",
+    "financial_docs.get_financial_news"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 4187,
+   "notes": "- 路由：公告与新闻走 `financial_docs`（get_company_announcements / get_financial_news），行情与估值走 `stock_data`（get_stock_price_indicators / get_stock_kline / get_stock_fundamentals），未使用 `analytics_data`，符合契约中\"专项工具优先\"的仲裁顺序。\n- 2次回购公告检索（call 3、4）返回0条，未再扩大重试次数，转而通过已获取的业绩公告正文与新闻检索间接还原回购公告的关键要素（采纳日期、上限金额、执行进度），已在正文与数据缺",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 4,
+  "question": "以贵州茅台、宁德时代、比亚迪、恒瑞医药和立讯精密为候选池，筛选连续三年ROE较高、资产负债率不过度扩张、经营现金流改善且最近一年盈利增速回升的公司，并说明筛选逻辑。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 5,
+   "calls_ok": 5,
+   "calls_failed": 0,
+   "elapsed": 133,
+   "refs": "references/stock/company-research.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_finance_analysis"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3240,
+   "notes": "1. `reportPeriod` 参数一次性传入了 \"FY2023,FY2024,FY2025,H1FY2025,H1FY2026\" 五个期次，5次调用（每家公司1次）均一次性返回全部所需数据，未出现契约与线上不一致的情况，未触发 `list-tools`。\n2. \"最近一年盈利增速回升\"的判断以 FY2025 年报归母净利润同比相对 FY2024 的变化为主，并用 H1FY2026 相对 H1FY2025 的同比增速交叉验证近况是否延续；两个口径在贵州茅台、宁德时代、比亚迪上方向一致，在恒瑞医药、立讯精密上年报与中报口径出现背离（已在正文中说明并按更保守的判断处理，即出现背离时不视为\"回升",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 5,
+   "calls_ok": 5,
+   "calls_failed": 0,
+   "elapsed": 133,
+   "refs": "SKILL.md, references/stock.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3200,
+   "notes": "1. 取数使用 `get_stock_fundamentals` 自然语言接口一次性索取 2021-2025 共5个财年末数据，未逐年单独调用，未触及12次调用上限（实际用5次）。\n2. 契约要求\"已指定具体股票时使用对应行情或领域工具\"，本题为已指定的5只具体股票的财务指标查询，故未使用 `search_stocks`（该工具仅用于未指定标的的筛选场景），筛选逻辑由本执行者基于返回的原始指标手工核对四条标准得出，每个数字均对应上表所列某次调用的返回值。\n3. FY2025 年报数据已可查询（截至提问日期2026-09-07），故\"最近一年\"按 FY2025 认定；\"连续三年ROE\"按 FY2",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 5,
+  "question": "比亚迪最新业绩增长但若股价阶段性下跌，请从业绩预期差、估值、管理层指引、汽车行业景气和资金面几个角度解释可能原因。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 168,
+   "refs": "references/stock/company-research.md,references/stock/trading-analysis.md,references/stock/industry-sector.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_finance_analysis",
+    "stock_research.stock_get_company_earnings_estimate",
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_company_updates",
+    "stock_research.stock_get_money_flow_analysis",
+    "stock_research.stock_get_industry_research",
+    "stock_research.stock_get_sector_realtime_analysis"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2342,
+   "notes": "1. 调用1返回结果中，结构化`summary`部分（含期次标签`FY2025`）与同一响应里的\"财务分析\"叙述文本存在数字口径不一致（文本提到\"营业总收入3448.15亿元，同比下降3.15%\"等，与summary的FY2025全年8039.65亿元、+3.46%明显对不上，疑似文本语料对应另一报告期或模板未及时更新）。本回答仅采用有明确期次标注的结构化数字（summary、announcement），未采信该处文本中的具体数字。\n2. 调用7板块实时分析返回的\"板块分析\"文字提及原油、黄金、人民币、工业品价格等宏观内容，与汽车板块本身关联度不高，疑似通用/跨板块模板文案，未采信其结论，仅使",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 222,
+   "refs": "references/stock.md, references/stock-indicators.md, references/financial-docs.md, references/economic.md",
+   "servers": [
+    "stock_data",
+    "financial_docs",
+    "economic_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_price_indicators",
+    "stock_data.get_stock_fundamentals",
+    "financial_docs.get_company_announcements",
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data",
+    "stock_data.get_stock_equity_holders",
+    "financial_docs.get_financial_news"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3166,
+   "notes": "1. 数据冲突：get_stock_price_indicators 返回的\"市净率\"字段为 0.000，与同一时点 get_stock_fundamentals 返回的市净率(LF) 3.2868 倍不一致；判断为价格指标接口该字段异常返回，本回答采用 get_stock_fundamentals 的数值，并在正文中如实提示该冲突，未做进一步重试（避免超出调用上限）。\n2. 净利润同比增速在两次调用中不完全一致：get_stock_fundamentals 的\"最新净利润_同比增长率\"为 -23.0993%，而 get_company_announcements/get_financial_",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 6,
+  "question": "英伟达股价若处于历史高位且市盈率较高，这两件事应该怎么一起理解？请结合增长、估值和风险解释，不要只看股价。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 5,
+   "calls_ok": 5,
+   "calls_failed": 0,
+   "elapsed": 151,
+   "refs": "stock/company-research.md, stock/market-overview.md, stock/trading-analysis.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_technical_analysis",
+    "stock_research.stock_get_company_earnings_estimate",
+    "stock_research.stock_get_company_finance_analysis",
+    "stock_research.stock_get_company_updates"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2703,
+   "notes": "1. `stock_get_company_finance_analysis` 未指定 `reportPeriod` 时默认返回 FY2025（截至2025-01-26财年）的结构化摘要，其\"每股指标\"中的 PeTTM=55.38倍是该报告期口径下的历史静态值，与 `stock_get_company_valuation` 返回的\"当前\"PE(TTM)=28.78倍（口径为2026-09-07实时价格/最新TTM盈利）不是同一时点，本回答统一采用估值工具的实时口径作为\"当前市盈率\"，未把两者直接混算，仅在备注中说明差异，避免误导。\n2. 同一工具返回的\"财务分析\"叙述性文本（语料）引用了截至F",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 99,
+   "refs": "SKILL.md,references/stock.md,references/stock-indicators.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_price_indicators",
+    "stock_data.get_stock_fundamentals",
+    "stock_data.get_risk_metrics"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1698,
+   "notes": "1. 调用1中请求的\"市盈率(预测)\"字段未出现在返回的 columns 中，也未在契约 `references/stock-indicators.md` 的枚举列表之外被拒绝——契约明确列出该字段，但实际响应静默丢弃，未给出错误信封说明原因，属于契约与线上返回不一致的现象，已如实告知用户。\n2. 调用1中\"市净率\"返回 0.000，明显不符合英伟达实际市净率水平（应为正且较大的数值），怀疑该字段对美股/该标的不可用或计算异常，但接口未返回错误码，无法进一步确认，已在回答中标注为数据缺口，未做任何换算或猜测替代。\n3. 调用2中用自然语言问法\"查询...净利润增长率...\"返回该字段为 nul",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 7,
+  "question": "查询贵州茅台最新总市值、PE(TTM)、PB和股息率，并标明数据日期和单位。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 128,
+   "refs": "references/stock/company-research.md, references/finance.md",
+   "servers": [
+    "stock_research",
+    "finance_data"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_valuation",
+    "finance_data.quote_get_realtime_indicators",
+    "finance_data.quote_search_realtime_indicators"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 784,
+   "notes": "1. 路由：估值类结论（PE/PB/股息率）依据 SKILL.md 路由优先级③走 `stock_research.stock_get_company_valuation`（该工具专为\"当前估值...覆盖 PE、PB、PS、PCF、企业倍数及股息率\"设计），但该工具返回体中未包含总市值字段，也未显式返回\"数据日期\"字段；为补齐总市值和明确数据日期，改用路由优先级③后半句\"严格指标代码取数走 finance_data\"，经 `quote_search_realtime_indicators` 确认字段代码后用 `quote_get_realtime_indicators` 一次性取得日期戳。\n2",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 2,
+   "calls_ok": 2,
+   "calls_failed": 0,
+   "elapsed": 48,
+   "refs": "references/stock.md, references/stock-indicators.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_price_indicators"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 455,
+   "notes": "1. 契约 `references/stock-indicators.md` 中\"总市值\"字段区分\"总市值1\"（不含限售股）与\"总市值2\"（含限售股），注明\"用户只说「总市值」时先确认口径\"；本次为无交互的批量评测任务，无法向用户询问，故两口径均取数并在回答中一并列出对比说明，供用户自行判断——本次贵州茅台两口径数值相同（该股票已无限售股）。\n2. 通用\"市净率\"字段首次调用返回 0.000，明显不符合贵州茅台实际估值水平（对比同期总市值与净资产量级），判断为该字段在本标的/本次查询上的数据异常或未覆盖，而非参数错误（未触发 PARAM_VALIDATION_ERROR 等错误码，调用本身成功",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 8,
+  "question": "列出宁德时代过去五个完整财年的营业收入、归母净利润、毛利率和经营现金流。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 4,
+   "calls_ok": 2,
+   "calls_failed": 2,
+   "elapsed": 82,
+   "refs": "references/stock/company-research.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_finance_analysis"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 626,
+   "notes": "前两次调用（Chinese 全称 windCode + CY 前缀多期；以及改用 Wind 代码后的 CY 单期）均返回 `backend_error: 财务摘要未查询到数据`。reference 中示例给出的日期格式为\"2025日历年年报填CY2025\"，但线上实测该报告类型标签需使用 FY 前缀（如 FY2024）才能命中年报数据，与 reference 描述存在出入。第 3 次改用 windCode=300750.SZ、reportPeriod=FY2024 探针成功后，第 4 次一次性传入 FY2021,FY2022,FY2023,FY2024,FY2025 五期，成功一次性取回全部所",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 55,
+   "refs": "SKILL.md,references/stock.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 518,
+   "notes": "一次自然语言查询（`get_stock_fundamentals`）即返回了 2021–2025 五个完整财年的四项指标，未出现路由或参数问题，无需重试或补充调用。唯一需说明的一点：question 参数中带上了公司代码 300750.SZ——该代码是宁德时代广为人知的唯一 A 股代码（与 SKILL.md 示例中\"贵州茅台（600519.SH）\"的写法一致），非凭空猜测；调用一次成功返回，未触发 NER 失败或标的未识别的情形。其余无数据缺口。",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 9,
+  "question": "评估特斯拉管理层指引是否可信：对比过去几次交付量/利润率指引、实际兑现情况、资本开支承诺和经营结果，判断管理层是否存在系统性乐观或保守。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 8,
+   "calls_failed": 1,
+   "elapsed": 528,
+   "refs": "references/stock/company-research.md, references/financial-docs.md, references/economic.md",
+   "servers": [
+    "stock_research",
+    "financial_docs",
+    "edb_data"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_company_finance_analysis",
+    "financial_docs.get_company_announcements",
+    "edb_data.economic_query_indicator_series",
+    "edb_data.economic_search_indicator",
+    "financial_docs.get_financial_news"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 4055,
+   "notes": "- 第2次调用`stock_get_company_finance_analysis`使用契约中\"多期形如Q1FY2025,H1FY2025\"的语法但以\"CY\"前缀传入年度组合（CY2021,CY2022,CY2023,CY2024）时返回`backend_error`（\"财务摘要未查询到数据\"）；改用契约默认值同款的\"FY\"前缀（FY2021,FY2022,FY2023,FY2024）后成功，怀疑该工具对美股（无中国财报\"日历年/财报年\"区分场景）更适配FY前缀，属参数格式修正而非业务口径猜测。\n- `financial_docs`域的公告/新闻检索为语义召回，返回内容多为对表格结构的文字性",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 244,
+   "refs": "references/stock.md, references/financial-docs.md",
+   "servers": [
+    "stock_data",
+    "financial_docs"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals",
+    "financial_docs.get_financial_news",
+    "financial_docs.get_company_announcements"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2281,
+   "notes": "1. 第7次调用（`get_company_announcements` 检索2024年10-K展望段落）返回内容过大，被终端截断并落盘至 `/home/skills/.agents/skills/wind-mcp-skill` 目录之外的临时文件；按隔离规则\"禁止读取该目录之外的任何文件或目录\"，未读取该落盘文件，故未能获得管理层在正式年报中对毛利率/资本开支的原文数字化承诺，只能以财经新闻中转述的管理层电话会发言作为替代依据，这是本次分析的主要数据缺口。\n2. Wind `get_stock_fundamentals` 返回的资本性支出/营业收入列，元数据 `unit` 标注为\"亿元\"但\"",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 10,
+  "question": "帮我快速检查万科A有没有资产负债表恶化的迹象，重点看有息负债、短债压力、应收、存货、商誉和经营现金流。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 147,
+   "refs": "SKILL.md, references/stock/company-research.md, references/finance.md",
+   "servers": [
+    "stock_research",
+    "finance_data"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_finance_analysis",
+    "finance_data.general_query_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3032,
+   "notes": "1. `stock_get_company_finance_analysis` 一次调用即返回利润表/资产负债表/现金流量表摘要、关键比率及一段自动生成的\"财务分析\"语料，但该语料内部与结构化字段存在两处明显数值矛盾：①资产负债率语料称75.49%，而按结构化\"负债合计/资产总计\"计算为77.51%（2026中报）；②经营活动现金流净额语料称42.03亿元，结构化现金流量表字段为4.95亿元（2026中报），相差约8倍。两处矛盾均已在\"最终回答\"中并列披露，未擅自取舍或换算，答复以可直接溯源的结构化字段为主。\n2. 该工具返回的\"资产负债表摘要\"未直接包含应收账款、存货、商誉等明细科目，因此改",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 132,
+   "refs": "references/stock.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2915,
+   "notes": "1. `get_stock_fundamentals` 返回的\"有息负债合计\"字段数值显著大于\"短期借款+一年内到期的非流动负债+长期借款+应付债券\"四项之和（各期缺口约4200亿~1.03万亿元），契约未说明该汇总字段的具体构成公式，本次未做进一步拆解调用，仅在回答中如实标注该口径差异，未把两者混用下结论。\n2. 商誉相关的减值测试明细、销售回款/预收账款（合同负债）等辅助判断\"存货收缩是良性去化还是业务收缩\"的数据本次未取（受限于聚焦本题指定的6项科目，且已用3次调用取得全部所需报告期数据，出于调用预算保守未进一步扩展查询范围）。\n3. 未发现认证、额度、路由或后端错误；3次调用全部一次成",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 11,
+  "question": "贵州茅台若宣布核心产品提价，请分析提价能否真正转化为利润增长，按提价幅度、执行率、销量、成本、渠道议价和竞争格局建立判断框架。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 7,
+   "calls_ok": 6,
+   "calls_failed": 1,
+   "elapsed": 179,
+   "refs": "stock/company-research.md, stock/industry-sector.md, financial-docs.md",
+   "servers": [
+    "stock_research",
+    "financial_docs"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_company_finance_analysis",
+    "stock_research.stock_get_company_updates",
+    "stock_research.stock_get_industry_research",
+    "financial_docs.get_company_announcements",
+    "stock_research.stock_get_company_valuation"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 3413,
+   "notes": "1. `stock_get_company_finance_analysis` 传入多报告期参数（H1FY2026,CY2025,CY2024）时，实际只返回了最新一期H1FY2026的数据，未见明确报错，视为接口对多期参数的实际支持与文档描述有出入，但未影响本次分析可用性，未做二次调用验证。\n2. `stock_get_industry_research` 对\"白酒行业竞争格局\"关键词返回 backend_error（行业研究接口返回为空），按契约规则未更换关键词重试，仅报告一次并转向其它工具补充竞争格局数据。\n3. 竞争格局分析中对五粮液的补充调用（`stock_get_company_p",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 1,
+   "elapsed": 135,
+   "refs": "stock.md, stock-indicators.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_basicinfo",
+    "stock_data.get_stock_fundamentals",
+    "stock_data.get_stock_price_indicators"
+   ],
+   "err_codes": [
+    "ok(字段名警告)"
+   ],
+   "foreign_servers": [],
+   "answer_len": 3414,
+   "notes": "1. 本题为假设性分析框架题（\"若宣布提价\"），Wind stock_data 契约下没有专门覆盖\"提价历史事件\"\"出厂价/批价\"\"实物销量（吨/万瓶）\"的工具或字段，`get_stock_events` 契约明确列出的事件类型（首发/再融资、分红、股本股东、治理监管）不含价格调整类事件，故未调用；本回答已在\"销量\"维度明确标注该数据缺口，未用模型记忆补历史提价具体日期/幅度等事实性内容。\n2. 调用 n5 时按 SKILL.md 示例误用别名字段名 `PE(TTM)`/`PB`，CLI 返回体 message 提示\"无效的行情指标:PE(TTM)\"（非 ok:false 错误信封，仍返回其余",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 12,
+  "question": "比较东方财富、同花顺和指南针，从增长、盈利能力、研发投入、资本开支、业务结构和估值做一页式竞品对比。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 9,
+   "calls_failed": 0,
+   "elapsed": 161,
+   "refs": "SKILL.md,references/stock/company-research.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_finance_analysis",
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_company_profile"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3519,
+   "notes": "1. `stock_get_company_finance_analysis` 返回体中除结构化 JSON 摘要外，还附带一段\"财务分析\"叙述文本(abstract/content)；三家公司的该叙述文本描述的营收、净利润等数字均明显小于同一返回体中结构化 JSON 摘要(summary)的 FY2025 年报数字(例如东方财富叙述文本称\"营业总收入105.05亿元\"，但结构化摘要为160.68亿元)，怀疑该叙述文本对应的是另一报告期(如半年报或此前缓存版本)的分析语料，与当前 FY2025 摘要口径不一致。本次回答仅采用结构化 JSON 摘要(summary)中的数字作答，未采信叙述文本中的",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 136,
+   "refs": "references/stock.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_basicinfo",
+    "stock_data.get_stock_fundamentals"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2416,
+   "notes": "1. **口径异常需重点说明**：调用2返回东方财富\"2025年营业收入\"为35.3227亿元，但\"2025年归母净利润\"高达120.8459亿元，净利率342.12%明显不合理。调用3/4追加查询后确认：东方财富作为证券/期货/公募基金综合金融控股平台，Wind字段\"营业收入\"仅35.32亿元，而\"营业总收入\"（含手续费佣金净收入91.00亿、投资收益26.50亿等）达160.6774亿元，\"利息净收入\"字段本次查询返回null（未取到）。同花顺、指南针的营业收入与净利润量级关系正常（净利率与净利润/营业收入基本吻合），说明窄口径失真仅出现在东方财富这类多牌照金融控股公司上，与非金融/轻资产",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 13,
+  "question": "腾讯控股的卖方盈利预测如果分歧较大，请比较乐观与保守预测背后的核心假设，判断分歧主要来自收入、利润率、资本开支还是估值。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 5,
+   "calls_ok": 5,
+   "calls_failed": 0,
+   "elapsed": 103,
+   "refs": "references/stock/company-research.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_company_earnings_estimate",
+    "stock_research.stock_get_company_updates",
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_company_finance_analysis"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2924,
+   "notes": "1. 一致预测中2027年营收同比+32.52%、2028年营收同比-9.36%的跳变明显异常（大概率是极端个体预测或口径切换导致的均值失真），本回答未采用该\"一致预测\"趋势下结论，改用同一返回中的5家机构最新预测明细逐项比较，已在正文中说明。\n2. `stock_get_company_earnings_estimate`仅返回58家一致评级机构中最新的5家详细预测明细（华创证券、第一上海、华源证券、东方证券、中泰证券），无法覆盖全部58家机构的乐观/保守分布，本回答的\"乐观/保守\"比较仅基于这5家样本，样本量有限。\n3. 华源证券、中泰证券两家未在返回中披露目标价，估值端分歧比较仅用东方证",
+   "parse_error": null
+  },
+  "official": {
+   "status": "OUT_OF_SCOPE",
+   "calls_total": 4,
+   "calls_ok": 3,
+   "calls_failed": 1,
+   "elapsed": 123,
+   "refs": "references/stock.md, references/stock-indicators.md, references/financial-docs.md, references/analytics.md",
+   "servers": [
+    "-",
+    "stock_data",
+    "financial_docs",
+    "analytics_data"
+   ],
+   "tools": [
+    "-.--help",
+    "stock_data.list-tools",
+    "financial_docs.list-tools",
+    "analytics_data.list-tools"
+   ],
+   "err_codes": [
+    "USAGE_ERROR"
+   ],
+   "foreign_servers": [
+    "-"
+   ],
+   "answer_len": 1658,
+   "notes": "- 路由困难：问题所需的\"卖方/分析师盈利预测分歧及其收入、利润率、资本开支、估值分项假设\"是典型的券商研报/一致预期（Wind WEST 类）数据需求，但当前 wind-mcp-skill 的 7 个 server_type 契约中均未暴露此类工具（`financial_docs.get_financial_news` 契约原文明确排除\"券商研报\"）。\n- 为避免臆断契约之外是否存在隐藏工具，额外用 `list-tools` 对 `stock_data`、`financial_docs`、`analytics_data` 三个最相关域做了实跑核验，返回的官方工具清单与 `references",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 14,
+  "question": "分析美的集团最新回购计划是否具有信息含量：结合回购价格区间、回购规模、历史估值、现金储备和注销/激励用途判断。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 5,
+   "calls_failed": 1,
+   "elapsed": 173,
+   "refs": "SKILL.md, references/stock/company-research.md, references/financial-docs.md, references/finance.md",
+   "servers": [
+    "stock_research",
+    "financial_docs",
+    "finance_data"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_updates",
+    "financial_docs.get_company_announcements",
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_company_finance_analysis",
+    "finance_data.quote_get_realtime_indicators"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2487,
+   "notes": "1. `stock_research.stock_get_company_updates`（探针调用）返回 `backend_error: 内部错误`，按契约未重发同一参数，改走 `financial_docs` 公告检索获取回购方案与进展，两次不同 query 的检索结果相互印证（旧方案2025年、新方案2026年），可信度较高。\n2. 路由上优先用 `financial_docs` 取回购公告原文（契约要求公告类优先该 server_type），再用 `stock_research` 取估值与财务，符合 SKILL.md 路由优先级第1、3条。\n3. `finance_data.quote",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 139,
+   "refs": "references/financial-docs.md, references/stock.md, references/stock-indicators.md",
+   "servers": [
+    "financial_docs",
+    "stock_data"
+   ],
+   "tools": [
+    "financial_docs.get_company_announcements",
+    "stock_data.get_stock_fundamentals",
+    "stock_data.get_stock_price_indicators",
+    "stock_data.get_stock_events"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2768,
+   "notes": "1. `get_stock_fundamentals` 返回的\"货币资金\"字段日期标注为 2026-09-07（查询当日），但该字段本质是\"最新报告期\"余额（很可能对应最新已披露的半年报/中报数据），契约未给出具体报告期截止日，故文中统一表述为\"最新报告期货币资金余额\"，未替用户强行推断为某一具体季度末数字。\n2. `get_stock_events` 返回记录中存在一条\"董事会预案(第一次修订)\"、\"定向回购\"、\"股权激励注销\"（2026-07-01）且金额/股数为 null 的记录，与本次主回购方案（集中竞价、65-130亿元）为不同性质的操作（针对未行权/离职员工股权激励股份的小额定向注",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 15,
+  "question": "中国神华股息率较高，为什么仍然不能简单等同于“低风险”？请从盈利可持续性、派息率、负债和煤炭周期性解释。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 5,
+   "calls_failed": 1,
+   "elapsed": 316,
+   "refs": "references/stock/company-research.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_company_finance_analysis",
+    "stock_research.stock_get_company_valuation",
+    "stock_research.stock_get_company_earnings_estimate",
+    "stock_research.stock_get_company_updates"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2354,
+   "notes": "1. 第2次调用（`stock_get_company_finance_analysis` 传入多报告期 `CY2021,CY2022,CY2023,CY2024,CY2025`）返回 `backend_error：\"财务摘要未查询到数据\"`；按规则未重发相同参数，改为省略 `reportPeriod`（使用工具默认值 FY2025）重试成功，因此无法拿到2021-2024年的历史杠杆/盈利趋势明细，只能用FY2025单期数据+主营构成历史表+机构预测数据拼合出趋势判断，属于口径上的限制（历史多期财务趋势数据缺失）。\n2. 未取得中国神华专门的\"股利支付率\"历史序列字段；文中\"派息率74.0%",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 0,
+   "elapsed": 167,
+   "refs": "SKILL.md, references/stock.md, references/economic.md, references/stock-indicators.md",
+   "servers": [
+    "stock_data",
+    "economic_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals",
+    "stock_data.get_stock_events",
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data",
+    "stock_data.get_stock_price_indicators"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1729,
+   "notes": "1. 调用2（`get_stock_events` 分红派息历史）返回了两个子表：第一表（区间现金分红总额/每年累计分红总额/每年税前每股派息/每年股息率）逐年数值有变化，符合预期，已在正文中采用；第二表（每年现金分红总额起始止/每股股利_税前/年度累计分红总额/股息率TTM）中\"每股股利_税前=1.03元\"\"年度累计分红总额=449.0286亿元\"\"分红方案进度=董事会预案\"在2020-2024五行中完全重复不变，与第一表及公开常识不符，怀疑是该子表未正确按年度切片、存在后端聚合异常，本次未采用其数据，仅作为契约与线上不一致的记录。\n2. 调用5中猜测的 `indexes` 字段名 `PE(",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 16,
+  "question": "列出腾讯控股最新披露的主要股东及持股比例，并标明对应报告期或披露日期。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 2,
+   "calls_ok": 2,
+   "calls_failed": 0,
+   "elapsed": 134,
+   "refs": "references/stock/company-research.md,references/company/ownership-governance.md,references/stock/trading-analysis.md,references/finance.md",
+   "servers": [
+    "stock_research"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_money_flow_analysis"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1036,
+   "notes": "1. 路由：本题为\"股票研究结论类\"股东与持股比例查询，按 SKILL.md 路由优先级第3条走 `stock_research`；未使用 `company_data` 的 `company_list_shareholder`（该工具面向工商登记类股权信息，适用主体是\"企业名称/统一社会信用代码\"，腾讯控股为开曼群岛注册的港股上市公司，工商登记股东口径与港交所权益披露口径不一致，为避免误导未调用，以节省调用额度）。\n2. 数据缺口：`stock_get_company_profile` 返回的\"大股东当前及历史明细\"节点本身**没有直接标注该股东名单对应的报告期或公告日期字段**；报告中给出的",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 38,
+   "refs": "references/stock.md",
+   "servers": [
+    "stock_data"
+   ],
+   "tools": [
+    "stock_data.get_stock_equity_holders"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 565,
+   "notes": "- `get_stock_equity_holders` 是自然语言问答式工具，未提供独立的\"披露日期\"字段，只返回\"最新报告期\"（H1 FY2026），因此报告期与披露日期未能完全对应到具体日历日期，已在回答中如实说明。\n- 返回结果中第4–8名股东持股比例均为数值0，第9、10名股东名称与比例为空值，怀疑是接口对小额/未达阈值披露权益的处理方式，未做二次调用验证（受12次调用上限与\"避免同结构重复探测\"的自检要求约束，且首次调用已成功返回结构化数据，未触发错误信封，无需重试）。\n- 未做其他调用，仅用1次CLI调用即获得完整可用数据，未超出12次上限。",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 17,
+  "question": "在易方达蓝筹精选混合、景顺长城新兴成长混合、兴全合润混合、富国天惠精选成长混合和中欧医疗健康混合中，找过去五年表现相对稳定、不是靠最近一年突然爆发、同时最大回撤控制较好的产品，并说明稳定性的判定口径。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 5,
+   "calls_ok": 5,
+   "calls_failed": 0,
+   "elapsed": 235,
+   "refs": "references/fund/discovery-profile.md, references/fund/performance-attribution.md, references/fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3393,
+   "notes": "1. 本 Skill 的 `fund_research` 未提供基金历史净值/收益率序列工具，无法直接取得逐日或逐年历史收益率做严格的年度收益拆分或标准差计算；本次采用\"近1年回报\"在不同 `asOfDate` 下滚动取值的方法近似构造5个年度收益点，属于对契约允许范围内的合理组合使用，已在\"判定口径\"中说明方法论及其局限（各截止日按交易日自动回溯，年度区间为近似值而非严格自然年）。\n2. 2022-09-05 截止日的调用中，易方达蓝筹精选混合（005827.OF）\"近5年\"相关字段（最大回撤、年化波动率）返回\"不适用\"，推测是该基金当时成立不满5年（该基金2018年成立，2022年9月时点",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 5,
+   "calls_ok": 5,
+   "calls_failed": 0,
+   "elapsed": 252,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2836,
+   "notes": "1. 五只基金题面均未指定份额类别（A/C等），`get_fund_performance` 的自然语言解析（NER）自动落到了各基金的 A 类份额代码，本回答未额外核实是否存在业绩差异更大的 C 类份额，如需按 C 类份额核对需另发调用（受 12 次总调用上限约束，本次未做）。\n2. \"近1年\"\"近3年累计\"等滚动区间指标，返回体未给出具体起止日期（仅年度收益率表给出了起止日期），本回答按\"以最新净值日推算\"的常规理解处理，无法进一步核实精确窗口；已在正文注明该口径与自然年口径可能不一致（如易方达蓝筹精选出现自然年为正、近1年滚动为负的情况）。\n3. 五年年度收益率标准差为本执行者基于返回的",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 18,
+  "question": "客户想长期配置沪深300，请比较华泰柏瑞沪深300ETF、华夏沪深300ETF、嘉实沪深300ETF及其联接基金在交易方式、费率、跟踪和适用人群上的差异。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 2,
+   "calls_ok": 2,
+   "calls_failed": 0,
+   "elapsed": 117,
+   "refs": "references/fund/discovery-profile.md,references/fund/performance-attribution.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3971,
+   "notes": "1. 华夏沪深300ETF、嘉实沪深300ETF两只ETF按中文名称检索时，`fund_get_basic_info` 返回的 Wind 代码后缀为\".OF\"（即 510330.OF、159919.OF），但\"基金上市地点/上市日期\"字段已明确显示为交易所上市（上交所/深交所），与市场公开认知的场内代码 510330.SH、159919.SZ 一致；本文严格按 CLI 原样返回代码呈现，未按记忆自行改写为.SH/.SZ后缀，请以 Wind 终端展示为准。\n2. 嘉实联接基金 160706.OF 的\"基金上市地点\"字段返回\"不适用\"，但\"上市日期\"字段返回具体日期(2005-10-17)，且基金",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 109,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info",
+    "fund_data.get_fund_performance",
+    "fund_data.get_fund_holders",
+    "fund_data.get_fund_price_indicators"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3289,
+   "notes": "1. 调用4构造 `get_fund_price_indicators` 的 `indexes` 参数时未先读取 `references/fund-indicators.md`（契约要求\"构造前先读取该文件并逐字复制\"），而是直接沿用常见字段名；调用返回成功且字段与预期一致，未触发参数错误，但流程上属于未完全遵守契约指引，特此说明。\n2. \"赎回费率\"与\"近1年平均跟踪偏离度\"两个字段后端均返回空值/null，非调用失败，已在正文数据缺口部分注明，未用记忆或常识补数。\n3. 联接基金各只均有多类份额（A/C/I/Y），本次仅对A类（或嘉实的LOF-A）取了跟踪误差、规模与持有人结构明细，C/I",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 19,
+  "question": "分析易方达蓝筹精选混合过去两年业绩变化，更可能来自基金经理、行业配置、风格漂移还是选股失效，并给出验证路径。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 10,
+   "calls_ok": 10,
+   "calls_failed": 0,
+   "elapsed": 239,
+   "refs": "fund/discovery-profile.md, fund/performance-attribution.md, fund/allocation-holdings.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_performance",
+    "fund_research.fund_get_selection_timing_analysis",
+    "fund_research.fund_get_style_analysis",
+    "fund_research.fund_get_industry_allocation",
+    "fund_research.fund_get_top_equity_holdings",
+    "fund_research.fund_get_brinson_attribution",
+    "fund_research.fund_get_return_attribution"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3402,
+   "notes": "1. 基金经理共管信息（张坤/何一铖/杨思亮）来自 `fund_get_basic_info` 的\"现任\"字段，不含任职起止时间；受契约范围限制（`references/fund/discovery-profile.md` 未提供经理变更历史工具），无法确认变更是否发生在近两年区间内，已在回答中明确标注为待核实缺口。\n2. Brinson 归因（调用9）只取了 2026-06-30 一个报告期（对应下一季度收益区间），受 12 次调用上限约束未能覆盖近两年全部季度，回答中已注明这是单季快照而非两年累计贡献拆分，并在验证路径中列出补齐方法。\n3. 发现 `fund_get_performance",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 8,
+   "calls_ok": 8,
+   "calls_failed": 0,
+   "elapsed": 249,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info",
+    "fund_data.get_fund_performance",
+    "fund_data.get_fund_holdings",
+    "fund_data.get_fund_holders"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3516,
+   "notes": "- 调用3（行业配置，问句中包含\"Wind一级行业分类\"等较具体字段组合）返回\"没找到数据\"，简化措辞后（调用4）取数成功，说明该自然语言工具对过度具体化的字段短语较敏感。\n- 调用5中\"前十大重仓股名称及占净值比例\"字段跨8个报告期查询时只返回\"腾讯控股\"一只且市值恒定为11.6862亿元，未能取得完整前十大持仓名单及逐期变化明细，判断为该问法下的数据返回局限，已在验证路径第1条给出改为单期查询的建议。\n- 调用6中\"基金换手率\"字段在8个报告期返回同一数值28.9825%，怀疑该字段口径为年度/最新值而非按报告期滚动的序列；\"组合估值水平(PE、PB)\"本次未返回任何数据，两次相关请求（调",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 20,
+  "question": "分析华泰柏瑞沪深300ETF过去半年规模变化，区分是份额净申购、净值上涨还是两者共同造成，并判断资金流是否持续。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 9,
+   "calls_failed": 0,
+   "elapsed": 265,
+   "refs": "fund/size-financials.md, fund/discovery-profile.md, fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_size",
+    "fund_research.fund_get_nav"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1471,
+   "notes": "1. `fund_get_size` 的\"基金份额份数合计\"字段实测不随 `asOfDate` 变化（工具文档说明该参数仅作用于 `f_info_fundscale_cc`、`f_netasset_total2`），四次不同日期查询该字段均返回同一最新值 1,891,488.769 万份，无法直接取得历史份额序列。为此改用\"规模合计÷单位净值\"反推各时点份额，属基于返回数据的估算而非直接取数，已在正文注明；估算份额尾数呈稳定整百结构，与 ETF 份额通常为 100 份整数倍的特征吻合，可信度较高，但仍非精确历史份额值。\n2. `fund_get_size` 返回的\"基金子份额规模(公告披露)\"",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 162,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_holders",
+    "fund_data.get_fund_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1767,
+   "notes": "1. `get_fund_holders` 第一次调用（半年区间）返回体的\"基金份额\"列虽标注单位为\"份\"，但数值量级（如4,476,558.77）明显是\"万份\"口径（乘以10,000后与第二次调用返回的绝对\"份\"数量级一致，如2026-07-24前后两次调用可交叉核对）。这是契约标注与实际返回量级不一致的情况；按 SKILL 规则\"元数据未给出时保留原值、不得自行换算\"，但此处元数据本身存在歧义，我通过与第二次调用（同一区间衔接处）的绝对值交叉核验后，采用\"×10,000\"换算展示，并在此明确说明推断依据，供复核。\n2. `get_fund_holders` 首次查询半年区间时被截断为100",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 21,
+  "question": "比较易方达沪深300ETF联接基金A类与C类份额：按持有3个月、1年和3年三个期限比较费用结构，不要简单说哪一类一定更便宜。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 323,
+   "refs": "references/fund/discovery-profile.md, references/fund/size-financials.md, references/fund/nav-trading.md, references/fund/performance-attribution.md, references/fund/allocation-holdings.md, references/fund/screener.md, references/financial-docs.md",
+   "servers": [
+    "fund_research",
+    "financial_docs"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "financial_docs.get_company_announcements"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1992,
+   "notes": "1. fund_research 契约中未提供按持有期限拆分的\"赎回费率阶梯\"结构化字段，只能取得\"最高赎回费率\"这一单一数值。为补充阶梯信息，尝试了5次 financial_docs 全文检索（call2/3/4/6/7），其中1次（call5）命中完全无关的可转债赎回公告（华亚转债等），其余命中了本基金及同类基金的招募说明书片段，确认了本基金赎回费按\"0-6天/7天及以上\"两档设置、且该结构对A/C相同，但始终未取得\"7天及以上\"档的具体百分比数值。由于该值对本基金未直接核实到，最终回答中未断言具体数字（未借用检索中出现的其他基金——如\"银华标普港股通低波红利ETF联接\"——的4档费率表数",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 146,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2230,
+   "notes": "- `get_fund_info` 的 \"赎回费率_支持历史\"/\"最新赎回费率\"/\"原始赎回费率\" 三种字段命名均返回空字符串，判断为 Wind 当前数据源对这两只基金没有记录赎回费分档明细，而非查询措辞问题（已用三种不同自然语言问法验证一致为空）。\n- 未获取赎回费数据的情况下，费用结构对比仅覆盖申购费（A类）与销售服务费（C类）两项差异成本，已在正文中明确提示此局限；未使用模型记忆补全该缺口的具体数值。\n- 未切换到 `financial_docs`（招股书/公告）域去尝试补取赎回费文本，原因：该工具契约描述为\"上市公司公告\"检索，主要面向股票发行人，且 SKILL.md 的路由仲裁规则未",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 22,
+  "question": "查询易方达蓝筹精选混合最新单位净值、累计净值和净值日期。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 42,
+   "refs": "references/fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_nav"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 378,
+   "notes": "1. 用户问题中的\"累计净值\"与本次返回的\"复权单位净值\"并非同一字段（Wind 体系中\"累计单位净值\"通常为单独字段 f_nav_accumulated，\"复权单位净值\"为另一套复权计算口径），`fund_get_nav` 的默认返回集里没有出现累计单位净值字段，且该工具无 `includeFields` 参数可显式请求该字段，故本次无法取得\"累计净值\"的确切数值，只能提供单位净值与复权单位净值作为参考，需在答复中明确区分并声明缺口。\n2. 基金名称匹配：CLI 直接接受基金名称作为 `windCodes` 元素，返回的基金简称\"易方达蓝筹精选\"（代码 005827.OF）与用户所问\"易方达",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 23,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 109,
+   "notes": "无。单位净值与累计净值数值相同，为接口原样返回，未做任何换算或修正。",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 23,
+  "question": "列出易方达蓝筹精选混合最新披露的前十大重仓股、持仓比例和报告期。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 22,
+   "refs": "references/fund/allocation-holdings.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_top_equity_holdings"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 548,
+   "notes": "无",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 27,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_holdings"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 819,
+   "notes": "无。首次调用即成功命中数据，未做参数猜测或路由调整；返回的报告期字段原文为\"Q2 FY2026\"，按公历对应为2026年二季度（截至2026年6月30日）的定期报告披露持仓。",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 24,
+  "question": "易方达蓝筹精选混合如果发生基金经理调整，请比较新旧基金经理历史风格、任职产品、回撤控制和调整前后的持仓变化，形成风险提示。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 12,
+   "calls_ok": 12,
+   "calls_failed": 0,
+   "elapsed": 307,
+   "refs": "fund/discovery-profile.md, fund/performance-attribution.md, fund/allocation-holdings.md, fund/screener.md, fund/size-financials.md, fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_performance",
+    "fund_research.fund_get_style_analysis",
+    "fund_research.fund_get_top_equity_holdings",
+    "fund_research.fund_screener"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3968,
+   "notes": "1. 本题为假设性问题（\"如果发生基金经理调整\"），查询时点未发现任何实际的经理变更公告或候选接任人信息；fund_research 各工具契约中也没有可用字段返回基金经理任职起止日期或候选接任人，故\"新旧基金经理\"对比无法落到具体的\"新任经理\"身份，只能以现任三位共管人（张坤、何一铖、杨思亮）各自的历史风格/任职产品/回撤控制数据搭建风险提示框架，并在正文中反复明确该边界，避免把假设当成已发生事实。\n2. \"调整前后持仓变化\"部分用2025-06-30与2026-06-30两期十大重仓数据做了替代性的\"过去一年持仓演变\"对比，并非某次具体经理变更前后的严格对照（因为该期间管理架构未变，一直是",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 11,
+   "calls_failed": 0,
+   "elapsed": 280,
+   "refs": "references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info",
+    "fund_data.search_funds",
+    "fund_data.get_fund_performance",
+    "fund_data.get_fund_holdings",
+    "fund_data.get_fund_holders"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3773,
+   "notes": "1. `search_funds` 对\"何一铖\"的两次自然语言措辞（\"基金经理为何一铖的基金产品……\"、\"基金经理为何一铖，列出……\"）均返回\"没找到数据\"，改用更口语化的\"何一铖管理的基金产品，基金代码、简称、任职日期\"后第三次才命中，命中/未命中的边界不明确，契约未说明该工具对措辞的敏感度，记为路由摩擦。\n2. 第9次调用尝试用\"精确起始日期+多窗口组合\"（区间收益率/最大回撤/年化波动率+近1年两项）一次性获取\"经理任期专项业绩\"，返回\"没找到数据\"；`get_fund_performance` 契约未明确该工具是否支持自定义任意起止日期的区间指标，本次未能获得真正意义上\"新任基金经理个",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 25,
+  "question": "查询广发纳斯达克100ETF当前场内价格、最新NAV/IOPV和折溢价率，并标明时间。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 115,
+   "refs": "references/fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_listed_historical_price",
+    "fund_research.fund_get_nav"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 522,
+   "notes": "1. 未传 `windCodes` 精确代码时先用中文全称\"广发纳斯达克100ETF\"探测，命中 Wind 代码 159941.OF（场内简称\"纳指ETF广发\"），后续调用改用该代码，未出现实体歧义。\n2. `fund_get_listed_historical_price` 不传 `tradeDate` 时默认取当日（2026-09-07）数据，但该日的\"净流入额\"\"融资融券余额\"两个字段尚未公布（返回为空），已用第3次调用（显式传09-04）核实这是数据发布时滞而非取数错误，第4次调用显式传09-07确认与默认结果完全一致，从而锁定\"当前场内价格/IOPV/折溢价率\"的实际口径日期为202",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 146,
+   "refs": "SKILL.md, references/fund.md, references/fund-indicators.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_price_indicators",
+    "fund_data.get_fund_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 650,
+   "notes": "1. 首次用 `get_fund_price_indicators` 的 `indexes` 中加入\"贴水率\"字段（契约 `references/fund-indicators.md` 中列出的官方字段名），实际返回列表中该字段被静默省略（既未出现在 columns 中，也未在错误信封中说明原因），单独只请求\"贴水率\"字段复现同样现象，判断该字段对本基金（159941.OF）在此接口下不可用或未适配，遂改走 `get_fund_performance` 自然语言工具获取，该工具契约明确覆盖\"折溢价率、IOPV\"等 ETF/LOF 专项指标。\n2. `get_fund_performance` ",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 26,
+  "question": "比较华泰柏瑞沪深300ETF、华夏沪深300ETF和嘉实沪深300ETF，从管理费、托管费、成交活跃度、跟踪误差和规模稳定性判断各自优势。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 183,
+   "refs": "fund/discovery-profile.md, fund/nav-trading.md, fund/performance-attribution.md, fund/size-financials.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_performance",
+    "fund_research.fund_get_size",
+    "fund_research.fund_get_listed_historical_price"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1982,
+   "notes": "1. `fund_get_size` 返回字段中，\"基金份额份数合计\"、\"基金规模合计(报告期)\"、\"基金规模变动\"三列在三次不同 `asOfDate`（当前、2025-09-05、2024-09-05）查询中数值完全相同，未随 `asOfDate` 变化；这与 `references/fund/size-financials.md` 中\"asOfDate 作用于 f_info_fundscale_cc、f_netasset_total2\"的说明一致——只有\"基金子份额规模(公告披露)\"和\"基金规模合计\"两列会随 asOfDate 变化，因此规模稳定性对比只使用了这两列中的\"基金规模合计\"，未",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 10,
+   "calls_ok": 7,
+   "calls_failed": 3,
+   "elapsed": 264,
+   "refs": "SKILL.md, references/fund.md, references/fund-indicators.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info",
+    "fund_data.get_fund_price_indicators",
+    "fund_data.get_fund_performance",
+    "fund_data.get_fund_holders",
+    "fund_data.get_fund_kline"
+   ],
+   "err_codes": [
+    "partial",
+    "no_data"
+   ],
+   "foreign_servers": [],
+   "answer_len": 1475,
+   "notes": "1. 第2次调用（`get_fund_price_indicators` 用中文名传参）出现 NER 错配：`华夏沪深300ETF`被解析为联接类代码 `510330.OF`、`嘉实沪深300ETF`被解析为 `159919.OF`，二者成交量/成交额均返回 null；改用显式交易所代码 `510330.SH`/`159919.SZ`（第3次调用）后取得完整数据，最终答案采用第3次调用结果。\n2. 第4次调用中 `get_fund_performance` 返回的\"最新跟踪误差\"字段全部为 null（非报错，属\"跟踪误差\"这一自然语言指标未命中有效数值），改为明确指定\"近一年年化跟踪误差\"并给",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 27,
+  "question": "为什么广发纳斯达克100ETF这类跨境ETF可能出现较高场内溢价？请结合QDII额度、海外休市、汇率和申赎机制解释。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 66,
+   "refs": "references/fund/discovery-profile.md, references/fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_purchase_redemption_status",
+    "fund_research.fund_get_listed_historical_price",
+    "fund_research.fund_get_nav"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1750,
+   "notes": "本题为解释性/机制分析题，四次调用均成功且互相印证（申赎暂停状态 + IOPV溢折率 + 收盘价与单位净值交叉核算），已覆盖\"QDII额度、申赎机制\"两个维度的可验证数据；\"海外休市\"和\"汇率\"两个维度按 Skill 边界说明为机制性解释，未额外调用 edb_data 查询具体汇率数值（避免超出问题所需范围、且不影响结论的可验证性），如需汇率具体数值可另行按 edb_data 补充调用。未使用 list-tools，contract 与线上一致，未发现契约与实测不一致的情况。",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 1,
+   "elapsed": 181,
+   "refs": "fund.md, economic.md",
+   "servers": [
+    "fund_data",
+    "economic_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info",
+    "fund_data.get_fund_performance",
+    "fund_data.get_fund_holders",
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [
+    "ok(空序列)"
+   ],
+   "foreign_servers": [],
+   "answer_len": 1819,
+   "notes": "1. 第5次调用（`query_economic_indicator_data` 用 `observation:\"10\"`）返回结构完整但 `date`/`value` 为空数组，怀疑该指标发布频率虽标注\"日\"但实际为月度低频更新、近端未落到默认观测窗口；改用显式 `beginDate`/`endDate` 后（第6次）才取到两个月末观测点，判断为口径/参数适配问题而非后端故障，未继续重试。\n2. M0085772\"中国:QDII:投资额度\"是全市场/全行业汇总口径的QDII总额度，Wind 未提供广发基金公司或159941.SZ产品专属的QDII额度使用数据（未检索到对应指标），因此该数据仅",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 28,
+  "question": "比较兴全安泰平衡养老三年持有混合FOF、华夏养老2045三年持有混合FOF和南方养老2035三年持有混合FOF的底层基金与资产配置，找出重合度、权益暴露和潜在重复收费问题。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 12,
+   "calls_ok": 6,
+   "calls_failed": 6,
+   "elapsed": 390,
+   "refs": "fund/discovery-profile.md, fund/allocation-holdings.md, fund/screener.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_screener",
+    "fund_research.fund_get_asset_allocation",
+    "fund_research.fund_get_top_fund_holdings"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 4189,
+   "notes": "1. **兴全安泰平衡养老三年持有混合FOF 路由失败**：先后尝试了原始名称、加\"(FOF)\"括号格式、加\"持有期\"、加\"目标\"字样、去掉\"平衡\"共5种名称组合，`fund_get_basic_info` 均返回 `backend_error：未识别到有效的金融标的`；`fund_screener` 自然语言检索工具本身两次返回\"服务暂时不可用，请稍后重试\"，判断为该工具当时的系统性故障（非参数问题），未再重试第三次以节省调用预算。由于 CLI 调用总数已达12次上限，未能继续尝试更多名称变体或换用其他路径（如先用 `fund_get_similar_funds` 从已知的华夏/南方养老FO",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 12,
+   "calls_ok": 12,
+   "calls_failed": 0,
+   "elapsed": 427,
+   "refs": "SKILL.md, references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_holdings",
+    "fund_data.get_fund_info",
+    "fund_data.search_funds",
+    "fund_data.get_fund_financials"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 4610,
+   "notes": "1. 路由与实体识别耗费较多调用：用户给出的\"兴全安泰平衡养老三年持有混合FOF\"（省略了官方全称中的\"目标\"二字）连续4次（含2次`get_fund_holdings`直接查询、1次`get_fund_info`、1次`search_funds`）返回\"没找到数据\"，直到改用\"基金管理人为兴证全球基金管理有限公司+关键词\"的方式检索才命中（006580.OF）。同样问法下\"华夏养老2045\"\"南方养老2035\"用接近全称的表述一次即命中，说明该 Skill 的实体解析对\"目标\"等修饰词较敏感，建议契约或路由层补充别名容错。\n2. `get_fund_holdings` 返回的\"重仓基金名称\"",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 29,
+  "question": "分析中国10年期与30年期国债近期收益率曲线变化属于牛平还是牛陡，并从短端政策预期、长端增长通胀预期和国债供给解释。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 7,
+   "calls_failed": 2,
+   "elapsed": 315,
+   "refs": "references/bond.md, references/economic.md, references/finance.md",
+   "servers": [
+    "edb_data",
+    "finance_data"
+   ],
+   "tools": [
+    "edb_data.economic_search_indicator",
+    "edb_data.economic_get_indicator_series",
+    "edb_data.economic_query_indicator_series",
+    "finance_data.general_query_data"
+   ],
+   "err_codes": [
+    "NO_PERMISSION"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2075,
+   "notes": "1. 路由曲折：按 SKILL.md 路由优先级，国债到期收益率曲线本应属于 `edb_data`（宏观/利率类EDB指标），`economic_search_indicator` 成功检索到标准指标代码 S0059749（10年）/S0059752（30年），但正式取数工具 `economic_get_indicator_series` 与探索工具 `economic_query_indicator_series` 均返回\"受限指标已剔除：无权限\"，即该两个具体指标代码本身被后端标记为无权限访问（并非通用认证失败，未见 AUTH_ERROR/RATE_LIMIT_ERROR/backend_",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 11,
+   "calls_failed": 0,
+   "elapsed": 270,
+   "refs": "references/bond.md, references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1722,
+   "notes": "- 路由：本题涉及国债收益率曲线形态判断，属于宏观/利率类 EDB 指标查询，按 SKILL.md 路由规则 3（宏观、行业或汇率 EDB 指标）走 `economic_data`；未使用 `bond_data`（该服务只提供单只债券档案/行情估值/发债主体财务，没有\"10年期/30年期国债到期收益率曲线\"这一口径的工具，故先读了 `references/bond.md` 确认后未采用，改用 `economic_data`）。\n- 国债净发行额指标 `M5639023` 在 2026 年已无数据（updateDate 停留在 2025-12-31），属于后端数据源本身覆盖不足，非参数错误；已如",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 30,
+  "question": "对万科企业股份有限公司做信用风险快检，重点看短期偿债、现金覆盖、销售回款、债务到期分布、担保和再融资能力。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 9,
+   "calls_failed": 0,
+   "elapsed": 442,
+   "refs": "references/stock/company-research.md, references/bond.md, references/company/operating-financing-risk.md, references/financial-docs.md",
+   "servers": [
+    "stock_research",
+    "bond_data",
+    "company_data",
+    "financial_docs"
+   ],
+   "tools": [
+    "stock_research.stock_get_company_profile",
+    "stock_research.stock_get_company_finance_analysis",
+    "bond_data.get_bond_issuer_info",
+    "bond_data.get_bond_basicinfo",
+    "company_data.company_get_default_info",
+    "company_data.company_get_enterprise_score",
+    "company_data.company_get_news_sentiment",
+    "financial_docs.get_company_announcements",
+    "stock_research.stock_get_company_updates"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3546,
+   "notes": "1. 数值口径冲突：调用2（stock_get_company_finance_analysis）中，结构化字段\"现金流量表摘要\"给出H1FY2026经营活动现金净流量为4.95亿元，但同一返回体中的\"财务分析语料\"（叙述性AI生成文本）称\"经营活动现金流净额为42.03亿元，经营活动净现金流/营业总收入仅为6.45%\"，两者对不上（若按4.95/701.69计算约为0.7%）。已按Skill\"数量、单位、量级…一律以返回元数据为准\"的要求，以结构化字段为主，叙述字段仅作定性背景说明并在正文中明确标注差异，未做任何自行换算或强行调和。\n2. 评级时点缺失：bond_data get_bond_",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 9,
+   "calls_failed": 0,
+   "elapsed": 486,
+   "refs": "references/stock.md, references/bond.md, references/financial-docs.md",
+   "servers": [
+    "stock_data",
+    "bond_data",
+    "financial_docs"
+   ],
+   "tools": [
+    "stock_data.get_stock_fundamentals",
+    "stock_data.get_stock_events",
+    "bond_data.get_bond_issuer_info",
+    "bond_data.get_bond_basicinfo",
+    "financial_docs.get_company_announcements"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 4886,
+   "notes": "1. call2（`stock_data.get_stock_events`）在自然语言问题中明确指定了万科(000002.SZ)，但返回结果为全市场其他公司的并购重组/股权变动事件（四环生物、欧伦电气、华光环能等），未见任何与万科相关的记录，判断为工具未按实体正确过滤/路由的线上问题；本次未据此数据得出任何万科专项结论，仅作为契约与线上行为不一致的记录。\n2. call3（`bond_data.get_bond_issuer_info`）返回的\"最新主体信用评级\"字段为 AAA/中诚信国际/稳定，但该字段明显滞后：经 call9（financial_docs 公告检索）交叉核验，境内两家评级",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 31,
+  "question": "比较中国10年期国债与10年期国开债的收益率、流动性、税收和利差，解释什么时候国开债更有吸引力。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 0,
+   "elapsed": 225,
+   "refs": "references/bond.md, references/economic.md",
+   "servers": [
+    "bond_data"
+   ],
+   "tools": [
+    "bond_data.get_bond_market_data",
+    "bond_data.get_bond_basicinfo"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1824,
+   "notes": "1. `bond_data` 的 `get_bond_market_data` 面向具体债券实体（question 需含\"实体+指标+日期\"），没有直接的\"10年期国债/国开债收益率曲线\"聚合指标工具；本次改用当前最活跃的10年期基准新券（26国债10、26国开10）作为代理进行比较，属于合理的路由选择，但严格意义上不完全等同于\"中债国债到期收益率曲线:10年\"这类整体曲线指标，已在回答中说明代理券信息（Wind代码、起息/到期日）供核验。\n2. 税收字段（\"利息处理方式\"）在 `get_bond_basicinfo` 返回中为空，未能取得可核验的税收数据；回答中已将税收部分标注为背景常识、非",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 11,
+   "calls_failed": 0,
+   "elapsed": 307,
+   "refs": "references/bond.md, references/economic.md",
+   "servers": [
+    "economic_data",
+    "bond_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data",
+    "bond_data.get_bond_market_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2365,
+   "notes": "1. 路由：收益率与利差走势判定为宏观/利率曲线类指标，按 SKILL.md 路由表第3条走 `economic_data`（`search_economic_indicator` 找代码 + `query_economic_indicator_data` 取时间序列）；活跃券交叉验证与流动性尝试走 `bond_data.get_bond_market_data`，均严格按各自 references 契约传参（`question` 自然语言，`economic_data` 补 `beginDate`/`endDate`）。\n2. 契约与线上表现的差距：`bond_data.get_bond_m",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 32,
+  "question": "如果未来中国利率进入温和下行阶段，请比较中国2年期、10年期和30年期国债的收益与回撤特征，并给出久期情景分析框架。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 8,
+   "calls_failed": 3,
+   "elapsed": 366,
+   "refs": "references/bond.md, references/economic.md, references/index.md, references/finance.md",
+   "servers": [
+    "edb_data",
+    "bond_data",
+    "index_data"
+   ],
+   "tools": [
+    "edb_data.economic_search_indicator",
+    "edb_data.economic_get_indicator_series",
+    "edb_data.economic_query_indicator_series",
+    "bond_data.get_bond_market_data",
+    "index_data.get_index_kline"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2812,
+   "notes": "1. 权限限制：edb_data 的 `economic_get_indicator_series` 对 S0059745/S0059749/S0059752（中债国债到期收益率2年/10年/30年）返回\"受限指标已剔除：无权限\"，无法取得完整历史收益率序列；改用 `economic_query_indicator_series` 探索性查询也在补齐必填的日期参数后遇到 `backend_error`（\"服务暂时不可用，请稍后重试\"），按规则未重复原样调用。\n2. 30年/超长端历史财富指数两次尝试（\"中债-10年以上国债财富(总值)指数\"、\"中债-10年以上国债指数\"）均返回 `backen",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 10,
+   "calls_failed": 1,
+   "elapsed": 335,
+   "refs": "references/bond.md, references/economic.md",
+   "servers": [
+    "economic_data",
+    "bond_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data",
+    "bond_data.get_bond_market_data"
+   ],
+   "err_codes": [
+    "no_permission"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2919,
+   "notes": "1. 契约指定的中债估值中心\"国债到期收益率\"系列（S0059745/S0059749/S0059752）在本环境下无权限，返回\"受限指标已剔除\"而非标准错误信封，已改用中国货币网口径的等效指标(M0048267/M0325687/M0048274)替代，两口径数值可能有细微差异，未做交叉核对。\n2. 契约中未提供\"2年期/30年期国债总回报指数\"这类精确对应标的的现成指标，第三节使用了中证/中债按期限档编制的价格指数(1-3年档、10年单券档、30年档)作为对应期限的收益/回撤特征代理，与2/10/30年\"点\"上收益率并非完全同一标的，已在正文注明。\n3. 久期情景分析框架(第四节)中的价格",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 33,
+  "question": "以招商产业债券基金为例，解释债券基金为什么也会亏钱，并用利率、信用、久期和流动性四个因素说明。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 0,
+   "elapsed": 162,
+   "refs": "references/fund/discovery-profile.md, references/fund/performance-attribution.md, references/fund/allocation-holdings.md, references/fund/nav-trading.md",
+   "servers": [
+    "fund_research"
+   ],
+   "tools": [
+    "fund_research.fund_get_basic_info",
+    "fund_research.fund_get_performance",
+    "fund_research.fund_get_asset_allocation",
+    "fund_research.fund_get_bond_type_allocation",
+    "fund_research.fund_get_bond_holdings",
+    "fund_research.fund_get_purchase_redemption_status"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2237,
+   "notes": "1. 用户问题中的\"招商产业债券基金\"经fund_get_basic_info解析为217022.OF\"招商产业A\"（该基金全称含\"招商产业债券\"字样，分类为\"混合债券型一级基金\"），本报告即以此为标的作答；未额外核实是否存在B/C等其他份额类别，因未在预算内做进一步检索。\n2. fund_get_asset_allocation、fund_get_bond_type_allocation、fund_get_bond_holdings三次调用均传入reportDate=\"2026-09-07\"（当日），工具按契约回溯到最近已披露报告期2026-06-30(2026Q2)返回，属正常回退行为，非",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 220,
+   "refs": "SKILL.md, references/fund.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_info",
+    "fund_data.get_fund_performance",
+    "fund_data.get_fund_holdings",
+    "fund_data.get_fund_holders"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1758,
+   "notes": "1. 该基金有A/C两类份额（217022.OF、001868.OF），本次分析以历史更长的A类217022.OF为代表，未逐一取C类数据，属主动取舍，已在正文说明。\n2. call#3中\"最新利率债市值占净值比\"与\"最新信用债市值占净值比\"返回同一数值100.4501%，怀疑是自然语言工具在字段归并上的口径重叠或标签错配问题，未强行解读为\"该基金100%既是利率债又是信用债\"，正文仅引用为\"债券持仓（含杠杆）占比\"这一事实，未做进一步拆分断言。\n3. call#3中\"最新按信用评级的债券投资市值占基金资产净值比\"=56.0193%未标注对应哪一档评级，无法确认是AAA还是其他档位，正文未使用",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 34,
+  "question": "查询中国10年期国债最新到期收益率，并标明交易日。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 77,
+   "refs": "references/economic.md",
+   "servers": [
+    "edb_data"
+   ],
+   "tools": [
+    "edb_data.economic_search_indicator",
+    "edb_data.economic_get_indicator_series"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 270,
+   "notes": "1. `economic_get_indicator_series` 单独传 `numOfObservation:1` 时只返回了 `meta` 字段，没有返回 `date`/`value` 序列（疑似该参数在当前后端未生效或存在契约与线上不一致），因此改用显式 `startDate`/`endDate` 区间重新取数，成功拿到包含最新值的序列，未违反\"同一 server_type+tool_name+参数不得原样重发\"的规则（第二次调用参数已变化）。\n2. 该指标来源为\"中证指数公司\"，而非部分场景下常见的\"中债\"（中央结算公司）口径；这是 `economic_search_indicato",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 65,
+   "refs": "references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 341,
+   "notes": "第2次调用用 `observation:\"1\"` 取\"近1期\"时，后端只返回了指标 meta 信息，未返回 date/value 时间序列（空结果，非报错），与契约描述的\"近N期\"预期不符，判断为后端对该指标在 observation 模式下的返回不完整；随后改用 `beginDate`/`endDate` 区间（同一 server_type/tool_name，未更换路由）成功取到含日期的序列，从中读出最新交易日为 20260904。未见 updateDate（20260904）之后更晚的交易日数据，说明 Wind 该指标截至调用时点的最新更新即为 2026-09-04。",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 35,
+  "question": "列出中国国债1年、3年、5年、10年和30年期最新收益率。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 11,
+   "calls_failed": 0,
+   "elapsed": 218,
+   "refs": "bond.md, economic.md",
+   "servers": [
+    "edb_data"
+   ],
+   "tools": [
+    "edb_data.economic_search_indicator",
+    "edb_data.economic_get_indicator_series"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 862,
+   "notes": "- 路由：`bond_data` 下的债券工具（`get_bond_market_data` 等）均要求指定具体债券实体（如\"国债2601\"），不支持按期限的国债收益率曲线查询，故未使用；改走 `edb_data` 宏观指标链路，符合契约中\"专业财务、估值和宏观指标\"及收益率曲线属于宏观/评级机构公布口径的定位。\n- 最权威、覆盖全部5个期限的单一口径\"中债国债到期收益率\"（中债估值中心，S0059744/S0059746/S0059747/S0059749/S0059752）在 `economic_get_indicator_series` 上返回\"受限指标已剔除：无权限\"，判定为当前账号无",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 10,
+   "calls_ok": 10,
+   "calls_failed": 0,
+   "elapsed": 238,
+   "refs": "references/bond.md, references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 667,
+   "notes": "1. 路由：本题为\"国债收益率曲线\"这类利率类 EDB 指标查询，未指定具体某支国债券，因此按 SKILL.md 路由裁决第3条走 `economic_data`（而非 `bond_data`——`bond_data` 的三个工具均要求指定具体债券实体如\"国债2601\"，不适用于查询整条期限结构曲线），已读 `references/bond.md` 确认后排除。\n2. 首选的\"中债国债到期收益率\"口径（中债估值中心，S0059744/746/747/749/752）在 `search_economic_indicator` 中可检索到元信息，但 `query_economic_indicato",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 36,
+  "question": "分析房地产行业信用利差过去一个月若明显走阔，判断是无风险利率、行业基本面、万科等发行人信用事件还是流动性造成，并给出验证指标。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 12,
+   "calls_ok": 8,
+   "calls_failed": 4,
+   "elapsed": 342,
+   "refs": "references/bond.md, references/economic.md, references/financial-docs.md",
+   "servers": [
+    "edb_data",
+    "bond_data",
+    "financial_docs"
+   ],
+   "tools": [
+    "edb_data.economic_query_indicator_series",
+    "edb_data.economic_search_indicator",
+    "edb_data.economic_get_indicator_series",
+    "bond_data.get_bond_issuer_info",
+    "financial_docs.get_financial_news",
+    "bond_data.get_bond_market_data"
+   ],
+   "err_codes": [
+    "no_permission",
+    "no_results"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2560,
+   "notes": "1. 路由困难：`bond_data` 的四个工具（get_bond_basicinfo/get_bond_issuer_info/get_bond_market_data/get_bond_financial_data）均只接受自然语言 `question`，且契约文档明确\"本服务没有行情快照、K线或Quote工具\"，也没有\"行业信用利差\"这一聚合概念的专项工具；因此行业级信用利差只能走 `edb_data`，但该行业信用利差及各评级/期限收益率曲线指标（12+个代码）在本账号下**全部**返回\"无权限\"，属实际数据缺口，非猜测参数导致。\n2. 契约与线上一致：`economic_searc",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 10,
+   "calls_failed": 1,
+   "elapsed": 259,
+   "refs": "references/bond.md, references/economic.md, references/financial-docs.md",
+   "servers": [
+    "economic_data",
+    "bond_data",
+    "financial_docs"
+   ],
+   "tools": [
+    "economic_data.query_economic_indicator_data",
+    "economic_data.search_economic_indicator",
+    "bond_data.get_bond_issuer_info",
+    "financial_docs.get_financial_news",
+    "bond_data.get_bond_market_data"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2694,
+   "notes": "1. **契约与线上不一致/权限缺口（关键）**：`economic_data` 契约未提示指标存在权限分级，但实测显示凡来源为“中债估值中心”的指标（房地产行业收益率曲线 `M1012855`/`M1012894` 等、国债到期收益率曲线 `S0059746`/`S0059749`）均返回“受限指标已剔除：无权限”（调用4、5），来源为“国家统计局”“中国货币网”的指标（商品房销售面积、DR007）则可正常取数（调用6、9）。据此推断当前账号对“中债估值中心”数据源整体无权限，这直接导致本题最核心的两类数据（无风险利率、行业信用利差）均无法取得，是本次分析最大的数据缺口。\n2. `bond_",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 37,
+  "question": "以南山转债为例，解释一只可转债为什么既会受正股影响又会受债券市场影响，并结合转股价值、纯债价值、转股溢价率和条款说明。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 117,
+   "refs": "references/bond.md",
+   "servers": [
+    "bond_data"
+   ],
+   "tools": [
+    "bond_data.get_bond_basicinfo",
+    "bond_data.get_bond_market_data",
+    "bond_data.get_bond_issuer_info"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2641,
+   "notes": "1. 2013年4月到期前区间（调用2）行情数据全部为 null，无法确认该转债在到期前是否已因强赎或转股而提前摘牌，未能核实具体退出方式，属于数据缺口。\n2. 调用1返回的\"票面利率_当期\"为 0%，只是查询时点单一字段，未取得该转债发行时完整的分级票面利率表，未在正文中作为票息数据使用。\n3. 调用4返回的\"主体评级\"字段为空，未能核实南山铝业的具体信用评级，正文中已如实说明未获得该数据。\n4. 正股（南山铝业 A 股）本身的历史收盘价未单独取数（题目未直接要求，且节省调用次数），转股价值与推算的隐含正股价已通过转股价值/转股价格公式反推并在正文中说明为推算值。",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 8,
+   "calls_ok": 8,
+   "calls_failed": 0,
+   "elapsed": 216,
+   "refs": "SKILL.md,references/bond.md,references/stock.md",
+   "servers": [
+    "bond_data",
+    "stock_data"
+   ],
+   "tools": [
+    "bond_data.get_bond_basicinfo",
+    "bond_data.get_bond_market_data",
+    "bond_data.get_bond_issuer_info",
+    "stock_data.get_stock_kline"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2886,
+   "notes": "1. 南山转债（110002.SH）已于2009-09-24摘牌退市，因此\"最新\"行情类查询（调用2、4）均返回空值/0/null，无法给出当前时点的转股价值、纯债价值、转股溢价率；改为查询该券实际交易期内（2008年上市后不久）的一段区间行情（调用5）才取到有效数据，本回答中的转股价值/纯债价值/转股溢价率/纯债溢价率数字均为2008-06-16至2008-06-20区间历史值，非\"当前\"值，已在正文中明确标注。\n2. 用同一区间的正股（南山铝业）K线（调用7、8）与转债转股价值交叉核对时发现：不复权正股价格与\"转股价值=正股价/转股价格(8.42)×100\"的算术关系量级不完全吻合（推算隐",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 38,
+  "question": "查询万科企业股份有限公司一只当前存续境内公司债的发行规模、票面利率、起息日、到期日、付息频率和主体评级。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 30,
+   "refs": "bond.md",
+   "servers": [
+    "bond_data"
+   ],
+   "tools": [
+    "bond_data.get_bond_basicinfo"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 867,
+   "notes": "问题要求\"一只\"债券，但 Wind 返回该主体名下共 7 只当前存续境内公司债，工具未按\"仅返回一只\"过滤（该工具为自然语言取数，未提供额外筛选债券代码的参数）。为避免遗漏或误选，已选取一只（H3万科01，148380.SZ）作为主答案，并将其余 6 只全部列出供交叉核对，所有数据均来自同一次调用，无需二次调用验证。未做其他猜测或参数修正。",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE",
+   "calls_total": 2,
+   "calls_ok": 2,
+   "calls_failed": 0,
+   "elapsed": 49,
+   "refs": "references/bond.md",
+   "servers": [
+    "bond_data"
+   ],
+   "tools": [
+    "bond_data.get_bond_basicinfo",
+    "bond_data.get_bond_issuer_info"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 389,
+   "notes": "问题要求\"一只\"存续境内公司债，但契约工具 `get_bond_basicinfo` 的自然语言查询未做\"仅返回一只\"的强约束，实际返回了7只同主体境内债券（其中1只已到期不属存续）。执行者基于返回数据自行筛选并选取一只到期日晚于当前日期（2026-09-07）的债券（149358.SZ H1万科02）作为代表作答，其余存续债券（149478.SZ、149931.SZ、149568.SZ、149815.SZ、149976.SZ）的要素未逐一列出，如需可另行查询。主体评级调用中通过在question里附带具体债券代码/简称来锚定同一只债，未见契约层面的问题。",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 39,
+  "question": "判断沪铜期货（CU）近期上涨是现货偏紧还是资金推动，请结合基差、期限结构、上期所库存、仓单和持仓变化分析。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 10,
+   "calls_ok": 10,
+   "calls_failed": 1,
+   "elapsed": 269,
+   "refs": "references/futures.md, references/finance.md",
+   "servers": [
+    "futures_data",
+    "finance_data"
+   ],
+   "tools": [
+    "futures_data.futures_get_basis",
+    "futures_data.futures_get_warehouse_receipt",
+    "futures_data.futures_get_supply_demand",
+    "futures_data.futures_get_fund_flow",
+    "futures_data.futures_get_position_ranking",
+    "futures_data.futures_get_research_opinion",
+    "finance_data.quote_get_realtime_indicators"
+   ],
+   "err_codes": [
+    "ok(数据无效)"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2513,
+   "notes": "1. 调用9（finance_data quote_get_realtime_indicators）参数猜测有误：误用了2025年到期的合约代码（CU2509/2510/2511/2512.SHF为2025年9-12月合约，早已到期）以及错误的指标字段名\"最新价\"（应为\"最新成交价\"），导致该次调用虽未报错但仅返回交易日字段、无有效价格数据。已在调用10中用正确的2026年合约代码（CU2609/2610/2611/2612/2701/2703.SHF）和正确字段名\"最新成交价\"重新取数并取得有效期限结构快照，未重复消耗调用预算之外的额外重试。\n2. \"期限结构\"仅取得2026-09-07当日",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 7,
+   "calls_ok": 7,
+   "calls_failed": 0,
+   "elapsed": 235,
+   "refs": "references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1842,
+   "notes": "1. Skill 的 7 个 server_type 中没有专门的\"期货\"类目；CU 沪铜期货的基差、持仓量、交易所库存均通过 `economic_data`（EDB 宏观/行业指标库）间接检索获得，属于路由裁决第3类\"行业EDB指标\"的扩展应用，非专属期货数据接口，取数覆盖面有限。\n2. \"仓单\"无独立命名指标，检索确认（call 7）后改用\"库存期货:阴极铜\"(S0049493) 作为最接近的代理指标，已在回答中明确标注为代理口径，非官方\"仓单日报\"原始字段。\n3. 分月合约（近月/远月）价格及月间价差在 economic_data 中检索不到（call 5），因此期限结构无法直接构建，只",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 40,
+  "question": "分析螺纹钢期货（RB）近月与远月价差最近的变化，判断是需求预期、库存、交割逻辑还是资金移仓导致。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 10,
+   "calls_ok": 10,
+   "calls_failed": 0,
+   "elapsed": 337,
+   "refs": "futures.md, finance.md",
+   "servers": [
+    "finance_data",
+    "futures_data"
+   ],
+   "tools": [
+    "finance_data.quote_get_realtime_indicators",
+    "finance_data.quote_get_historical_data_series",
+    "futures_data.futures_get_basis",
+    "futures_data.futures_get_warehouse_receipt",
+    "futures_data.futures_get_fund_flow",
+    "futures_data.futures_get_research_opinion",
+    "futures_data.futures_get_supply_demand"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2796,
+   "notes": "1. `quote_get_historical_data_series` 在 `rangeflag=0` 配合 `count=20`（不传 `startDate/endDate`）时返回了 2009 年的历史K线数据而非最近20根，与 reference 中\"rangeflag=0取最近count条\"的说明不一致；改用 `rangeflag=2` + 显式 `startDate/endDate` 后取数正常，已在调用日志中标注该异常，未重复计入失败调用（无结构化错误码，属于口径落差）。\n2. 计算所用近/远月合约（RB2610.SHF、RB2701.SHF）为通过实时行情探针（调用1）基于成",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 10,
+   "calls_ok": 10,
+   "calls_failed": 0,
+   "elapsed": 299,
+   "refs": "references/economic.md, references/financial-docs.md, references/index.md",
+   "servers": [
+    "economic_data",
+    "financial_docs"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data",
+    "financial_docs.get_financial_news"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2501,
+   "notes": "1. 路由困难：本 Skill 的 7 个 server_type（stock_data/fund_data/index_data/bond_data/financial_docs/economic_data/analytics_data）均未提供专门的\"期货合约\"或\"近月/远月价差\"契约；`references/index.md` 明确限定为指数与板块，不含商品期货合约。四次 EDB 检索（调用1/3/4）确认 economic_data 只能提供\"活跃合约\"连续价、基差、库存等宏观行业口径指标，没有可直接调用的近月-远月价差时间序列。\n2. 因此本题的核心数值（RB10-1价差具体点位）只",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 41,
+  "question": "公司三个月后需要采购铜，计划使用上海期货交易所沪铜期货（CU）套保，请设计买入套保的分析流程，说明合约选择、期限匹配和基差风险。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 6,
+   "calls_ok": 6,
+   "calls_failed": 0,
+   "elapsed": 91,
+   "refs": "futures.md",
+   "servers": [
+    "futures_data"
+   ],
+   "tools": [
+    "futures_data.futures_get_contract_spec",
+    "futures_data.futures_get_basis",
+    "futures_data.futures_get_position_ranking",
+    "futures_data.futures_get_research_opinion",
+    "futures_data.futures_get_supply_demand"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3337,
+   "notes": "1. 未单独查询 CU2612（远月合约）本身的持仓/成交量数据，\"流动性充足\"的结论基于品种/主力口径的持仓排名（调用4），对具体远月合约的流动性判断为推断，已在正文中明确说明。\n2. `futures_get_basis` 仅取了当前快照（未传 startDate/endDate），因此只有基差当前值和历史分位数，没有取得基差近期走势的完整时间序列；分析中\"基差收敛/走扩\"为基于分位数的统计判断，不构成价格预测。\n3. `futures_get_supply_demand` 返回条目较多（含多项供需分类指标及历史序列），受输出长度限制未逐条展开，仅摘录了矿山铜产能利用率等代表性指标；如需完",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 169,
+   "refs": "references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3183,
+   "notes": "1. **路由说明**：SKILL.md 的 7 个 `server_type` 契约中没有专门的期货/衍生品行情域（对 `references/` 下全部6份契约文件全文检索\"期货\"\"商品\"\"基差\"\"CU.\"均无命中），SKILL.md 主描述文字中虽提到\"衍生品\"覆盖，但契约层面未落地对应工具。经判断本题属于\"宏观、行业...EDB 指标\"范畴内可覆盖的部分（SHFE 铜期货结算价、现货铜价格均可作为行业商品价格类 EDB 指标检索到），因此按 SKILL.md 路由规则第3条改走 `economic_data`，而非直接判 `OUT_OF_SCOPE`；但该域仅能取得\"活跃合约\"结算价这",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 42,
+  "question": "以沪铜（CU）、螺纹钢（RB）、铁矿石（I）、豆粕（M）、原油（SC）和黄金（AU）为候选池，找出近期价格上涨、持仓同步增加且期限结构偏强的品种，并说明筛选逻辑。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 147,
+   "refs": "references/futures.md",
+   "servers": [
+    "futures_data"
+   ],
+   "tools": [
+    "futures_data.futures_get_fund_flow",
+    "futures_data.futures_get_basis"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1985,
+   "notes": "1. `futures_data` 契约中没有直接的\"总持仓量（手）历史序列\"或\"跨月合约期限结构（近月/远月价差曲线）\"工具，本次分别用 `futures_get_fund_flow` 的\"持仓额\"变化和 `futures_get_basis` 的\"现货-期货基差及历史分位\"作为代理指标，口径与题目字面的\"持仓量\"和\"期限结构曲线\"不完全等价，已在回答正文中明确标注，请评审留意。\n2. \"近期\"区间取 2026-08-14 至 2026-09-04（约3周/14个交易日），为分析时自行选定的口径，未依赖用户指定的具体时间窗口；若用户预期的\"近期\"窗口不同，结论可能随窗口变化。\n3. 基差快照",
+   "parse_error": null
+  },
+  "official": {
+   "status": "OUT_OF_SCOPE",
+   "calls_total": 1,
+   "calls_ok": 0,
+   "calls_failed": 1,
+   "elapsed": 70,
+   "refs": "references/index.md, references/economic.md, references/analytics.md",
+   "servers": [
+    "(none)"
+   ],
+   "tools": [
+    "(none).--help"
+   ],
+   "err_codes": [
+    "USAGE_ERROR"
+   ],
+   "foreign_servers": [
+    "(none)"
+   ],
+   "answer_len": 1155,
+   "notes": "- 判定 OUT_OF_SCOPE 的依据：`SKILL.md` 路由表仅含 stock_data/fund_data/index_data/bond_data/financial_docs/economic_data/analytics_data 七类，且对 `references/` 全目录做了 `grep -rn \"期货|持仓量|期限结构|SHFE|DCE|INE|商品\"`，零命中，确认无期货合约/持仓量/期限结构相关字段或工具。\n- 唯一执行的一次 CLI 调用是 `node scripts/cli.mjs --help`（未加 server_type/tool_name，不符合取数命",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 43,
+  "question": "以螺纹钢期货（RB）为例，解释“主力合约”和“主力连续”有什么区别，以及为什么看长期走势时不能直接用当前主力合约。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 8,
+   "calls_ok": 8,
+   "calls_failed": 0,
+   "elapsed": 249,
+   "refs": "references/futures.md,references/finance.md",
+   "servers": [
+    "finance_data",
+    "futures_data"
+   ],
+   "tools": [
+    "finance_data.general_search_indicators",
+    "finance_data.quote_search_realtime_indicators",
+    "futures_data.futures_get_position_ranking",
+    "futures_data.futures_get_contract_spec",
+    "finance_data.quote_get_historical_data_series"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2143,
+   "notes": "1. 未能直接取到\"当前（2026-09-07）具体是哪一张合约代码被判定为主力\"这一字段：`general_search_indicators`（关键词\"主力合约代码\"\"主力合约\"）和 `quote_search_realtime_indicators`（关键词\"主力合约\"）均返回空列表，说明当前工具契约里没有直接暴露\"主力合约解析结果代码\"这一指标，因此答案中未编造具体的\"当前主力合约代码\"，仅用历史区间的价差和数据连续性对比来论证概念区别。\n2. `futures_get_contract_spec` 对具体合约代码 `RB2601.SHF` 的查询返回内容与对品种代码 `RB.SHF`",
+   "parse_error": null
+  },
+  "official": {
+   "status": "OUT_OF_SCOPE",
+   "calls_total": 0,
+   "calls_ok": 0,
+   "calls_failed": 0,
+   "elapsed": 41,
+   "refs": "index.md, stock.md, analytics.md",
+   "servers": [],
+   "tools": [],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 826,
+   "notes": "本题标的为商品期货合约（螺纹钢期货 RB），不属于股票/基金/指数板块/债券/公告新闻/宏观行业汇率/跨标聚合中任何一类，wind-mcp-skill 的 7 个 server_type 均未提供期货合约相关工具或字段（已用关键词\"期货\"\"futures\"\"主力合约\"\"主力连续\"\"商品\"检索全部 references/*.md，零匹配）。按 SKILL.md 路由规则，此类标的类型不落在既定路由表内应直接判定 OUT_OF_SCOPE，且不得用 analytics_data、wind-alice 或模型记忆伪装成支持，故未发起任何 CLI 数据调用（calls_total=0）。若用户需要该类",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 44,
+  "question": "查询螺纹钢期货（RB）当前主力合约代码、最新价、成交量和持仓量。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 9,
+   "calls_ok": 9,
+   "calls_failed": 0,
+   "elapsed": 179,
+   "refs": "futures.md, finance.md",
+   "servers": [
+    "finance_data"
+   ],
+   "tools": [
+    "finance_data.quote_get_realtime_indicators",
+    "finance_data.quote_search_realtime_indicators",
+    "finance_data.general_search_indicators",
+    "finance_data.general_query_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 893,
+   "notes": "- quote_get_realtime_indicators 对 RB.SHF / RB2701.SHF 请求持仓量时，无论传中文\"持仓量\"还是经 quote_search_realtime_indicators 确认的英文字段名\"POSITION\"，返回的 headers 中均不包含该字段，接口本身不报错，属于契约文档未明确说明的静默丢弃行为，与文档描述的\"具体字段以传入的可用行情指标为准\"不完全一致。为补齐该数据改用 general_query_data 自然语言取数链路，工具链路与价格/成交量数据来源不同，口径可能存在差异。\n- 成交量出现 754,653 与 75,465,300 两",
+   "parse_error": null
+  },
+  "official": {
+   "status": "OUT_OF_SCOPE",
+   "calls_total": 2,
+   "calls_ok": 0,
+   "calls_failed": 2,
+   "elapsed": 70,
+   "refs": "references/stock.md, references/fund.md, references/index.md, references/bond.md, references/economic.md, references/financial-docs.md, references/index-indicators.md, references/fund-indicators.md, references/stock-indicators.md",
+   "servers": [
+    "(usage-check)"
+   ],
+   "tools": [
+    "(usage-check).--help"
+   ],
+   "err_codes": [
+    "USAGE_ERROR"
+   ],
+   "foreign_servers": [
+    "(usage-check)"
+   ],
+   "answer_len": 823,
+   "notes": "- 本题在路由阶段即可判定越界（期货/商品期货不在 wind-mcp-skill 的 7 个 server_type 覆盖范围内），因此没有对任何 `server_type` 发起真正的 `call` 取数请求，也没有触碰被禁止的另一版本 wind-mcp-skill 目录或其它文件。\n- 仅执行了 2 次 `node scripts/cli.mjs --help`（非规定的 `call <server_type> <tool_name>` 格式，均返回 `USAGE_ERROR`），用于核实 CLI 自身列出的 `server_type` 枚举与 SKILL.md 路由表是否一致（结果一致，",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 45,
+  "question": "列出上海原油期货（SC）当前主要存续合约的到期月份和最新价格，并按到期时间排序。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 6,
+   "calls_ok": 4,
+   "calls_failed": 2,
+   "elapsed": 326,
+   "refs": "references/futures.md, references/finance.md, references/analytics.md",
+   "servers": [
+    "futures_data",
+    "finance_data"
+   ],
+   "tools": [
+    "futures_data.list-tools",
+    "finance_data.quote_get_realtime_indicators",
+    "futures_data.futures_get_contract_spec"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 1566,
+   "notes": "1. `wind-mcp-skill` 当前暴露的 `futures_data` 7 个工具（已用 `list-tools` 核实实时契约）中没有\"按品种一次性列出全部当前存续/挂牌合约代码\"的专用工具；`finance_data` 的 `general_query_data`/`general_get_indicator_data` 等也要求先给出确定的单一标的，不支持列出某品种全部存续合约。因此本次采用\"用 `futures_get_contract_spec`（windCode=SC.INE 品种级）取得官方挂牌规则文字说明（近12个月连续+其后8个季月）→ 按该规则批量拼出候选月合约代",
+   "parse_error": null
+  },
+  "official": {
+   "status": "OUT_OF_SCOPE",
+   "calls_total": 1,
+   "calls_ok": 1,
+   "calls_failed": 0,
+   "elapsed": 80,
+   "refs": "references/stock.md, references/index.md, references/economic.md",
+   "servers": [
+    "(none - CLI help)"
+   ],
+   "tools": [
+    "(none - CLI help).(none)"
+   ],
+   "err_codes": [],
+   "foreign_servers": [
+    "(none - CLI help)"
+   ],
+   "answer_len": 945,
+   "notes": "- SKILL.md 顶部 description 提到\"衍生品等数据\"，但第 1 节的实际路由表（7 个 `server_type`）及各 `references/*.md` 契约中均未提供任何期货/衍生品合约的工具，`stock.md` 与 `index.md` 均在开篇明确限定各自适用范围（分别为\"只用于股票\"和\"只用于指数和板块\"），`economic.md` 限定为宏观/行业 EDB 指标而非合约行情，三者均不能覆盖 SC 原油期货具体合约的到期月份与最新价。这属于契约与顶层 description 的表述不完全一致（description 提及衍生品，但路由表/契约未落地），已如实",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 46,
+  "question": "过去五年沪铜期货（CU）对应的国内铜库存快速下降时，期货价格和基差通常如何变化？请验证库存与价格关系是否稳定。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 2,
+   "calls_ok": 2,
+   "calls_failed": 0,
+   "elapsed": 247,
+   "refs": "references/futures.md",
+   "servers": [
+    "futures_data"
+   ],
+   "tools": [
+    "futures_data.futures_get_supply_demand",
+    "futures_data.futures_get_basis"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1749,
+   "notes": "- 首次调用命令在执行时工作目录已是 `/home/skills/wind-skills/skills/wind-mcp-skill`（环境默认 cwd），未显式加 `cd` 前缀，但等效于要求的完整命令形式；第二次调用起未再出现该情况（后续也未额外加 `cd`，因 cwd 全程未变，效果与显式 `cd` 一致），仅在此说明以便核查。\n- \"国内铜库存\"选用了 `futures_get_supply_demand` 中\"库存分析\"类别、来源标注为\"上海期货交易所\"的周频指标「库存小计:阴极铜」，未使用 `futures_get_warehouse_receipt`（该工具仅支持单日快照，若要拼",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 174,
+   "refs": "references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1642,
+   "notes": "1. 契约中 `server_type` 列表（stock_data/fund_data/index_data/bond_data/financial_docs/economic_data/analytics_data）没有专门的\"期货\"领域；本题涉及的沪铜期货价格、基差、库存按 SKILL.md 路由规则第3条（\"宏观、行业...EDB 指标...即使未出现'宏观'字样\"）归入 `economic_data`，通过 `search_economic_indicator` 检索确认到对应 EDB 代码后取数，这是路由层面的判断，非契约明文列出的场景，特此说明。\n2. \"国内铜库存\"用 S004",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 47,
+  "question": "比较沪铜期货（CU）与LME三个月期铜近期强弱，统一币种和单位后考虑人民币汇率、进口成本和库存差异，判断内外盘价差是否异常。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 8,
+   "calls_failed": 3,
+   "elapsed": 348,
+   "refs": "futures.md, finance.md",
+   "servers": [
+    "finance_data",
+    "futures_data"
+   ],
+   "tools": [
+    "finance_data.quote_get_realtime_indicators",
+    "finance_data.general_query_data",
+    "finance_data.quote_get_historical_data_series",
+    "futures_data.futures_get_supply_demand"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 2975,
+   "notes": "1. `LMCADS03` 及 `LMCADS03.LME` 均无法被 `finance_data.quote_get_realtime_indicators` 识别为有效标的（返回 backend_error \"未识别到有效的金融标的\"），reference（finance.md）未给出 LME 品种的标准 Wind 代码写法，只能改用 `general_query_data` 自然语言取数绕过实体识别问题，属于路由困难。\n2. `quote_get_realtime_indicators` 批量传入 `windCodes` 时，只要其中一个标的未识别（如 `USDCNY.EX`），整批请求",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 11,
+   "calls_ok": 11,
+   "calls_failed": 0,
+   "elapsed": 305,
+   "refs": "references/economic.md",
+   "servers": [
+    "economic_data"
+   ],
+   "tools": [
+    "economic_data.search_economic_indicator",
+    "economic_data.query_economic_indicator_data"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2797,
+   "notes": "- 路由：期货（CU、LME三个月铜）在 SKILL.md 路由表中未被 `stock_data`/`index_data` 等专项领域覆盖（`index_data` 明确限定\"只用于指数和板块\"），按第3条仲裁规则（宏观/行业EDB指标，即使未出现\"宏观\"字样）归入 `economic_data`，全程只用 `search_economic_indicator` + `query_economic_indicator_data` 两个工具，未跨域使用 `analytics_data`。\n- 参数猜测：`search_economic_indicator` 的 `question` 措辞（如\"",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 48,
+  "question": "判断上证50ETF期权当前隐含波动率是贵还是便宜，请比较50ETF近月ATM IV、过去一年IV分位数和50ETF近期实际波动率。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 140,
+   "refs": "references/options/volatility.md, references/options/contract-market.md",
+   "servers": [
+    "options_data"
+   ],
+   "tools": [
+    "options_data.options_get_iv_term_structure",
+    "options_data.options_calc_iv_cone",
+    "options_data.options_get_variety_stats"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1434,
+   "notes": "1. 命令格式：任务要求每条命令写成 `cd /home/skills/wind-skills/skills/wind-mcp-skill && WIND_SKILL_AUTO_UPDATE=0 timeout 150 node scripts/cli.mjs call ...`；实际执行环境的默认工作目录已经是该 Skill 目录（`pwd` 确认一致），因此本次4次调用均未在命令文本前显式拼接 `cd ... &&` 前缀，但均在正确目录下执行、结果不受影响。为避免违反\"同一 server_type+tool_name+参数不得原样重发\"的规则，未重新以字面 cd 前缀的形式重发这4条已成",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 2,
+   "calls_ok": 2,
+   "calls_failed": 0,
+   "elapsed": 120,
+   "refs": "analytics.md, bond.md, economic.md, financial-docs.md, fund-indicators.md, fund.md, index-indicators.md, index.md, stock-indicators.md, stock.md",
+   "servers": [
+    "fund_data"
+   ],
+   "tools": [
+    "fund_data.list-tools",
+    "fund_data.get_fund_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 1037,
+   "notes": "1. 本题的路由结论是\"部分 OUT_OF_SCOPE\"：wind-mcp-skill 的 SKILL.md 路由表（stock_data/fund_data/index_data/bond_data/financial_docs/economic_data/analytics_data）没有任何一行覆盖\"期权\"这一标的类型或\"隐含波动率/IV分位数\"这一指标，对 references/ 全部 10 份契约文件做关键词核查（期权、认购、认沽、隐含、IV、波动率指数、VIX、分位）均无命中（唯一\"分位数\"命中在 stock.md 估值指标，只覆盖 PE/PB/PS/股息率/市值，不含波动率）。按",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 49,
+  "question": "分析上证50ETF期权当前看跌偏斜是否明显：比较同期限ATM期权与虚值Put的隐含波动率，判断市场是否在提高下行风险定价。",
+  "dev": {
+   "status": "DONE",
+   "calls_total": 3,
+   "calls_ok": 3,
+   "calls_failed": 0,
+   "elapsed": 104,
+   "refs": "references/options/volatility.md",
+   "servers": [
+    "options_data"
+   ],
+   "tools": [
+    "options_data.options_get_volatility_surface",
+    "options_data.options_get_iv_term_structure"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 2146,
+   "notes": "未调用 `options_calc_iv_cone`：该工具参数不含 moneyness，只能给出ATM隐波的历史分布分位，无法直接支持\"虚值Put相对ATM的偏斜是否处于历史高位\"这一问法，故未纳入调用，仅在结论中说明局限。moneyness=90/95分别对应\"虚值Put/轻度虚值Put\"的价值状态判定为路由推断（moneyness<100对应行权价低于远期价，即Put方向为虚值），与曲面knots的strike单调递增关系吻合，未见契约与线上不一致之处。",
+   "parse_error": null
+  },
+  "official": {
+   "status": "OUT_OF_SCOPE",
+   "calls_total": 1,
+   "calls_ok": 0,
+   "calls_failed": 1,
+   "elapsed": 76,
+   "refs": "references/analytics.md, references/bond.md, references/economic.md, references/financial-docs.md, references/fund-indicators.md, references/fund.md, references/index-indicators.md, references/index.md, references/stock-indicators.md, references/stock.md",
+   "servers": [
+    "(cli usage)"
+   ],
+   "tools": [
+    "(cli usage).--help"
+   ],
+   "err_codes": [
+    "USAGE_ERROR"
+   ],
+   "foreign_servers": [
+    "(cli usage)"
+   ],
+   "answer_len": 1442,
+   "notes": "- 本题的核心诉求（同期限 ATM vs 虚值 Put 隐含波动率比较、看跌偏斜判断）需要期权链/期权行情/隐含波动率类数据，而 wind-mcp-skill 当前 7 个 server_type 的契约与后端工具清单（`scripts/tool-manifest.json`）均不包含任何期权、衍生品或隐含波动率相关字段/工具，属于该 Skill 明确未覆盖的领域，与\"契约与线上不一致\"或\"参数猜测\"无关，是纯粹的能力缺口。\n- 唯一一次 CLI 调用是 `node scripts/cli.mjs --help`，用于核实后端实际暴露的 server_type 枚举是否与文档一致（结果一致，均",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 50,
+  "question": "我持有100万元华泰柏瑞沪深300ETF风险敞口，希望防范未来一个月尾部下跌，请基于沪深300相关期权设计Protective Put的合约选择和风险评估框架。",
+  "dev": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 12,
+   "calls_ok": 11,
+   "calls_failed": 1,
+   "elapsed": 355,
+   "refs": "references/options/contract-market.md, references/finance.md",
+   "servers": [
+    "options_data",
+    "finance_data"
+   ],
+   "tools": [
+    "options_data.options_get_listed_terms",
+    "options_data.options_get_term_metrics",
+    "options_data.options_get_variety_series",
+    "options_data.options_get_variety_stats",
+    "finance_data.quote_get_realtime_indicators"
+   ],
+   "err_codes": [
+    "backend_error"
+   ],
+   "foreign_servers": [],
+   "answer_len": 4069,
+   "notes": "1. `options_get_listed_terms` 不传`tradeDate`时后端返回`backend_error`（\"服务暂时不可用\"），改传显式交易日`2026-09-04`后成功，怀疑默认日期在当前环境下无可用截面数据，属于契约默认值与线上行为不完全一致的情况，未做进一步重试（按规则backend_error原样调用仅报告一次）。\n2. `options_get_term_metrics` 是本题最大的数据缺口来源：无论是否显式传入`indicators`（含默认值、纯中文枚举名\"最新价/结算价/隐含波动率/成交量/持仓量\"），在两个到期日（09-23近月、10-28下月）上均",
+   "parse_error": null
+  },
+  "official": {
+   "status": "DONE_WITH_LIMITS",
+   "calls_total": 4,
+   "calls_ok": 4,
+   "calls_failed": 0,
+   "elapsed": 160,
+   "refs": "references/fund.md, references/index.md",
+   "servers": [
+    "fund_data",
+    "index_data"
+   ],
+   "tools": [
+    "fund_data.get_fund_price_indicators",
+    "index_data.get_index_price_indicators",
+    "index_data.get_index_technicals",
+    "fund_data.get_fund_performance"
+   ],
+   "err_codes": [],
+   "foreign_servers": [],
+   "answer_len": 3063,
+   "notes": "1. 本题\"基于沪深300相关期权设计Protective Put的合约选择\"这一核心诉求，其数据基础（期权链、行权价、权利金、隐含波动率、Greeks）在 wind-mcp-skill 的 server_type 路由表（stock_data/fund_data/index_data/bond_data/financial_docs/economic_data/analytics_data）中没有对应工具，已通过 `cat scripts/tool-manifest.json` 及对全部 `references/*.md` 做关键词核查（\"期权/隐含/波动率/Greek/希腊/Delta\"）",
+   "parse_error": null
+  }
+ },
+ {
+  "id": 51,
+  "question": "如果持有100万元华夏上证50ETF并希望通过上证50ETF期权做Covered Call增强收益，如何根据期限、Delta、隐波和被行权风险选择合约？",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 52,
+  "question": "我买入上证50ETF近月认购期权后，50ETF上涨但期权仍然亏损，为什么会这样？请用Delta、隐含波动率和时间价值解释。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 53,
+  "question": "找上证50ETF最近月最接近平值的认购和认沽期权，列出最新价、IV、Delta、成交量和持仓量。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 54,
+  "question": "列出上证50ETF近月、次月和季月ATM期权的隐含波动率，并计算期限差。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 55,
+  "question": "上证50ETF期权PCR最近如果明显升高，这是否说明市场更悲观？请区分成交量PCR和持仓量PCR并结合50ETF走势解释。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 56,
+  "question": "在重要政策会议前，使用上证50ETF近月ATM Call和Put构建跨式组合，请用总权利金估算市场隐含波动幅度，并讨论事件后的IV Crush风险。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 57,
+  "question": "分析最近美元兑人民币（USD/CNY）汇率的主要驱动因素，区分美元指数、中美利差、中国增长预期、资本流动和政策因素。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 58,
+  "question": "中国出口企业三个月后将收到1000万美元货款，担心人民币升值，请以USD/CNY为标的比较远期、掉期和外汇期权三种套保思路的优缺点。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 59,
+  "question": "分析美元指数DXY近期走强更主要是美国利率上行、避险需求还是欧元走弱造成，并给出验证指标。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 60,
+  "question": "为什么美联储降息通常会影响美元兑人民币（USD/CNY）？请用中美利差、资本流动和美元指数解释，不要只说“降息美元就跌”。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 61,
+  "question": "查询美元兑人民币最新即期汇率，并分别标明在岸USD/CNY和离岸USD/CNH的时间。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 62,
+  "question": "查询美元兑人民币（USD/CNY）1个月远期汇率或远期点，并同时给出即期汇率。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 63,
+  "question": "比较墨西哥比索兑美元（MXN/USD）、巴西雷亚尔兑美元（BRL/USD）和印度卢比兑美元（INR/USD）的Carry Trade风险，不只看利差，还要考虑波动率、融资货币、政策拐点和尾部风险。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 64,
+  "question": "分析国际现货黄金（XAU/USD）近期上涨主要由美国实际利率、美元指数、全球央行购金、黄金ETF资金还是避险推动，并建立可验证的归因框架。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 65,
+  "question": "分析Brent原油在地缘事件后冲高回落时，真实供给损失、风险溢价、全球库存和需求预期分别发挥了什么作用。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 66,
+  "question": "评估LME铜价上涨对中国家电制造业成本的影响，并区分铜矿供给、冶炼、库存、现货升贴水和中国需求的贡献。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 67,
+  "question": "分析CBOT大豆未来一个季度的主要风险，重点考虑美国天气、种植面积、单产、出口销售、库存和巴西/阿根廷供应。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 68,
+  "question": "为什么周大福足金饰品价格与国际现货黄金（XAU/USD）、上海黄金交易所Au99.99和沪金期货（AU）价格不一样？分别受哪些因素影响？",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 69,
+  "question": "查询Brent原油最新价格、涨跌幅和交易时间。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 70,
+  "question": "查询国际现货黄金（XAU/USD）最新价格，标明币种、单位和时间。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 71,
+  "question": "从工业增加值、社会消费品零售、固定资产投资、社会融资、房地产销售和出口六个维度判断中国经济当前是在复苏、企稳还是继续放缓，并指出相互矛盾的信号。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 72,
+  "question": "市场为什么重新交易美联储降息？请结合美国核心PCE、非农就业、失业率、平均时薪、零售销售和金融条件判断降息依据是否充分。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 73,
+  "question": "判断美国当前通胀压力主要来自需求还是供给，请结合核心PCE、服务通胀、商品通胀、平均时薪和PPI分析。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 74,
+  "question": "评估未来半年美国、欧元区和东盟需求变化对比亚迪汽车出口的影响，并同时考虑人民币汇率环境。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 75,
+  "question": "为什么中国GDP仍在增长，但居民可能感觉工作更难找、收入压力更大？请结合中国城镇就业、居民收入和行业结构解释总量增长与个人体感的差异。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 76,
+  "question": "查询中国最新CPI同比、核心CPI同比和PPI同比，并标明数据所属月份。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 77,
+  "question": "查询美国最新非农新增就业、失业率和平均时薪同比，并标明数据期。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 78,
+  "question": "查询中国最新社会融资规模增量、M1同比和M2同比，并标明月份和单位。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 79,
+  "question": "比较中国官方制造业PMI、美国ISM制造业PMI、欧元区制造业PMI、日本制造业PMI和印度制造业PMI，判断全球制造业周期是否同步改善。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 80,
+  "question": "判断日本是否真正摆脱通缩，请结合日本核心CPI、春斗工资、服务价格、通胀预期和日本央行政策分析。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 81,
+  "question": "比较中证A500指数与沪深300指数的行业结构、市值风格、集中度和历史风险收益特征，解释两者分别代表什么市场暴露。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 82,
+  "question": "判断申万半导体行业当前景气处于库存去化、复苏还是扩张阶段，请结合DRAM/NAND价格、库存、订单、资本开支和中芯国际/海光信息等龙头公司指引。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 83,
+  "question": "比较申万银行、电子、医药生物、食品饮料和有色金属行业当前估值分位、盈利增速和盈利预期变化，区分“估值便宜但基本面仍恶化”和“估值提升有盈利支撑”的板块。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 84,
+  "question": "为什么沪深300指数下跌时，A股仍可能有很多股票上涨？请结合沪深300权重股、万得全A等权表现和市场涨跌家数解释。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 85,
+  "question": "查询沪深300指数最新PE(TTM)、PB和股息率，并标明日期。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 86,
+  "question": "列出中证A500指数最新前十大权重股及权重，并标明成分生效日期。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 87,
+  "question": "给字节跳动有限公司做快速公司画像，覆盖主要股东背景、核心业务、重要子公司/投资、主要竞争对手以及公开可获取的经营与法律风险信息。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 88,
+  "question": "评估吉利汽车控股有限公司收购一家智能驾驶软件公司的潜在协同，比较产品、客户、地区、技术能力、竞争对手和潜在整合风险。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 89,
+  "question": "对万科企业股份有限公司做授信前快检：识别实际控制/股权结构、重要关联企业、股权质押、司法诉讼、经营异常和重大负面事件。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 90,
+  "question": "分析阿里巴巴集团的中国商业、国际商业、云智能和菜鸟等主要业务分部增长、盈利能力和资本占用，判断哪些板块在创造价值、哪些板块拖累回报。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 91,
+  "question": "查询宁德时代新能源科技股份有限公司最新法定代表人、注册资本、成立日期、经营状态和统一社会信用代码。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 92,
+  "question": "把万科企业股份有限公司过去三个月的重要公告、监管处罚/问询、股权变动和重大合同按时间线整理，并区分已落地事项与仍待执行事项。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 93,
+  "question": "比较宝钢股份与河钢股份的碳排放暴露、能源结构、减排目标和绿色资本开支，判断哪家公司面临更高的转型风险。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 94,
+  "question": "如果宁德时代出现重大环境或公司治理争议，请分析该事件可能通过罚款、停产、融资成本、客户关系和估值影响公司，并说明需要核验哪些公开证据。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 95,
+  "question": "查询贵州茅台最新ESG总评分及环境、社会、治理三个分项，并标明评级机构和日期。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 96,
+  "question": "评估特斯拉中国月度保险注册量能否用于预测特斯拉季度汽车收入，设计样本期、滞后关系、季节性处理、异常值和样本外验证方案。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 97,
+  "question": "判断当前市场是否进入Risk-off状态，请综合沪深300指数、中国10年期国债、国际现货黄金、美元指数DXY、中国信用利差和VIX指数信号，并指出哪些信号相互矛盾。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 98,
+  "question": "比较高通胀、通胀回落、增长衰退三种宏观情景下标普500指数、中国30年期国债、国际现货黄金、Brent原油和美元指数DXY通常的风险收益特征，形成资产配置观察框架。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 99,
+  "question": "给我一张最新跨资产市场快照：沪深300指数、恒生指数、标普500指数、中国10年期国债收益率、国际现货黄金、Brent原油和美元指数DXY，统一标明日期/时间。",
+  "dev": null,
+  "official": null
+ },
+ {
+  "id": 100,
+  "question": "如果投资期限是三到五年，请以沪深300ETF、中国国债基金、黄金ETF和货币基金为例，解释股票、债券、黄金和现金在组合里分别承担什么角色、主要风险以及彼此的分散作用，不给具体买卖建议。",
+  "dev": null,
+  "official": null
+ }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "id": 21,
+    "A": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 4, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 3},
+    "capability_gap": "both",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "两份都拿不到赎回费分档并如实标注，A 用 4 次调用还取到申购费的金额分档（1.2%/0.8%/0.2%）支撑盈亏平衡讨论，B 花 5 次 financial_docs 全文检索仍未拿到阶梯数值，效率明显更低。",
+    "notable": "基金费率工具缺少按持有期限拆分的赎回费阶梯字段（一版返回空串、一版只给'最高赎回费率'）；financial_docs 公告检索偏股票发行人，检索基金招募说明书费率表命中率低且易召回同名基金/可转债赎回公告。"
+  },
+  {
+    "id": 22,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 4, "routing": 3, "faithfulness": 5, "answer": 3, "efficiency": 5},
+    "capability_gap": "B",
+    "backend_issue": "none",
+    "winner": "A",
+    "reason": "A 一次调用拿齐单位净值/累计净值/净值日期三项；B 的 fund_get_nav 只返回单位净值与复权单位净值，缺累计净值且未尝试其他工具，只能声明缺口。",
+    "notable": "fund_get_nav 无 includeFields 参数、默认返回集不含'累计单位净值'，只有'复权单位净值'，reference 应提示累计净值的替代取数路径。"
+  },
+  {
+    "id": 23,
+    "A": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "tie",
+    "reason": "两份均 1 次调用命中同一报告期（2026Q2）与完全一致的十大重仓占比；A 多给持股数量/市值与占股票投资比，B 多给股票代码，质量相当。",
+    "notable": ""
+  },
+  {
+    "id": 24,
+    "A": {"coverage": 3, "routing": 3, "faithfulness": 5, "answer": 4, "efficiency": 4},
+    "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "A",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 查到经理调整已实际发生（2026-05-23 增聘何一铖、杨思亮）并用 Q1 vs Q2 做真正的'调整前后'持仓对比；A 因工具无任职起止日期字段，误判为纯假设情形，只能用相隔一年的两期持仓替代。",
+    "notable": "fund_research 的 fund_get_basic_info 没有'基金经理任职起止日期/历任经理'字段（另一版 get_fund_info 有），导致无法识别经理变更事件；另一版 search_funds 对人名措辞高度敏感（同一经理两种问法返回'没找到数据'，第三种才命中）。"
+  },
+  {
+    "id": 25,
+    "A": {"coverage": 3, "routing": 4, "faithfulness": 4, "answer": 3, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 给出 09-07 收盘价 1.668、IOPV 1.4945、溢价 11.6092%（三者自洽）并单独标注 NAV 口径日 09-03；A 把 1.4918（等于净值）当成'最新成交价'，与其同时给出的 9.6662% 溢价率在数学上互相矛盾，且日期停留在 09-03。",
+    "notable": "get_fund_price_indicators 的'贴水率'字段被静默丢弃（不报错也不出现在列里），且其'最新成交价'疑似回填净值；get_fund_performance 用'最新'措辞时 IOPV/升贴水率会被回填为 0，必须显式指定日期。"
+  },
+  {
+    "id": 26,
+    "A": {"coverage": 4, "routing": 3, "faithfulness": 5, "answer": 4, "efficiency": 3},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 5},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "B 用 7 次全成功调用覆盖五个维度，并用 asOfDate 取到三个时点规模做出真正的规模稳定性判断；A 10 次调用 3 次失败，规模稳定性因'近一年份额变动'口径存疑而未能给出结论（A 的 20 日均量口径更扎实是其亮点）。",
+    "notable": "中文名传参存在 NER 错配（华夏/嘉实沪深300ETF 被解析成 .OF 代码后成交量返回 null）；'最新跟踪误差'字段返回全 null，须改问'近一年年化跟踪误差'；get_fund_holders 的'近一年份额变动'口径不明（绝对值达份额总数的 3-5 倍）。"
+  },
+  {
+    "id": 27,
+    "A": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 5, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "两份机制解释都覆盖了额度/休市/汇率/申赎四条线且都以'暂停申购赎回'为核心证据；B 额外取到近一月折溢价率序列（9.07%~13.16%）、份额变动和全市场 QDII 额度指标并明确标注口径层级差异，证据更厚。",
+    "notable": "economic_data 的 query_economic_indicator_data 用 observation 参数对低频指标返回空序列，需显式 beginDate/endDate；Wind 无基金公司/单只产品层级的 QDII 额度指标，只有全市场汇总口径。"
+  },
+  {
+    "id": 28,
+    "A": {"coverage": 5, "routing": 3, "faithfulness": 5, "answer": 5, "efficiency": 3},
+    "B": {"coverage": 2, "routing": 2, "faithfulness": 5, "answer": 3, "efficiency": 2},
+    "capability_gap": "none",
+    "backend_issue": "B",
+    "winner": "A",
+    "reason": "A 在 5 次实体识别失败后改用'管理人+关键词'命中兴全 006580.OF，三只基金的资产配置、底层持基、费率全部取到；B 因 6 次 backend_error（含 fund_screener 两次'服务暂时不可用'）始终未解析出兴全，只完成三分之二任务（但 B 发现华夏睿磐泰茂 A/C 份额的实质性重合，是 A 漏掉的点）。",
+    "notable": "fund_get_basic_info 批量请求只要有一个标的未识别就整体 backend_error、无部分成功，极易耗尽预算；养老FOF 名称省略'目标/日期'即无法识别，需补别名容错；另一版 get_fund_holdings 的'重仓基金名称'列存在错位（十条全显示第一条名称）。"
+  },
+  {
+    "id": 29,
+    "A": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "B": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 4},
+    "capability_gap": "none",
+    "backend_issue": "A",
+    "winner": "tie",
+    "reason": "两份都判定牛平且端点数值一致（10Y 1.68%、30Y 2.1325%、利差 45.25bp）；A 多取 1 年期国债做短端政策预期论证但被 EDB 指标无权限逼到 finance_data 兜底、数据源列重复口径较乱，B 路由干净、给了两种测算窗口但短端仅靠 DR007 且供给指标已停更。",
+    "notable": "EDB 的中债国债到期收益率 S0059749/S0059752 对该账号返回'无权限'，可用的是 M1001654/M1001657，应在 reference 中直接给出可用代码；国债净发行额 M5639023 已停更至 2025-11，需注明替代口径（托管量 M0341964 或 M0341940 发行量）。"
+  },
+  {
+    "id": 30,
+    "A": {"coverage": 4, "routing": 5, "faithfulness": 5, "answer": 4, "efficiency": 5},
+    "B": {"coverage": 5, "routing": 4, "faithfulness": 5, "answer": 5, "efficiency": 4},
+    "capability_gap": "both",
+    "backend_issue": "none",
+    "winner": "B",
+    "reason": "同为 9 次调用，B 交叉核验出境内评级已于 2025-12-05 被终止、惠誉降至 CCC- 负面观察，并取到 EBITDA -471 亿、利息保障 -1.78、现金/短债 0.30-0.32 倍及审计师持续经营重大不确定性提示；A 只能并陈 AAA 与'评级被下调'的矛盾未能解开（A 的优势是拿到 7 笔展期的结构化违约记录与逾期利息）。",
+    "notable": "bond_data.get_bond_issuer_info 的'最新主体信用评级'字段严重滞后且不返回评级日期，单独引用会得出与事实相反的 AAA 结论，必须要求交叉核验公告；get_stock_events 未按实体过滤（问万科返回全市场其他公司并购事件）；受限货币资金拆分与银行贷款到期结构两版都取不到。"
+  }
+]
