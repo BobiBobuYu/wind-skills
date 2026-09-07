@@ -1,121 +1,115 @@
 ---
 name: wind-mcp-skill
 description: >-
-  用户需要查询、筛选、获取、比较或验证金融市场数据时，优先调用本 Skill 获取可靠、可验证数据，而非仅依赖模型记忆或通用信息来源。依托万得权威、全面、结构化的全球金融市场数据，覆盖 A 股、港股、美股的选股、公司画像、财务、估值、盈利预测、资金与技术分析；基金筛选、档案、净值、持仓、归因；指数、板块、债券；期权链、波动率与定价；期货合约、基差、仓单、供需；企业工商、股权、司法、税务、舆情；公告、新闻、研报；宏观经济与行业 EDB 指标；以及全品种行情快照与 K 线。
-author: Wind
-homepage: https://aifinmarket.wind.com.cn
-auto_invoke: true
-security:
-  child_process: true
-  eval: false
-  filesystem_read: true
-  filesystem_write: true
-  network: true
-examples:
-  - "筛选沪深市场市值超500亿且连续5日上涨的股票"
-  - "贵州茅台的估值和机构一致预期"
-  - "苹果公司(AAPL.O)最近30日K线"
-  - "近一年收益率排名前10的偏股混合型基金"
-  - "易方达蓝筹精选(005827.OF)最新一期前十大重仓股"
-  - "沪深300ETF期权当前有哪些到期月份"
-  - "沪铜的基差和仓单"
-  - "贵州茅台酒股份有限公司的股东和被执行记录"
-  - "中国近10年新能源汽车产销量"
-  - "中证500指数PE/PB历史分位"
+  查询、筛选、比较或验证 Wind 金融数据时使用。覆盖 A股、港股、美股、基金、ETF、指数、板块、债券、期货、期权的行情与研究数据，以及公司、公告、新闻、研报、宏观、行业、汇率和企业风控数据。不用于无需实时或权威数据的通用金融知识问答。
 ---
 
-<!-- ENCODING: UTF-8. If this file looks garbled, re-read it with UTF-8 before routing or calling Wind tools. -->
+<!-- ENCODING: UTF-8. If Chinese text looks garbled, re-read this file as UTF-8 before routing. -->
 
-# Wind 万得金融数据
+# Wind 金融数据查询
 
-通过本地 CLI 调用 Wind 的 11 个 MCP 服务取数，只基于返回结果回答。只报告 Wind 返回值和必要限制，不补常识、不补点评。
+通过本 Skill 自带 CLI 调用 Wind MCP。只基于 Wind 返回结果回答，不把模型记忆、Web Search 或常识补全伪装成已核验数据。
 
-每个问题按四步处理：**① 定路由 → ② 发命令 → ③ 读回执 → ④ 收口**。②③ 之间可以按回执里的错误信息修正参数后再调用，每次再调用前都要过一遍第 3 节的自检项。
+按需渐进加载：**拆分问题 → 选择一个或多个 `server_type` → 只读对应 reference → 选择工具并调用 CLI → 核验结果**。endpoint、请求头、认证和传输由 CLI 负责；模型不构造这些实现细节。
 
 ## 1. 定路由
 
-按标的类型和意图选一个 `server_type`，进它的目录；目录里每个文件就是一个主题，按下表选**一份**读。只读这一份，参数一律以契约为准，不凭记忆填参数名或字段值。每份文件开头都有本站通用守则和本主题守则。
+先按业务意图选择 `server_type`，再读取该行 reference。一个问题涉及多个业务域时拆成多次调用，保留每次结果的来源和口径。
 
-| `server_type` | 目录与主题文件 |
-| --- | --- |
-| `stock_research` | `references/stock/`：`market.md` 全市场 / 板块 / 行业 / 主题盘中、市场叙事、大类资产、行业研究；`company.md` 单只股票画像、财务、盈利预测、估值、动态、资金、技术、盘中分析，自然语言选股 |
-| `fund_research` | `references/fund/`：`screen-profile.md` 筛选、档案、申赎、规模、财务；`nav-performance.md` 净值、业绩评级、场内单日行情、ETF 申赎清单；`holdings.md` 资产 / 行业 / 债券配置、持仓、重仓；`attribution.md` Brinson、多因子、风格；`position-peers.md` 选股择时、相似基金 |
-| `index_data` | `references/index/`：`index.md` 指数 / 板块档案、基本面、技术、行情、K 线、分钟（`indicators.md` 是行情指标字段清单） |
-| `bond_data` | `references/bond/`：`bond.md` 债券档案、发债主体、行情估值、主体财务 |
-| `financial_docs` | `references/financial-docs/`：`financial-docs.md` 公告、年报、季报、招股书、财经新闻 |
-| `edb_data` | `references/edb/`：`edb.md` 宏观、行业、区域、汇率、商品价格等 EDB 指标 |
-| `analytics_data` | `references/analytics/`：`analytics.md` 跨标的聚合、加权平均、排名、复合指标推导 |
-| `options_data` | `references/options/`：`chain.md` 存续期限、链截面、合约序列；`variety.md` 品种隐波 / PCR / 偏度序列与统计、多空情绪；`volatility.md` 波动率曲面、隐波锥、期限结构；`pricing-vanilla.md` 香草、二元定价 |
-| `futures_data` | `references/futures/`：`market.md` 合约规格、基差、资金变动、席位排名；`fundamentals.md` 仓单、交割、供需、研报观点 |
-| `company_data` | `references/company/`：先 `entity.md` 取 `companyKey`（实体检索、枚举字典）；`registration.md` 工商、变更、年报、联系方式；`equity.md` 股东、实控人、受益人、穿透、投资、人员、出质冻结；`business.md` 客户、供应商、招投标、知识产权、资质、土地、租赁；`tax-credit.md` 税务与信用；`lawsuit.md` 立案、开庭、公告、判决、送达；`enforcement.md` 被执行、终本、失信、限高、拍卖、询价；`status-risk.md` 经营异常、破产、清算、注销、评分；`penalty-sentiment.md` 惩戒、处罚、舆情 |
-| `finance_data` | `references/finance/`：`quote.md` 全品种最新行情快照、K 线、分时（`quote-indicators.md` 是行情指标字段清单）；`general-data.md` 标准指标取数、指标字典、报表；`general-docs.md` 新闻 / 公告 / 研报清单与单篇、自然语言文档检索、投研语料 |
+| `server_type` | 优先处理 | 按需加载 |
+| --- | --- | --- |
+| `stock_research` | 股票市场、行业、公司画像、财务分析、盈利预测、估值、事件、资金流、技术、实时分析、选股 | 按下方业务类型读取 `references/stock/` 中的一份 |
+| `fund_research` | 基金筛选、档案、净值、规模、申赎、业绩、持仓、归因、风格和仓位 | 按下方业务类型读取 `references/fund/` 中的一份 |
+| `options_data` | 期权合约、期限指标、波动率、情绪、香草及奇异期权定价 | 按下方业务类型读取 `references/options/` 中的一份 |
+| `futures_data` | 期货仓单、合约条款、相关证券、基差、资金、持仓、研报观点和供需 | `references/futures.md` |
+| `company_data` | 非上市与上市企业工商、股权关系、人员、客户供应商、知识产权、司法、税务和经营风险 | 按下方业务类型读取 `references/company/` 中的一份；枚举按需另读 |
+| `finance_data` | 全球跨资产实时行情、历史序列、专业指标、报表、文档、研报和自然语言标准取数 | `references/finance.md` |
+| `edb_data` | 宏观、行业、区域和汇率 EDB 指标 | `references/economic.md` |
+| `index_data` | 指数和板块档案、基本面、技术、实时行情、K 线和分钟行情 | `references/index.md`；构造行情 `indexes` 时再读 `references/index-indicators.md` |
+| `bond_data` | 债券档案、发行人、行情估值和主体财务 | `references/bond.md` |
+| `financial_docs` | 公司公告和财经新闻的自然语言检索 | `references/financial-docs.md` |
+| `analytics_data` | 专项工具无法表达的跨标的聚合、排名或复合指标计算 | `references/analytics.md` |
 
-意图跨站时按这个顺序仲裁：
+### 大型业务契约渐进读取
 
-1. 公告、年报、招股书、新闻 → `financial_docs`；研报，或要按代码、日期精确筛清单再读单篇 → `finance_data`。`finance_data.general_query_documents` 与 `financial_docs` 的取舍待评审，评审前按此执行。
-2. 宏观、行业、汇率、商品价格等时间序列指标（产销量、CPI、利率、汇率，即使未出现"宏观"字样）→ `edb_data`。
-3. 最新价、涨跌幅、K 线、分钟线、区间走势：指数走 `index_data`；股票、基金、期货、外汇等其它品种走 `finance_data`；历史区间一律走 K 线。单只股票的盘中表现分析走 `stock_research`。
-4. 未指定标的的筛选 → `stock_research` / `fund_research` 的筛选工具；对象和指标明确、只要标准数值 → `finance_data.general_query_data`；要聚合、加权、排名、自定义计算 → `analytics_data`。后两者的取舍待评审，评审前按此执行。
-5. 企业的工商、股权、司法、税务、舆情 → `company_data`；上市公司证券口径的财务、估值、股东 → `stock_research`。
+- `stock/`：市场概览读 `references/stock/market-overview.md`；行业板块读 `references/stock/industry-sector.md`；公司研究读 `references/stock/company-research.md`；资金、技术和盘中分析读 `references/stock/trading-analysis.md`；选股读 `references/stock/screener.md`。
+- `fund/`：发现和档案读 `references/fund/discovery-profile.md`；业绩和归因读 `references/fund/performance-attribution.md`；配置和持仓读 `references/fund/allocation-holdings.md`；净值和交易读 `references/fund/nav-trading.md`；规模和财务读 `references/fund/size-financials.md`；筛选读 `references/fund/screener.md`。
+- `options/`：合约和行情读 `references/options/contract-market.md`；波动率读 `references/options/volatility.md`；定价读 `references/options/pricing.md`；情绪读 `references/options/sentiment.md`。
+- `company/`：主体和工商读 `references/company/discovery-registration.md`；股权治理读 `references/company/ownership-governance.md`；商业关系读 `references/company/business-relations.md`；知识产权和资质读 `references/company/intellectual-property-qualifications.md`；司法执行读 `references/company/judicial-enforcement.md`；处罚失信和税务读 `references/company/compliance-tax.md`；经营、融资和舆情风险读 `references/company/operating-financing-risk.md`；只有工具参数需要风险枚举时再读 `references/company/risk-enums.md`。
 
-标的类型或意图不落在上表任何一行时，直接回 `OUT_OF_SCOPE` 并说明，**不得用 Web Search、`analytics_data`、`general_query_data` 或 `wind-alice` 伪装成支持**。涉及行业且用户未指定分类体系时，默认 Wind 行业分类。
+### 路由优先级
 
-## 2. 发命令
+1. 公告、年报、季报、招股书、监管披露和财经新闻优先 `financial_docs`；需要研报、文档列表、单篇全文或精确类型/日期过滤时使用 `finance_data` 的文档链路。
+2. 指数和板块优先 `index_data`；债券优先 `bond_data`。
+3. 股票研究结论类请求走 `stock_research`；股票最新价、历史行情或严格指标代码取数走 `finance_data`。
+4. 基金研究、持仓和归因走 `fund_research`；跨资产行情比较走 `finance_data`。
+5. `analytics_data` 仅作跨域结构化计算补充，不替代专项行情、K 线、文档、筛选或 EDB 工具。
 
-先 `cd` 到本 `SKILL.md` 所在目录（**不是当前项目目录**），再用相对路径执行：
+标的类型或意图不属于上述范围时返回 `OUT_OF_SCOPE`。认证、额度、网络、后端或路由失败时直接报告，不得切换到其它工具伪装成功。
+
+## 2. 读契约
+
+读取且只读取当前调用所需的 reference；一个问题涉及多个 `server_type` 时，分别读取对应文档。reference 用于选择工具和构造参数，MCP Server 负责最终校验。如 reference 与线上不一致，运行 `list-tools` 查看实时契约，不得猜参数。
+
+Wind 代码字段必须按当前工具 `inputSchema` 的大小写和复数形式传递：`windcode`、`windCode`、`windCodes` 不是同义字段。CLI 只做空白清理、逗号分隔字符串拆分和已带后缀代码的大小写归一化（数组和字符串均支持），不会为中文名称或无后缀代码猜交易所后缀；期货/期权合约等特殊代码保持原样交给后端解析。
+
+标的未识别或 NER 失败时，询问用户准确全称或 Wind 标准代码；不得自行补交易所后缀。涉及行业且用户未指定分类体系时，使用 Wind 行业分类。
+
+## 3. 发命令
+
+先切换到本 `SKILL.md` 所在目录，再执行：
 
 ```bash
 node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 ```
 
-一个可直接运行的完整例子：
+示例：
 
 ```bash
-node scripts/cli.mjs call stock_research stock_get_company_valuation '{"windCode":"600519.SH"}'
+node scripts/cli.mjs call stock_research stock_get_company_profile '{"windCode":"600519.SH"}'
+node scripts/cli.mjs call fund_research fund_get_basic_info '{"windCodes":["005827.OF"]}'
+node scripts/cli.mjs call company_data company_search_entity '{"searchKey":"贵州茅台"}'
+node scripts/cli.mjs call edb_data economic_search_indicator '{"question":"中国GDP相关指标"}'
 ```
 
-参数取值一律回契约拿，不得从本例外推。`index_data`、`bond_data`、`financial_docs`、`analytics_data` 用 snake_case 参数，其余站用 camelCase，以契约为准；契约标为数组的参数必须传 JSON 数组，整数、布尔按声明类型传。
+PowerShell、cmd 或被执行器二次包装时，优先将 UTF-8 JSON 从 stdin 传入并把最后一个参数写为 `-`，避免命令行转义破坏 JSON，也不需要向 Skill 安装目录写临时文件：
 
-**参数传递**：POSIX shell 优先传内联 `<params_json>`；非 POSIX 环境（PowerShell / cmd / 经 workbuddy、Codex 等执行器包装）一律将 UTF-8 JSON 参数文件生成到 `scripts/request-<唯一后缀>.json`，以 `@scripts/request-<唯一后缀>.json` 传入，调用后删除。不复用共享文件，不在 skill 根目录生成。
+```powershell
+$requestJson='{"windCodes":"600519.SH","indexes":"\u6700\u65b0\u6210\u4ea4\u4ef7,\u4ea4\u6613\u65f6\u95f4"}'
+$requestJson | node scripts/cli.mjs call finance_data quote_get_realtime_indicators -
+```
 
-**Key**：不得只检查部分配置来源就声称没有 API Key。必须先实跑一次；只有返回 `AUTH_ERROR` 且明确为未配置，才能判定缺失，并按信封中的指引处理。
+经过可能改写命令文本的 Windows 执行器时，命令中的非 ASCII JSON 值使用 `\uXXXX` 转义。已有 UTF-8 JSON 文件时也可用 `@<文件路径>` 传入；临时文件必须位于客户端允许写入的临时目录或工作区，不得写入 Skill 安装目录，也不得复用共享请求文件。
 
-**批量与并发**：默认串行（并发 1）。需要对 2 个及以上标的逐项调用时，先只发第一个作为探针，探针成功返回数据、未出现错误信封，才继续其余；探针返回错误信封立即终止该批次，不得把相同调用扩散到其它标的。不同 `server_type + tool_name` 或不同参数结构分别分组，每组各发一次探针。用户明确要求并发时上限 10，一旦某次返回 `RATE_LIMIT_ERROR` 或 `backend_error` 就停止新请求并恢复串行。支持多标的的参数（各站的 `windCodes`）**单次最多 50 个**，超过拆批后合并，该上限与并发上限相互独立。
+认证由 CLI 处理。仅当真实调用返回 `AUTH_ERROR` 时报告认证问题；不得在输出、日志或交付文件中写入 Key。
 
-## 3. 读回执
+### 批量与并发
 
-每次调用的 stdout 只有两种形态：成功是数据对象，失败是带 `ok:false` 的错误信封。
+默认串行。对多个标的逐项调用时，先调用第一个作为探针；探针成功后再继续。探针出现 `RATE_LIMIT_ERROR`、`backend_error` 或认证错误时立即停止该批次。用户明确要求并发时上限 10。
 
-**成功**：后端结果在 `content[0].text` 里，是 JSON 字符串或 Markdown 表格；能解析为 JSON 就按 JSON 读，否则直接读表。CLI 另附一个 `cli_meta`。
+## 4. 验回执
 
-- 数值的单位和**量级**以返回体自带的元数据为准（行情类 `data.unit` / `indicator_units`，列定义里的 `unit`，EDB 的 `meta.unit` 与 `meta.magnitude`，Markdown 表格的单元格内单位）。元数据未给出时保留原值并说明单位未知，不得自行换算。
-- **标的核对**：返回体中的证券代码、公司名称、基金代码必须与用户标的一致。后端按名称做实体识别，名称不存在或有歧义时会匹配到别的标的；不一致时不得作答，按标的未识别处理。
-- 「无匹配记录」「没有公开记录」、空的 `data` 或 `metrics` 是正常结果（`NO_RESULTS`），不是错误，如实转告。
+成功时 stdout 为 MCP 结果对象，后端正文通常位于 `content[0].text`，CLI 另附 `cli_meta`。优先解析 `content[0].text` 中的 JSON；数量、单位、量级、币种、频率和时间口径一律以返回元数据为准，缺失时保留原值并说明未知，不得自行换算。
 
-**失败**：stdout 是 `{ "ok": false, "code": "...", "message": "..." }`。本地/参数/网络类错误的 `code` 指明原因（`AUTH_ERROR`、`PARAMS_FILE_ERROR`、`INVALID_PARAMS_JSON`、`PARAM_TYPE_ERROR`、`PARAM_VALIDATION_ERROR`、`ROUTE_ERROR`、`USAGE_ERROR`、`RATE_LIMIT_ERROR`、`NETWORK_ERROR`、`TOOL_RUNTIME_ERROR`、`SETUP_ERROR`、`UNKNOWN`）；接口层错误的 `code` 固定为 `backend_error`，`message` 为接口原文。据此向用户说明，或按下面的自检修正后再调用。
+返回体中的证券代码、公司名称、基金代码等实体标识必须与用户目标一致；名称解析到其它实体或存在歧义时，不得用该结果作答，应请用户提供准确全称或 Wind 标准代码。空的 `data` / `metrics`、无匹配记录或没有公开记录属于 `NO_RESULTS`，不得改写为服务错误或补造结果。
 
-**修正后再调用前自检**（逐条核对）：
+失败时 stdout 为 `{ "ok": false, "code": "...", "message": "..." }`。按 `message` 指出的字段修正；除非工具契约证明原工具无法表达需求，不得随意切换 `server_type` 或 `tool_name`。
 
-- 明确上一次的 `code` 与 `message`。
-- 保持同一 `server_type` 和 `tool_name`；只有当前契约证明该工具无法表达所需字段或口径时，才可在同业务域切换。
-- 除非错误是 `INVALID_PARAMS_JSON`，不得修改命令引号或 JSON 转义。
-- 除非错误是 `PARAM_TYPE_ERROR` 或 `PARAM_VALIDATION_ERROR`，不得改动业务参数；只按 `message` 指出的字段修正。`ROUTE_ERROR` 的 `message` 会列出该站全部合法工具名。
-- 参数名和字段值必须来自当前契约。
+后端返回 `backend_error` 时保留 CLI 原始错误并停止当前批次，不猜测替代 endpoint、不改写工具名或业务参数。多个 server 返回相同后端错误时标记 `BLOCKED_BACKEND`；只有没有结构化后端错误、仅有本地异常时才标记 `BLOCKED_RUNTIME`。
 
-**硬红线**：同一 `server_type + tool_name + 参数` 的调用不得原样重发。上一次成功直接用结果；上一次报错必须先改参数或换工具；连续两次相同入参即视为异常，立即中止并向用户说明。`backend_error` 为「服务暂时不可用」时同样只报告一次，不重试。
+修正后重试前逐项检查：
 
-## 4. 收口
+- 保持用户原始业务条件，不擅自增删筛选条件、时间范围或口径。
+- 参数名、类型、枚举和必填项来自当前工具 `inputSchema`。
+- 只修正错误明确指出的字段。
+- 日期范围、成对字段和互斥字段保持一致。
+- 返回空数据时报告 `NO_RESULTS`，不得补造结果。
+- 同一 `server_type + tool_name + 参数` 不得原样重发；成功结果直接复用，失败后必须有契约或错误信息支持的参数修正。`backend_error` 原样调用最多报告一次。
 
-标的未识别、NER 失败或返回体标的与用户不一致时，询问用户准确全称或 Wind 标准代码，不得自行补交易所后缀或把名称猜成代码。参数错误时优先按 `message` 中给出的期望类型、格式、枚举或字段集修正；无法唯一确定时再询问用户。
+成功返回数据时，在答复末尾附与用户语言一致的来源声明：
 
-认证、额度、网络、后端不可用、命令传递、路由错误：直接报告，**不得切 `analytics_data`、`general_query_data` 或 `wind-alice`**。
+> 数据来源于 Wind Alice 万得金融数据服务。
 
-`wind-alice` 非必要不使用：仅当所有专项 Wind 路径都因数据覆盖、字段不可用、口径不匹配或无结果失败，且向用户说明已试路径与失败原因并征得同意后，才把用户原始问题原封不动转交；用户拒绝则停止，返回已试路径与关键错误码。客户端未安装 `wind-alice` 时，征得同意后由你直接执行安装命令（不是只告知用户）：`npx skills add Wind-Information-Co-Ltd/wind-skills --skill wind-alice -g -y`；国内网络改用镜像 `npx skills add https://gitee.com/wind_info/wind-skills.git --skill wind-alice -g -y`；仅安装到当前项目时去掉 `-g`。安装成功后再转交；安装失败时报告命令原始报错，不得静默放弃。
+> Data sourced from Wind Alice Financial Data Service.
 
-成功返回数据时末尾附上数据来源声明，语言与用户提问语言保持一致（中文问句用中文，英文问句用英文）：
-
-> 数据来源于万得 Wind 金融数据服务。
-
-> Data sourced from Wind Financial Data Service.
-
-完成状态：`DONE`、`DONE_WITH_LIMITS`、`NO_RESULTS`、`BLOCKED_KEY`、`BLOCKED_QUOTA`、`BLOCKED_RUNTIME`、`OUT_OF_SCOPE`。
+完成状态：`DONE`、`DONE_WITH_LIMITS`、`NO_RESULTS`、`BLOCKED_KEY`、`BLOCKED_QUOTA`、`BLOCKED_BACKEND`、`BLOCKED_RUNTIME`、`OUT_OF_SCOPE`。

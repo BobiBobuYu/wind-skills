@@ -42,6 +42,7 @@ const DEFAULT_SOURCES = [
   'Wind-Information-Co-Ltd/wind-skills',
   'git@gitee.com:wind_info/wind-skills.git',
 ];
+const DEFAULT_INSTALL_SCOPE = 'global';
 const LOCK_STALE_MS = 30 * 60 * 1000;
 const QUIET_MS = 10 * 1000;
 const MAX_WAIT_MS = 10 * 60 * 1000;
@@ -52,9 +53,11 @@ function normalizePath(value) {
 }
 
 function updateScope() {
-  const globalRoot = normalizePath(join(homedir(), '.agents', 'skills'));
-  const skillDir = normalizePath(SKILL_DIR);
-  return skillDir.startsWith(`${globalRoot}/`) ? 'global' : 'project';
+  // Global installation is the default. A project install is only an explicit
+  // caller choice, never something inferred from the current checkout path.
+  return String(process.env.WIND_SKILL_INSTALL_SCOPE || '').trim().toLowerCase() === 'project'
+    ? 'project'
+    : DEFAULT_INSTALL_SCOPE;
 }
 
 function projectRoot() {
