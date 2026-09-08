@@ -1,6 +1,6 @@
 # `stock_research` 个股交易与盘中分析
 
-用于个股资金流、技术面和实时综合分析。精确行情字段与历史序列读取 `references/finance/` 下对应契约。
+用于个股资金流、技术面和实时综合分析。精确行情字段与历史序列读取 `references/general/general.md`。
 
 ## 目录
 

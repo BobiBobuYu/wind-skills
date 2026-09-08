@@ -124,7 +124,7 @@ const CALL_EXAMPLES = [
   `cli.mjs call stock_research stock_screener '{"question":"筛选沪深市场市值超500亿且连续5日上涨的股票"}'`,
   `cli.mjs call stock_research stock_get_company_profile '{"windCode":"600519.SH"}'`,
   `cli.mjs call fund_research fund_get_basic_info '{"windCodes":["005827.OF"]}'`,
-  `cli.mjs call finance_data quote_get_realtime_indicators '{"windCodes":"600519.SH","indexes":"最新成交价,涨跌幅"}'`,
+  `cli.mjs call general_data quote_get_realtime_indicators '{"windCodes":"600519.SH","indexes":"最新成交价,涨跌幅"}'`,
   `cli.mjs call company_data company_search_entity '{"searchKey":"贵州茅台"}'`,
   `cli.mjs call edb_data economic_search_indicator '{"question":"中国GDP相关指标"}'`,
   `cli.mjs call index_data get_index_kline '{"windcode":"000300.SH","begin_date":"2026-04-01","end_date":"2026-04-30"}'`,
@@ -997,6 +997,10 @@ if (IS_MAIN) runMain();
 
 function runMain() {
   const [cmd, ...args] = process.argv.slice(2);
+  // 对外别名在入口归一化，复用真实服务的认证、参数兼容和传输逻辑。
+  if (['call', 'list-tools', 'list-servers'].includes(cmd) && args[0] === 'general_data') {
+    args[0] = 'finance_data';
+  }
 
   const USAGE =
     `wind-mcp-skill\n` +
@@ -1008,6 +1012,7 @@ function runMain() {
     `  cli.mjs open-portal                                # 打开万得开发者中心拿 API Key\n` +
       `  cli.mjs setup-key <KEY> [--server <default|stock_research>] [--scope <global|skill>]\n` +
       `    默认 scope=global；仅用户明确要求时使用 scope=skill\n\n` +
+    `general_data 是 finance_data 的别名，两者均可用于 call / list-tools / list-servers。\n\n` +
     `可用 server_type:\n` +
     Object.entries(SERVERS).map(([k, v]) => `  ${k.padEnd(20)}${v.label}`).join('\n') + '\n\n' +
     `典型:\n` +
