@@ -53,6 +53,8 @@ description: 这是万得面向 AI Agent 的专业金融数据调用入口，提
 
 reference 用于选择工具和构造参数，MCP Server 负责最终校验。发现参数拒绝、工具缺失或契约疑似过期时，运行 `node scripts/cli.mjs list-tools <server_type>` 核对完整线上定义，定位相关工具，不必每次调用前重复获取。契约与实际返回仍冲突时，保留差异并说明限制，不猜参数或隐瞒兼容问题。
 
+工具名与 server 名必须逐字使用：只能调用当前 reference 契约或 `list-tools` 返回中实际存在的 `server_type` 与 `tool_name`，不得凭记忆、推测或相似命名编造、改写工具名（包括大小写、单复数、前后缀变体）。目标工具在契约中找不到时，视为当前专项未覆盖，按路由规则改查 `general_data` 或运行 `list-tools` 核对，不尝试相似名称。
+
 参数名、类型、枚举和必填项以当前工具契约为准；`windcode`、`windCode`、`windCodes` 不能互换，数组与逗号分隔字符串也须按字段类型填写。CLI 负责已实现的代码和参数兼容处理；Agent 不自行猜测交易所后缀。
 
 工具支持自然名称且目标明确时，可直接查询，无需固定先调用筛选工具。需要识别、搜索或条件筛选时，按契约选择具备相应能力的工具；仅在实体、指标、报表或文档标识尚未明确且工具要求时执行前置发现。返回候选存在歧义或无法识别时，请用户确认准确全称或 Wind 标准代码，不静默选择。
@@ -66,6 +68,8 @@ reference 用于选择工具和构造参数，MCP Server 负责最终校验。�
 ```bash
 node scripts/cli.mjs call <server_type> <tool_name> '<params_json>'
 ```
+
+`<server_type>` 与 `<tool_name>` 直接取自已确认的契约条目，逐字替换，不做任何拼写调整。
 
 示例：
 
@@ -115,5 +119,3 @@ CLI 失败通常返回 `{ "ok": false, "code": "...", "message": "..." }`，也�
 > 数据来源于 Wind Alice 万得金融数据服务。
 
 > Data sourced from Wind Alice Financial Data Service.
-
-完成状态：`DONE`、`DONE_WITH_LIMITS`、`NO_RESULTS`、`BLOCKED_KEY`、`BLOCKED_QUOTA`、`BLOCKED_BACKEND`、`BLOCKED_RUNTIME`、`OUT_OF_SCOPE`。

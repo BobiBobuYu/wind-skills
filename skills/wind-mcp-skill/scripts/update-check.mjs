@@ -33,10 +33,13 @@ export function normalizePath(value) {
   return process.platform === 'win32' ? normalized.toLowerCase() : normalized;
 }
 
-// 更新范围默认 global；只有显式 WIND_SKILL_INSTALL_SCOPE=project 才按项目安装处理。诊断与执行共用。
-export function installScope() {
+// 更新范围：env 显式指定优先；否则按 skillDir 实际位置自检——
+// 只有目录真的位于 ~/.agents/skills 下才算 global，项目内安装一律按 project。诊断与执行共用。
+export function installScope(skillDir = SKILL_DIR) {
   const override = String(process.env.WIND_SKILL_INSTALL_SCOPE || '').trim().toLowerCase();
-  return override === 'project' || override === 'global' ? override : 'global';
+  if (override === 'project' || override === 'global') return override;
+  const globalRoot = normalizePath(join(homedir(), '.agents', 'skills'));
+  return normalizePath(skillDir).startsWith(`${globalRoot}/`) ? 'global' : 'project';
 }
 
 export function updateStateFile(skillDir) {
@@ -99,7 +102,7 @@ export function diagnoseUpdate(skillDir) {
   return {
     platform: process.platform,
     node_pid: process.pid,
-    update_scope: installScope(),
+    update_scope: installScope(skillDir),
     update_state_file: file,
     update_state: state,
     next_update_needed: !updatedToday(state),
