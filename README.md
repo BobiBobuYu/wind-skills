@@ -153,9 +153,9 @@ Set-Content -Path "$env:USERPROFILE\.wind-aifinmarket\config" -Value "WIND_API_K
 
 ### 三级兜底（按优先级）
 
-1. 环境变量 `WIND_API_KEY`
+1. 全局 `~/.wind-aifinmarket/config`（**推荐**，所有 wind skill 共享）
 2. SKILL.md 同目录 `config.json`
-3. 全局 `~/.wind-aifinmarket/config`（**推荐**，所有 wind skill 共享）
+3. 环境变量 `WIND_API_KEY`
 
 ---
 
@@ -202,7 +202,7 @@ AI 会根据问题自动选择可用能力。取数类问题优先使用 `wind-m
 | 跨标的聚合、排名、复合计算                                    | `analytics_data`   | `analytics/analytics.md`                          |
 | 专项未覆盖的通用行情、专业指标、报表、文档、研报、自然语言取数 | `general_data`     | `general/general.md`                              |
 
-> 渐进加载：SKILL.md 只有路由表和各业务域文件清单，每次问答再读一份契约。`general_data` 是对外别名，CLI 入口归一化到万得 `finance_data` 服务；其余 server_type 与万得 MCP 地址路径段一一对应（`https://mcp.wind.com.cn/vserver_<server_type>/mcp/`）。
+> 渐进加载：SKILL.md 只有路由表和各业务域文件清单，每次问答再读一份契约。`general_data` 对应万得 `vserver_finance_data` 服务，`finance_data` 作为兼容名同样接受；其余 server_type 与万得 MCP 地址路径段一一对应（`https://mcp.wind.com.cn/vserver_<server_type>/mcp/`）。
 
 更详细的路由表与仲裁顺序见 [`skills/wind-mcp-skill/SKILL.md`](./skills/wind-mcp-skill/SKILL.md)，设计说明见 [`docs/wind-mcp-skill-v3-design.md`](./docs/wind-mcp-skill-v3-design.md)。
 

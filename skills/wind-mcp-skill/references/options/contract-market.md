@@ -41,7 +41,7 @@
 | --- | --- | --- | --- | --- |
 | `optionVarietyCode` | 是 | `string` | — | 期权品种代码，如510050OP.SH表示上证50ETF期权。通常由上游工具 `options_get_listed_terms` 的返回结果中获取。 |
 | `tradeDate` | 否 | `string` | 默认："2026-06-01"；正则：^\d{4}-\d{2}-\d{2}$；格式：date | 交易日（格式为YYYY-MM-DD）。查询上市期权品种期限的日期。 |
-| `expiryDate` | 否 | `string` | 默认："2026-09-01"；正则：^\d{4}-\d{2}-\d{2}$；格式：date | 期权到期日（格式为YYYY-MM-DD）。指定要获取哪个期限下的期权链。通常由上游工具 `options_get_listed_terms` 的返回结果中获取。 |
+| `expiryDate` | 是 | `string` | 正则：^\d{4}-\d{2}-\d{2}$；格式：date | 期权到期日（格式为YYYY-MM-DD）。指定要获取哪个期限下的期权链。通常由上游工具 `options_get_listed_terms` 的返回结果中获取。 |
 | `underlyingPrice` | 否 | `number` | — | 期权标的现价。与strikeLevels配合使用，确定行权价筛选区间的中心点。该数值的单位随资产类型变化（股票为货币单位，指数为点数，商品为对应计价单位等），但传入时直接使用市场报价的原始数值，不做任何单位换算。确保该数值与期权链中的行权价位于同一数值标尺上、可直接比较即可。若不传，则返回该期限下的全部期权合约。 |
 | `indicators` | 否 | `array<string>` | 默认：["lastPrice","settlePrice","volume","openInterest","iv","delta","gamma","vega","theta"] | 期权指标列表，可选指标包括：最新价、结算价、成交量、持仓量、持仓量变化、隐含波动率、波动率涨跌、delta、gamma、vega、theta,涨跌、涨跌幅、开、高、低 |
 | `strikeLevels` | 否 | `integer` | 最小：1 | 期权合约上下档位个数，如5表示上下各5档。控制返回的期权合约范围。若不传，则忽略档位限制，返回该期限下的全部期权合约。 |
