@@ -21,8 +21,6 @@ description: 平台 skill 清单本地副本。由 npx skills update -g -y 随 w
 | wind-alice-equity-research-expert | Alice 专家-个股深研/财报事件/估值 | API Key        | Alice 个股研究专家:个股深研、财报与事件解读、估值位置与同业比较、可证伪投资 Thesis 与跟踪,用户原话直接透传 |
 | wind-alice-wealth-advisor | Alice 专家-财富管理/组合诊断/配置 | API Key        | Alice 财富管理专家:客户洞察、产品研究与筛选、持仓诊断、资产配置、调仓再平衡、定投与保险保障,用户原话直接透传 |
 | wind-alice-meeting-expert | Alice 专家-会议/业绩会/纪要 | API Key        | Alice 会议专家:路演/业绩会/调研拜访的会前准备、会中 AI 参会记录与转写、会后纪要与跟进事项,用户原话直接透传 |
-| ifind-finance-data    | 数据-行情/基金/宏观/新闻公告/智能选股 | API Key        | 访问同花顺 iFinD 金融数据:股票、基金、宏观经济、行业经济、新闻公告,并支持智能选股、选基与指标搜索                                       |
-| mx-finance-data       | 数据-结构化查询/行情/财务/估值/多资产 | 依赖 + API Key | 访问东方财富数据库:覆盖 A 股 / 港股 / 美股、基金、债券等多资产结构化数据,输出 xlsx 与结果说明文件                                       |
 | tushare-finance-skill | 数据-行情/财务/宏观/多资产            | 依赖 + Token   | 访问 Tushare Pro 金融数据:覆盖 A 股、港股、美股、基金、期货、债券、财务报表与宏观经济指标                                               |
 
 ---
