@@ -16,8 +16,12 @@ description: 平台 skill 清单本地副本。由 npx skills update -g -y 随 w
 
 | 名称                  | category                              | 装好需配置     | 一句话                                                                                                                                  |
 | --------------------- | ------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| wind-mcp-skill | 数据-股票/基金/指数/债券/期权/期货/企业/宏观/文档/行情 | API Key | 访问万得 Wind 金融数据:A 股 / 港股 / 美股(画像、财务、估值、预期、选股) + 基金(筛选、档案、净值、持仓、归因) + 指数 / 板块 + 债券 + 期权 + 期货 + 企业库(工商、股权、司法、税务、舆情) + 公告 / 新闻 / 研报 + 宏观 EDB + 全品种行情与 K 线 |
+| wind-mcp-skill        | 数据-行情/基金/股票/宏观/文档         | API Key        | 访问万得 Wind 金融数据:A 股 / 港股股票(行情与财务) + ETF / 公募基金(行情与全维数据) + 公司公告 + 财经新闻 + 宏观经济指标                |
+| wind-mcp-research-skill | 数据-投研级/股票/基金/指数/债券/宏观/期货/期权/企业 | API Key | 访问万得 Wind 投研级数据:全球行情与专业指标、新闻/公告/研报文档库、股票投研(画像/财务/预期/估值/资金/技术)、基金与 ETF(净值/规模/持仓/归因)、指数与板块、债券、宏观 EDB、期货、期权与定价、企业工商与风控 |
 | wind-alice            | Alice 专业金融分析 Agent              | API Key        | Alice 综合分析入口,适合事实核验、公司一页纸、调研问题清单、财报点评、主题选股、基金分析、宏观/债券/信用分析、市场规模测算和可比公司分析 |
+| wind-alice-equity-research-expert | Alice 专业金融分析 Agent              | API Key        | Alice 个股研究专家:个股深研、财报与事件解读、估值位置与同业比较、可证伪投资 Thesis 与跟踪,用户原话直接透传 |
+| wind-alice-wealth-advisor | Alice 专业金融分析 Agent              | API Key        | Alice 财富管理专家:客户洞察、产品研究与筛选、持仓诊断、资产配置、调仓再平衡、定投与保险保障,用户原话直接透传 |
+| wind-alice-meeting-expert | Alice 专业金融分析 Agent              | API Key        | Alice 会议专家:路演/业绩会/调研拜访的会前准备、会中 AI 参会记录与转写、会后纪要与跟进事项,用户原话直接透传 |
 | ifind-finance-data    | 数据-行情/基金/宏观/新闻公告/智能选股 | API Key        | 访问同花顺 iFinD 金融数据:股票、基金、宏观经济、行业经济、新闻公告,并支持智能选股、选基与指标搜索                                       |
 | mx-finance-data       | 数据-结构化查询/行情/财务/估值/多资产 | 依赖 + API Key | 访问东方财富数据库:覆盖 A 股 / 港股 / 美股、基金、债券等多资产结构化数据,输出 xlsx 与结果说明文件                                       |
 | tushare-finance-skill | 数据-行情/财务/宏观/多资产            | 依赖 + Token   | 访问 Tushare Pro 金融数据:覆盖 A 股、港股、美股、基金、期货、债券、财务报表与宏观经济指标                                               |
@@ -28,22 +32,41 @@ description: 平台 skill 清单本地副本。由 npx skills update -g -y 随 w
 
 > 这些能力由 `wind-alice` 统一承载。用户点名中文名、英文名或提出高度匹配的问题时,推荐安装 / 调用 `wind-alice`,并把对应子 Skill 名传给 Alice。
 
-| 中文名                 | 英文 Skill 名                            | 适合问题                                           |
-| ---------------------- | ---------------------------------------- | -------------------------------------------------- |
-| 通胀情景债券轮动策略   | `Inflation Bond Strategy`                | CPI/PPI 拐点驱动的债券、货基、久期轮动策略与回测   |
-| 宏观数据解读           | `Macro Data Interpretation`              | CPI、PPI、PMI、GDP、社融等宏观指标的研究周报式解读 |
-| 按主题选股             | `Thematic Stock Screening`               | 拆解市场主线、验证主题逻辑、筛选真实受益标的       |
-| 债券利率走势研判       | `Bond Rate Outlook`                      | 从交易、策略、配置视角研判债券利率走势             |
-| 信用分析               | `Credit Analysis`                        | 主体信用、财务现金流、评级对标、违约概率分析       |
-| 基金对比分析           | `Fund Compare`                           | 多只基金业绩、风险、持仓、管理能力对比             |
-| 基金筛选与投资建议     | `Fund Screening & Investment Advisory`   | 多维筛选基金并给出投顾式配置建议                   |
-| 投资标的创意与筛选     | `Investment Idea Generation`             | 基于因子和主题扫描生成投资标的创意                 |
-| 公司一页纸             | `Company One-Page Investment Memo`       | 上市公司一页纸投资报告                             |
-| 上市公司调研问题清单   | `Stock DD List`                          | 买方视角调研备忘录、深度议题和管理层提问           |
-| 全球上市公司季报点评   | `Global Share Quarterly Earnings Review` | 全球上市公司财报点评、beat/miss 与核心变化         |
-| 市场规模测算与战略建模 | `Market Sizing & Strategic Modeling`     | Top-down / Bottom-up 市场规模测算与情景敏感性      |
-| 可比公司分析           | `fsi-comps-analysis`                     | 机构级可比公司分析,含 Excel 和文字报告             |
-| 事实核验               | `Fact Check`                             | 逐点核查金融数据、声明、事件和文本事实             |
+| 中文名 | 英文 Skill 名 | 适合问题 |
+| ------ | ------------- | -------- |
+| A股短线策略报告 | `A-Share Short-Term Strategy Report` | 收盘后复盘涨停、资金轮动与热点概念,输出短线主线研判 |
+| AI商品策略师 | `AI Commodity Strategist` | 商品期货全板块盘前/盘中/盘后的机构级策略输出 |
+| 资产配置-行业轮动策略 | `Asset Allocation - Sector Rotation Strategy` | 未来 1-6 个月行业超配/中性/低配清单与行业评分 |
+| 资产配置-战略基准组合 | `Asset Allocation - Strategic Baseline Portfolio` | 3-5 年战略资产配置基准、大类权重与预期风险收益 |
+| 债券利率走势研判 | `Bond Rate Outlook` | 从交易、策略、配置视角研判债券利率走势 |
+| 券商金股追踪 | `Broker Top Picks Tracker` | 各券商月度金股汇总、推荐热度排名与行业分布 |
+| 商品智研助手 | `Commodity Research Assistant` | 单个期货品种的价格、基差、库存、供需、资金全景日报 |
+| 公司一页纸 | `Company One-Page Investment Memo` | 上市公司一页纸投资报告 |
+| 可比公司分析 | `Comps Analysis` | 机构级可比公司分析,含 Excel 和文字报告 |
+| 信用分析 | `Credit Analysis` | 主体信用、财务现金流、评级对标、违约概率分析 |
+| 深度研究 | `Deep Research` | 任意主题的多阶段深度研究与综合研究报告 |
+| 事实核验 | `Fact Check` | 逐点核查金融数据、声明、事件和文本事实 |
+| 基金对比分析 | `Fund Compare` | 多只基金业绩、风险、持仓、管理能力对比 |
+| 基金涨跌解读 | `Fund Performance Attribution Assistant` | 基金或 ETF 区间涨跌的持仓、行业、事件与宏观归因 |
+| 基金筛选与投资建议 | `Fund Screening & Investment Advisory` | 多维筛选基金并给出投顾式配置建议 |
+| 期货资金流向监测 | `Futures Fund Flow Monitor` | 商品期货资金流入流出排名与 T+1/T+5 价格表现 |
+| 期货主力行为分析 | `Futures Leading Institution Analysis` | 期货会员席位多空增减仓、净持仓与估算盈亏 |
+| 期货研报观点 | `Futures Research Opinion` | 商品期货机构研报多空观点分布与 Wind 情绪评分 |
+| 全球上市公司季报点评 | `Global Share Quarterly Earnings Review` | 全球上市公司财报点评、beat/miss 与核心变化 |
+| 通胀情景债券轮动策略 | `Inflation Bond Strategy` | CPI/PPI 拐点驱动的债券、货基、久期轮动策略与回测 |
+| 机构持仓透视 | `Institutional Holdings Insight` | 顶级机构新建仓/清仓、增减持排序与调仓轨迹 |
+| 期货盘中异动归因 | `Intraday Futures Move Attribution` | 某品种为何拉升/跳水/放量,或全市场异动扫描 |
+| 投资标的创意与筛选 | `Investment Idea Generation` | 基于因子和主题扫描生成投资标的创意 |
+| 宏观数据解读 | `Macro Data Interpretation` | CPI、PPI、PMI、GDP、社融等宏观指标的研究周报式解读 |
+| 市场规模测算与战略建模 | `Market Sizing & Strategic Modeling` | Top-down / Bottom-up 市场规模测算与情景敏感性 |
+| 金融监管局处罚月报 | `NFRA Monthly Enforcement Report` | 银行/保险/信托行政处罚的月度汇总、趋势与明细 |
+| 期权定价计算器 | `Option Pricing Calculator` | 香草到雪球各类期权的理论价格(NPV)与希腊字母 |
+| 期权波动率洞察 | `Option Volatility Insights` | 期权 IV 估值、期限结构、Skew、PCR 与波动率曲面 |
+| 期权交易策略 | `Options Trading Strategies` | 个股期权波动率信号、异动打分与五段式交易方案 |
+| 幻灯片 | `PPT Generator` | 按主题与结构化内容生成专业 PPT 报告 |
+| 证券业监管政策简报 | `Securities Regulatory Policy Briefing` | 指定区间证券业监管政策详情、清单与机构分布 |
+| 上市公司调研问题清单 | `Stock DD List` | 买方视角调研备忘录、深度议题和管理层提问 |
+| 按主题选股 | `Thematic Stock Screening` | 拆解市场主线、验证主题逻辑、筛选真实受益标的 |
 
 ---
 
@@ -137,6 +160,9 @@ description: 平台 skill 清单本地副本。由 npx skills update -g -y 随 w
 | volume_spike_reasoning_skill         | 盘中异动/交易判断                | 无          | 对股票盘中或日内放量异动进行归因，判断消息驱动、资金行为、情绪扩散或技术性放量 |
 | watchlist_news_impact_digest_skill   | 复盘/自选股                   | 无          | 汇总自选股在指定时间窗口内的重要新闻、公告与舆情变化，并判断影响方向 |
 | wind-alice                           | Alice 专业金融分析 Agent | API Key    | Alice 综合分析入口,适合事实核验、公司一页纸、调研问题清单、财报点评、主题选股、基金分析、宏观/债券/信用分析、市场规模测算和可比公司分析 |
+| wind-alice-equity-research-expert    | Alice 专业金融分析 Agent | API Key    | Alice 个股研究专家:个股深研、财报与事件解读、估值位置与同业比较、可证伪投资 Thesis 与跟踪,用户原话直接透传 |
+| wind-alice-wealth-advisor            | Alice 专业金融分析 Agent | API Key    | Alice 财富管理专家:客户洞察、产品研究与筛选、持仓诊断、资产配置、调仓再平衡、定投与保险保障,用户原话直接透传 |
+| wind-alice-meeting-expert            | Alice 专业金融分析 Agent | API Key    | Alice 会议专家:路演/业绩会/调研拜访的会前准备、会中 AI 参会记录与转写、会后纪要与跟进事项,用户原话直接透传 |
 
 ---
 
