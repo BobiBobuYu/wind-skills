@@ -25,8 +25,8 @@
 | `spotPrice` | 是 | `number` | — | 标的资产现价 |
 | `optionType` | 是 | `string` | 枚举："call" / "put" | 期权类型：看涨(call) 或 看跌(put)。 |
 | `strikePrice` | 是 | `number` | — | 执行价格。 |
-| `expirationDate` | 否 | `string` | 默认："2026-09-01" | 到期日期 (YYYY-MM-DD)。 |
-| `valuationDate` | 否 | `string` | 默认："2026-08-01"；正则：^\d{4}-\d{2}-\d{2}$ | 估值日期 (YYYY-MM-DD)。 |
+| `expirationDate` | 是 | `string` | 正则：^\d{4}-\d{2}-\d{2}$ | 到期日期 (YYYY-MM-DD)。 |
+| `valuationDate` | 是 | `string` | 正则：^\d{4}-\d{2}-\d{2}$ | 估值日期 (YYYY-MM-DD)。 |
 | `volatility` | 是 | `number` | — | 年化隐含波动率 (小数形式)。格式转换：如果用户输入 '25' 或 '25%'，请填入 0.25；如果输入 0.25，则保持不变。 |
 | `riskFreeRate` | 是 | `number` | — | 年化无风险利率 (小数形式)。对于 FX 期权，填入本币(计价货币)无风险利率。 |
 | `dividendYield` | 是 | `number` | — | 第二利率(小数形式)：Equity:输入年化股息率；FX:输入外币(基础货币)无风险利率；Futures:通常填0。 |
@@ -50,8 +50,8 @@
 | `spotPrice` | 是 | `number` | — | 标的资产现价 |
 | `optionType` | 是 | `string` | 枚举："call" / "put"；默认："call" | 期权类型：看涨(call) 或 看跌(put)。 |
 | `strikePrice` | 是 | `number` | — | 执行价格。 |
-| `expirationDate` | 否 | `string` | 默认："2026-09-01" | 到期日期 (YYYY-MM-DD)。 |
-| `valuationDate` | 否 | `string` | 默认："2026-09-01"；正则：^\d{4}-\d{2}-\d{2}$ | 估值日期 (YYYY-MM-DD)。 |
+| `expirationDate` | 是 | `string` | 正则：^\d{4}-\d{2}-\d{2}$ | 到期日期 (YYYY-MM-DD)。 |
+| `valuationDate` | 是 | `string` | 正则：^\d{4}-\d{2}-\d{2}$ | 估值日期 (YYYY-MM-DD)。 |
 | `volatility` | 是 | `number` | — | 年化隐含波动率 (小数形式)。格式转换：如果用户输入 '25' 或 '25%'，请填入 0.25；如果输入 0.25，则保持不变。 |
 | `riskFreeRate` | 是 | `number` | — | 年化无风险利率 (小数形式)。对于 FX 期权，填入本币(计价货币)无风险利率。 |
 | `dividendYield` | 是 | `number` | — | 第二利率(小数形式)：Equity:输入年化股息率；FX:输入外币(基础货币)无风险利率；Futures:通常填0。 |
