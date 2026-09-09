@@ -19,7 +19,6 @@
 | Skill | 能力域 |
 | --- | --- |
 | [`wind-mcp-skill`](./skills/wind-mcp-skill) | **访问万得 Wind 金融数据**：股票、基金、指数/板块、债券、期货、期权、企业风控、宏观 EDB、公告新闻研报，11 个 MCP server / 140+ 工具 |
-| [`wind-mcp-research-skill`](./skills/wind-mcp-research-skill) | **访问万得 Wind 投研级数据**：7 个 MCP 服务 / 130+ 工具，覆盖全球行情与专业指标、文档库、股票/基金投研、宏观、期货、期权与定价、企业工商与风控 |
 | [`tushare-finance-skill`](./skills/tushare-finance-skill) | **访问 Tushare Pro 金融数据**：A 股、港股、美股、基金、期货、债券、财务报表与宏观经济指标 |
 
 ### Agent 类
@@ -109,7 +108,6 @@
 | [`wind-find-finance-skill`](./skills/wind-find-finance-skill) | 万得金融能力发现与安装路由入口 |
 
 > `wind-find-finance-skill` 是入口型 meta-skill，不调 MCP server、不需要 API Key。
-> `wind-mcp-skill` / `wind-mcp-research-skill` 用于访问万得 Wind 金融数据，按数据域分类调用。
 > `wind-alice` 是万得 Alice Agent 入口，需要 API Key。
 
 ---
@@ -151,7 +149,6 @@ npx skills add Wind-Alice/AliceMarket --list
 
 ---
 
-## 🔑 配置 API Key（wind-mcp-skill / wind-mcp-research-skill / wind-alice 需要）
 
 ### 让 AI 帮你打开开发者中心拿 Key（推荐）
 
@@ -249,7 +246,6 @@ Wind AliceMarket/
 └── skills/                         ← 所有 skill 直接平铺，对齐 npx skills 协议
     ├── wind-find-finance-skill/    ← 入口（纯 SKILL.md + references）
     ├── wind-mcp-skill/             ← 万得 Wind 金融数据访问（11 个 MCP server）
-    ├── wind-mcp-research-skill/    ← 万得 Wind 投研级数据访问（7 个 MCP server）
     ├── tushare-finance-skill/      ← Tushare Pro 金融数据
     ├── wind-alice/                 ← 万得 Alice Agent（A2A + SSE）
     └── …                           ← 其余金融技能类 skill，见上方表格
