@@ -15,19 +15,19 @@ description: 这是万得面向 AI Agent 的专业金融数据调用入口，提
 
 根据金融对象和业务意图定位 `server_type`，再按契约确认工具是否支持所需数据、时间范围、粒度、口径及标的数量。已有信息足够时直接查询；缺少影响结果的必要信息且契约无适用默认值时，再向用户澄清。
 
-| `server_type`    | 首选场景                         | 按需加载                                          |
+| `server_type`    | 研究对象                         | 按需加载                                          |
 | ---------------- | ---------------------------- | --------------------------------------------- |
-| `stock_research` | 股票                           | `references/stock/`                           |
+| `stock_research` | 股票及上市公司                    | `references/stock/`                           |
 | `fund_research`  | 基金、ETF、REITs                 | `references/fund/`                            |
 | `options_data`   | 期权                           | `references/options/`                         |
 | `futures_data`   | 期货                           | `references/futures/futures.md`               |
-| `company_data`   | 企业、风控                        | `references/company/`                         |
+| `company_data`   | 工商注册企业                      | `references/company/`                         |
 | `edb_data`       | 宏观、行业与区域经济                   | `references/economic/economic.md`             |
 | `index_data`     | 指数、板块                        | `references/index/index.md`                   |
 | `bond_data`      | 债券                           | `references/bond/bond.md`                     |
 | `financial_docs` | 公告与财经新闻                      | `references/financial-docs/financial-docs.md` |
-| `analytics_data` | 专项未覆盖的聚合与指标计算                | `references/analytics/analytics.md`           |
-| `general_data`   | 专项未覆盖的通用金融行情、指标、报表、文档与投研参考资料 | `references/general/general.md`               |
+| `analytics_data` | 金融模型与计算器                    | `references/analytics/analytics.md`           |
+| `general_data`   | 各类证券品种的行情、指标、报表、文档的通用数据提取工具 | `references/general/general.md`               |
 
 ### 路由规则
 
