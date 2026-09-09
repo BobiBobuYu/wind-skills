@@ -1,12 +1,12 @@
 # Wind AliceMarket
 
-> **Wind AliceMarket · 万得金融 Skill 市场** · 通过 MCP 协议把万得金融数据接入 AI Agent，一站式收录万得官方数据能力 + 社区金融分析工作流共 78 个 skill
+> **Wind AliceMarket · 万得金融 Skill 市场** · 通过 MCP 协议把万得金融数据接入 AI Agent，一站式收录万得官方数据能力 + 社区金融分析工作流
 
 [![GitHub](https://img.shields.io/badge/GitHub-Wind--Alice%2FAliceMarket-blue?logo=github)](https://github.com/Wind-Alice/AliceMarket)
 
 ---
 
-## 📦 收录的 Skill（共 78 个）
+## 📦 收录的 Skill
 
 ### 技能发现类
 
@@ -252,7 +252,7 @@ Wind AliceMarket/
     ├── wind-mcp-research-skill/    ← 万得 Wind 投研级数据访问（7 个 MCP server）
     ├── tushare-finance-skill/      ← Tushare Pro 金融数据
     ├── wind-alice/                 ← 万得 Alice Agent（A2A + SSE）
-    └── …                           ← 其余 75 个金融技能类 skill，见上方表格
+    └── …                           ← 其余金融技能类 skill，见上方表格
 ```
 
 ---
