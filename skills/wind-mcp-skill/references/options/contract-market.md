@@ -43,7 +43,7 @@
 | `tradeDate` | 否 | `string` | 默认："2026-06-01"；正则：^\d{4}-\d{2}-\d{2}$；格式：date | 交易日（格式为YYYY-MM-DD）。查询上市期权品种期限的日期。 |
 | `expiryDate` | 是 | `string` | 正则：^\d{4}-\d{2}-\d{2}$；格式：date | 期权到期日（格式为YYYY-MM-DD）。指定要获取哪个期限下的期权链。通常由上游工具 `options_get_listed_terms` 的返回结果中获取。 |
 | `underlyingPrice` | 否 | `number` | — | 期权标的现价。与strikeLevels配合使用，确定行权价筛选区间的中心点。该数值的单位随资产类型变化（股票为货币单位，指数为点数，商品为对应计价单位等），但传入时直接使用市场报价的原始数值，不做任何单位换算。确保该数值与期权链中的行权价位于同一数值标尺上、可直接比较即可。若不传，则返回该期限下的全部期权合约。 |
-| `indicators` | 否 | `array<string>` | 默认：["lastPrice","settlePrice","volume","openInterest","iv","delta","gamma","vega","theta"] | 期权指标列表，可选指标包括：最新价、结算价、成交量、持仓量、持仓量变化、隐含波动率、波动率涨跌、delta、gamma、vega、theta,涨跌、涨跌幅、开、高、低 |
+| `indicators` | 否 | `array<string>` | 元素枚举："lastPrice" / "settlePrice" / "volume" / "openInterest" / "oiChange" / "iv" / "ivChange" / "delta" / "gamma" / "vega" / "theta" / "change" / "pctChange" / "open" / "high" / "low"；默认：["lastPrice","settlePrice","volume","openInterest","iv","delta","gamma","vega","theta"] | 期权指标列表，可选指标包括：最新价（lastPrice）、结算价（settlePrice）、成交量（volume）、持仓量（openInterest）、持仓量变化（oiChange）、隐含波动率（iv）、波动率涨跌（ivChange）、delta、gamma、vega、theta、涨跌（change）、涨跌幅（pctChange）、开（open）、高（high）、低（low）。必须传英文键，不能传中文。 |
 | `strikeLevels` | 否 | `integer` | 最小：1 | 期权合约上下档位个数，如5表示上下各5档。控制返回的期权合约范围。若不传，则忽略档位限制，返回该期限下的全部期权合约。 |
 
 ### `options_get_contract_series`
@@ -59,7 +59,7 @@
 | 参数 | 必填 | 类型 | 约束 | 官方说明 |
 | --- | --- | --- | --- | --- |
 | `optionContractCodes` | 是 | `array<string>` | — | 需要查询的期权合约代码或标的代码列表，以获取其时间序列。 |
-| `indicators` | 是 | `array<string>` | — | 待提取的指标列表，可选值：最新价，涨跌，涨跌幅，结算价，成交量，持仓量，持仓量变化，隐含波动率，波动率涨跌，delta，gamma，vega，theta，开，高，低。 |
+| `indicators` | 是 | `array<string>` | 元素枚举："lastPrice" / "settlePrice" / "volume" / "openInterest" / "oiChange" / "iv" / "ivChange" / "delta" / "gamma" / "vega" / "theta" / "change" / "pctChange" / "open" / "high" / "low" | 待提取的指标列表。必须传英文键，不能传中文，可选值：最新价（lastPrice）、涨跌（change）、涨跌幅（pctChange）、结算价（settlePrice）、成交量（volume）、持仓量（openInterest）、持仓量变化（oiChange）、隐含波动率（iv）、波动率涨跌（ivChange）、delta、gamma、vega、theta、开（open）、高（high）、低（low）。 |
 | `startDate` | 否 | `string` | 默认："2026-06-01"；正则：^\d{4}-\d{2}-\d{2}$；格式：date | 开始日期（格式为YYYY-MM-DD）。时序数据查询的起始日期。 |
 | `endDate` | 否 | `string` | 默认："2026-09-01"；正则：^\d{4}-\d{2}-\d{2}$；格式：date | 结束日期（格式为YYYY-MM-DD）。时序数据查询的结束日期。 |
 
