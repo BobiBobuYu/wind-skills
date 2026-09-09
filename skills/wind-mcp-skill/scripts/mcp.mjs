@@ -283,13 +283,14 @@ function normalizeWindcode(code) {
   return raw;
 }
 
-// 通用服务按逗号分隔字符串接收 windCodes，其他服务按契约接收数组。
-function normalizeWindcodes(value, server_type) {
+// windCodes 一律按数组发出：全部服务的契约都是 array<string>。通用服务早先收逗号分隔字符串，
+// 2026-09-09 起后端也改成数组，旧的 join 会让网关把整串当成一个标的。用户仍可传逗号分隔的
+// 字符串，这里拆成数组。
+function normalizeWindcodes(value) {
   const codes = Array.isArray(value) ? value.map(normalizeWindcode)
     : typeof value === 'string' ? splitList(value).map(normalizeWindcode)
       : null;
-  if (!codes) return value;
-  return server_type === 'general_data' ? codes.join(',') : codes;
+  return codes || value;
 }
 
 // server_type + tool_name + 用户参数 → 实际发往网关的 arguments。
@@ -299,7 +300,7 @@ export function buildToolArguments(server_type, toolName, params) {
   if (typeof out.indexes === 'string') out.indexes = splitList(out.indexes).join(',');
   if (typeof out.windcode === 'string') out.windcode = normalizeWindcode(out.windcode);
   if (typeof out.windCode === 'string') out.windCode = normalizeWindcode(out.windCode);
-  if (Object.hasOwn(out, 'windCodes')) out.windCodes = normalizeWindcodes(out.windCodes, server_type);
+  if (Object.hasOwn(out, 'windCodes')) out.windCodes = normalizeWindcodes(out.windCodes);
 
   // count 是整型字段：整数字符串收敛成 number，其余原样交给网关校验。
   if (typeof out.count === 'string' && /^-?\d+$/.test(out.count.trim())) out.count = Number(out.count.trim());

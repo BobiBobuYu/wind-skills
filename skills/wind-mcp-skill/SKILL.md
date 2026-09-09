@@ -83,7 +83,7 @@ node scripts/cli.mjs call edb_data economic_search_indicator '{"question":"中�
 PowerShell、cmd 或被执行器二次包装时，优先将 UTF-8 JSON 从 stdin 传入并把最后一个参数写为 `-`，避免命令行转义破坏 JSON，也不需要向 Skill 安装目录写临时文件：
 
 ```powershell
-$requestJson='{"windCodes":"600519.SH","indexes":"\u6700\u65b0\u6210\u4ea4\u4ef7,\u4ea4\u6613\u65f6\u95f4"}'
+$requestJson='{"windCodes":["600519.SH"],"indexes":"\u6700\u65b0\u6210\u4ea4\u4ef7,\u4ea4\u6613\u65f6\u95f4"}'
 $requestJson | node scripts/cli.mjs call general_data quote_get_realtime_indicators -
 ```
 

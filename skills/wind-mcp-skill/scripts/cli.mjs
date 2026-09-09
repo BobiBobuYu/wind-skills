@@ -15,7 +15,7 @@ const CALL_EXAMPLES = [
   `cli.mjs call stock_research stock_screener '{"question":"筛选沪深市场市值超500亿且连续5日上涨的股票"}'`,
   `cli.mjs call stock_research stock_get_company_profile '{"windCode":"600519.SH"}'`,
   `cli.mjs call fund_research fund_get_basic_info '{"windCodes":["005827.OF"]}'`,
-  `cli.mjs call general_data quote_get_realtime_indicators '{"windCodes":"600519.SH","indexes":"最新成交价,涨跌幅"}'`,
+  `cli.mjs call general_data quote_get_realtime_indicators '{"windCodes":["600519.SH"],"indexes":"最新成交价,涨跌幅"}'`,
   `cli.mjs call company_data company_search_entity '{"searchKey":"贵州茅台"}'`,
   `cli.mjs call edb_data economic_search_indicator '{"question":"中国GDP相关指标"}'`,
   `cli.mjs call index_data get_index_kline '{"windcode":"000300.SH","begin_date":"2026-04-01","end_date":"2026-04-30"}'`,
