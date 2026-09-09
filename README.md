@@ -1,6 +1,6 @@
 # Wind AliceMarket
 
-> **Wind 万得金融 Skill 市场（monorepo）** · 通过 MCP 协议把万得金融数据接入 AI Agent，一站式收录万得官方数据能力 + 社区金融分析工作流共 78 个 skill
+> **Wind AliceMarket · 万得金融 Skill 市场** · 通过 MCP 协议把万得金融数据接入 AI Agent，一站式收录万得官方数据能力 + 社区金融分析工作流共 78 个 skill
 
 [![GitHub](https://img.shields.io/badge/GitHub-Wind--Alice%2FAliceMarket-blue?logo=github)](https://github.com/Wind-Alice/AliceMarket)
 
