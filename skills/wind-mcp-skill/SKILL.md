@@ -5,7 +5,7 @@ description: 这是万得面向 AI Agent 的专业金融数据调用入口，提
 
 <!-- ENCODING: UTF-8. If Chinese text looks garbled, re-read this file as UTF-8 before routing. -->
 
-# Wind 金融数据查询
+# Wind 金融数据查询-TEST
 
 通过本 Skill 自带 CLI 调用 Wind MCP。金融事实以工具返回的数据与来源材料为依据；区分原始数据、来源观点和基于数据的推导，不把模型记忆、Web Search 或常识补全伪装成已核验数据。
 
